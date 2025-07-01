@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/TheEthanDing/ethanding.com#readme",
   "dependencies": {
-    "airtable": "^0.12.2"
+    "airtable": "^0.12.2",
+    "node-fetch": "^2.7.0"
   }
 }
