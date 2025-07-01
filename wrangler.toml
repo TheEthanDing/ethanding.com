@@ -1,0 +1,10 @@
+name = "ethanding-books"
+main = "workers/books-api.js"
+compatibility_date = "2024-01-01"
+account_id = "f6413eebf7a74012c2411824d33838bd"
+
+[vars]
+# Non-sensitive config can go here
+
+# Add your Airtable API key as a secret:
+# wrangler secret put AIRTABLE_API_KEY

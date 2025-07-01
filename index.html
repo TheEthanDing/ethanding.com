@@ -7,6 +7,16 @@
     <link rel="icon" type="image/png" href="/images/profile.png" />
     <link rel="stylesheet" crossorigin href="/assets/index-dwlculdd.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8KB6YWZ4KS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-8KB6YWZ4KS');
+    </script>
     <style>
       /* Additional styles for the static version */
       .container {
@@ -248,9 +258,10 @@
         transform: translateY(-3px);
       }
       .book-cover {
+        position: relative;
         width: 100%;
         height: 100px;
-        background: #f5f5f5;
+        background: #f0f0f0;
         border-radius: 2px;
         overflow: hidden;
         margin-bottom: 0.3rem;
@@ -550,24 +561,18 @@
       // Fetch all books from Airtable API and display them
       async function fetchAndDisplayBooks() {
         try {
-          const baseId = 'appp0rlDg8bs8FlVB';
-          const tableId = 'tblLzVsk6YxiQ0xxE';
-          const viewId = 'viw7ZSeTTduvLSsKX';
-          const token = 'pat7ufqR4W0PzZw7m.3743b667a61b9956e108549aa613b4e23af8b95a718e016e77bde446cb2291c3';
+          // Using Cloudflare Worker to cache responses
+          const workerUrl = 'https://ethanding-books.ahaym.workers.dev';
           
           let offset = null;
           
           // Fetch all pages of records
           do {
             const url = offset 
-              ? `https://api.airtable.com/v0/${baseId}/${tableId}?view=${viewId}&offset=${offset}`
-              : `https://api.airtable.com/v0/${baseId}/${tableId}?view=${viewId}`;
+              ? `${workerUrl}?offset=${offset}`
+              : workerUrl;
               
-            const response = await fetch(url, {
-              headers: {
-                'Authorization': `Bearer ${token}`
-              }
-            });
+            const response = await fetch(url);
             
             if (response.ok) {
               const data = await response.json();
@@ -651,13 +656,19 @@
             const title = fields.Book ? fields.Book.trim() : 'Untitled';
             const authors = fields.Author ? fields.Author.join(', ') : 'Unknown Author';
             
-            // Get cover image if available - use small thumbnail for faster loading
+            // Get cover image if available - use optimized versions for faster loading
             let coverUrl = '';
             let fullCoverUrl = '';
             if (fields.cover && fields.cover.length > 0) {
-              // Use small thumbnail initially, upgrade to large on hover/view
-              coverUrl = fields.cover[0].thumbnails?.small?.url || fields.cover[0].thumbnails?.large?.url || fields.cover[0].url;
-              fullCoverUrl = fields.cover[0].thumbnails?.large?.url || fields.cover[0].url;
+              const cover = fields.cover[0];
+              // Use optimized images if available, fallback to thumbnails
+              if (cover.optimized) {
+                coverUrl = cover.optimized.small;
+                fullCoverUrl = cover.optimized.large;
+              } else {
+                coverUrl = cover.thumbnails?.small?.url || cover.thumbnails?.large?.url || cover.url;
+                fullCoverUrl = cover.thumbnails?.large?.url || cover.url;
+              }
             }
             
             carouselHTML += `
