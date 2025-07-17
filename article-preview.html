@@ -36,104 +36,81 @@
         }
         
         .container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .container:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
         }
         
         .article-header {
             position: relative;
-            height: 300px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-            padding: 2rem;
+            height: 280px;
+            background: #f8f9fa;
+            overflow: hidden;
         }
         
         .article-image {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            z-index: 1;
-        }
-        
-        .article-header::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 2;
-        }
-        
-        .article-header-content {
-            position: relative;
-            z-index: 3;
-        }
-        
-        .article-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        
-        .article-subtitle {
-            font-size: 1.2rem;
-            font-weight: 400;
-            opacity: 0.9;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
         
         .article-content {
-            padding: 3rem 2rem;
+            padding: 2rem;
+        }
+        
+        .article-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+            line-height: 1.3;
+        }
+        
+        .article-subtitle {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 1.5rem;
         }
         
         .article-meta {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            padding-bottom: 2rem;
-            border-bottom: 1px solid #eee;
+            gap: 0.75rem;
+            margin-bottom: 0;
         }
         
         .author-info {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
         }
         
         .author-avatar {
-            width: 40px;
-            height: 40px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             object-fit: cover;
         }
         
-        .author-details {
-            display: flex;
-            flex-direction: column;
-        }
-        
         .author-name {
-            font-weight: 600;
-            color: #333;
+            font-weight: 500;
+            color: #1a1a1a;
+            font-size: 0.85rem;
         }
         
         .article-date {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #666;
         }
         
@@ -141,12 +118,12 @@
             background: #4CAF50;
             color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             text-decoration: none;
             display: inline-block;
             margin-left: auto;
@@ -154,15 +131,6 @@
         
         .read-button:hover {
             background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
-        }
-        
-        .article-excerpt {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #555;
-            margin-bottom: 2rem;
         }
         
         .loading {
@@ -323,31 +291,36 @@
                 const previewHtml = `
                     <div class="article-header">
                         ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" class="article-image">` : ''}
-                        <div class="article-header-content">
-                            <h1 class="article-title">${escapeHtml(title)}</h1>
-                            <p class="article-subtitle">${escapeHtml(excerpt.substring(0, 150))}...</p>
-                        </div>
                     </div>
                     <div class="article-content">
+                        <h1 class="article-title">${escapeHtml(title)}</h1>
+                        <p class="article-subtitle">${escapeHtml(excerpt.substring(0, 200))}...</p>
                         <div class="article-meta">
                             <div class="author-info">
                                 <img src="/images/profile.png" alt="Ethan Ding" class="author-avatar">
-                                <div class="author-details">
-                                    <div class="author-name">Ethan Ding</div>
-                                    <div class="article-date">${escapeHtml(formattedDate)}</div>
-                                </div>
+                                <div class="author-name">Ethan Ding</div>
+                                <div class="article-date">${escapeHtml(formattedDate)}</div>
                             </div>
                             <a href="${escapeHtml(article.link)}" target="_blank" rel="noopener noreferrer" class="read-button">
                                 Read this post
                             </a>
                         </div>
-                        <div class="article-excerpt">
-                            ${escapeHtml(excerpt)}
-                        </div>
                     </div>
                 `;
 
                 document.getElementById('article-preview').innerHTML = previewHtml;
+                
+                // Make the whole container clickable
+                const container = document.querySelector('.container');
+                if (container) {
+                    container.addEventListener('click', (e) => {
+                        // Don't trigger if clicking the read button directly
+                        if (e.target.classList.contains('read-button')) {
+                            return;
+                        }
+                        window.open(article.link, '_blank');
+                    });
+                }
                 
             } catch (error) {
                 console.error('Error loading article preview:', error);
