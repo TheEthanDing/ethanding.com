@@ -40,7 +40,6 @@
   from = "/:slug"
   to = "/article-preview.html"
   status = 200
-  conditions = {Role = [""], Country = [""], Language = [""]}
   
 # Ensure static files are served directly
 [[redirects]]
