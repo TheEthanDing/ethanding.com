@@ -82,10 +82,34 @@ When working in this directory:
 3. Check `netlify status` to verify site connection
 4. All changes to `index.html` will automatically go live when committed and pushed
 
+## Article Preview System for Twitter
+
+### How It Works
+- **Homepage**: Links directly to Substack articles (normal user experience)
+- **Twitter Sharing**: Manually use `https://ethanding.com/article-slug` URLs
+- **Article Slugs**: Generated from article titles (e.g., "Hello World" → "hello-world")
+- **Server-Side Meta Tags**: Netlify Edge Function injects proper Open Graph and Twitter Card meta tags
+- **Bypass De-ranking**: Twitter sees your domain instead of Substack, avoiding platform penalties
+
+### Usage Workflow
+1. **Regular Users**: Click articles on homepage → go directly to Substack
+2. **Twitter Sharing**: 
+   - Find article title (e.g., "windsurf gets margin called")
+   - Convert to slug: `windsurf-gets-margin-called`
+   - Share: `https://ethanding.com/windsurf-gets-margin-called`
+   - Twitter shows rich preview with your domain
+
+### Technical Implementation
+- **Netlify Edge Function**: Fetches RSS feed and injects meta tags server-side
+- **Client-Side Fallback**: JavaScript handles article display and redirects
+- **Automatic Routing**: Any `/:slug` URL serves the preview system
+- **SEO Optimized**: Proper meta tags for all social media platforms
+
 ## Recent Changes
 - Added article preview system for Twitter sharing with clean design
-- Implemented dynamic routing for article slugs
+- Implemented dynamic routing for article slugs with server-side meta tag injection
 - Made article preview cards fully clickable with hover effects
+- Fixed homepage to link directly to Substack (not preview pages)
 - Fixed Substack article display (removed problematic image loading)
 - Moved "View all articles" link to top right of Writing section
 - Added proper padding to article cards for better hover spacing

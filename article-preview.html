@@ -154,6 +154,56 @@
             text-decoration: underline;
         }
         
+        .auto-redirect {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            z-index: 1000;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+        
+        .redirect-text {
+            margin-bottom: 0.5rem;
+        }
+        
+        .cancel-redirect {
+            background: transparent;
+            border: 1px solid white;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-left: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .cancel-redirect:hover {
+            background: white;
+            color: black;
+        }
+
         @media (max-width: 768px) {
             .article-title {
                 font-size: 2rem;
@@ -322,6 +372,9 @@
                     });
                 }
                 
+                // Start auto-redirect timer
+                startAutoRedirect(article.link);
+                
             } catch (error) {
                 console.error('Error loading article preview:', error);
                 document.getElementById('article-preview').innerHTML = `
@@ -332,6 +385,59 @@
                     </div>
                 `;
             }
+        }
+
+        // Auto-redirect functionality
+        function startAutoRedirect(articleUrl) {
+            const redirectTime = 3000; // 3 seconds
+            const updateInterval = 100; // Update every 100ms
+            let timeLeft = redirectTime;
+            let redirectCancelled = false;
+            
+            // Create redirect bar
+            const redirectBar = document.createElement('div');
+            redirectBar.className = 'auto-redirect';
+            redirectBar.innerHTML = `
+                <div class="redirect-text">
+                    Redirecting to article in <span id="countdown">3</span> seconds
+                    <button class="cancel-redirect" onclick="cancelRedirect()">Cancel</button>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            `;
+            
+            document.body.appendChild(redirectBar);
+            
+            // Update progress bar and countdown
+            const progressFill = document.getElementById('progress-fill');
+            const countdown = document.getElementById('countdown');
+            
+            const interval = setInterval(() => {
+                if (redirectCancelled) {
+                    clearInterval(interval);
+                    return;
+                }
+                
+                timeLeft -= updateInterval;
+                const progress = ((redirectTime - timeLeft) / redirectTime) * 100;
+                const secondsLeft = Math.ceil(timeLeft / 1000);
+                
+                progressFill.style.width = `${progress}%`;
+                countdown.textContent = secondsLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    window.location.href = articleUrl;
+                }
+            }, updateInterval);
+            
+            // Global cancel function
+            window.cancelRedirect = function() {
+                redirectCancelled = true;
+                clearInterval(interval);
+                document.body.removeChild(redirectBar);
+            };
         }
 
         // Load article when page loads
