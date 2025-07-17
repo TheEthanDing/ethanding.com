@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Article Preview</title>
+    <link rel="icon" type="image/png" href="/images/profile.png" />
+    
+    <!-- Open Graph meta tags for Twitter/social sharing -->
+    <meta id="og-title" property="og:title" content="" />
+    <meta id="og-description" property="og:description" content="" />
+    <meta id="og-image" property="og:image" content="" />
+    <meta id="og-url" property="og:url" content="" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Ethan Ding" />
+    
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta id="twitter-title" name="twitter:title" content="" />
+    <meta id="twitter-description" name="twitter:description" content="" />
+    <meta id="twitter-image" name="twitter:image" content="" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 2rem 1rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .article-header {
+            position: relative;
+            height: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .article-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        
+        .article-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 2;
+        }
+        
+        .article-header-content {
+            position: relative;
+            z-index: 3;
+        }
+        
+        .article-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .article-subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .article-content {
+            padding: 3rem 2rem;
+        }
+        
+        .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .author-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .author-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .article-date {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .read-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-left: auto;
+        }
+        
+        .read-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+        
+        .article-excerpt {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 3rem;
+            color: #d63384;
+        }
+        
+        .error a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        
+        .error a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .article-title {
+                font-size: 2rem;
+            }
+            
+            .article-subtitle {
+                font-size: 1rem;
+            }
+            
+            .article-content {
+                padding: 2rem 1.5rem;
+            }
+            
+            .article-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .read-button {
+                margin-left: 0;
+                align-self: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="article-preview" class="loading">
+            <p>Loading article preview...</p>
+        </div>
+    </div>
+
+    <script>
+        // Extract slug from URL
+        function getSlugFromUrl() {
+            const path = window.location.pathname;
+            const segments = path.split('/').filter(segment => segment.length > 0);
+            return segments[0]; // First segment after domain
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Decode HTML entities
+        function decodeHtmlEntities(text) {
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = text;
+            return textarea.value;
+        }
+
+        // Create slug from title
+        function createSlug(title) {
+            return title
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+
+        // Extract image from article content
+        function extractImageFromContent(content) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            const img = tempDiv.querySelector('img');
+            return img ? img.src : null;
+        }
+
+        // Fetch and display article
+        async function loadArticlePreview() {
+            try {
+                const slug = getSlugFromUrl();
+                if (!slug) {
+                    throw new Error('No article slug found');
+                }
+
+                // Fetch articles from Substack RSS
+                const rssUrl = 'https://ethanding.substack.com/feed';
+                const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+                
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Failed to fetch articles');
+                
+                const data = await response.json();
+                const articles = data.items || [];
+                
+                // Find article matching slug
+                const article = articles.find(item => {
+                    const itemSlug = createSlug(item.title);
+                    return itemSlug === slug;
+                });
+                
+                if (!article) {
+                    throw new Error('Article not found');
+                }
+
+                // Extract article data
+                const title = decodeHtmlEntities(article.title);
+                const date = new Date(article.pubDate);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                });
+                
+                // Clean excerpt
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = article.description || '';
+                let excerpt = tempDiv.textContent || tempDiv.innerText || '';
+                const textArea = document.createElement('textarea');
+                textArea.innerHTML = excerpt;
+                excerpt = textArea.value.substring(0, 300) + '...';
+                
+                // Extract image
+                const imageUrl = extractImageFromContent(article.content || article.description || '');
+                
+                // Update meta tags
+                const currentUrl = window.location.href;
+                document.getElementById('page-title').textContent = title;
+                document.getElementById('og-title').content = title;
+                document.getElementById('og-description').content = excerpt;
+                document.getElementById('og-url').content = currentUrl;
+                document.getElementById('twitter-title').content = title;
+                document.getElementById('twitter-description').content = excerpt;
+                
+                if (imageUrl) {
+                    document.getElementById('og-image').content = imageUrl;
+                    document.getElementById('twitter-image').content = imageUrl;
+                }
+
+                // Render article preview
+                const previewHtml = `
+                    <div class="article-header">
+                        ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" class="article-image">` : ''}
+                        <div class="article-header-content">
+                            <h1 class="article-title">${escapeHtml(title)}</h1>
+                            <p class="article-subtitle">${escapeHtml(excerpt.substring(0, 150))}...</p>
+                        </div>
+                    </div>
+                    <div class="article-content">
+                        <div class="article-meta">
+                            <div class="author-info">
+                                <img src="/images/profile.png" alt="Ethan Ding" class="author-avatar">
+                                <div class="author-details">
+                                    <div class="author-name">Ethan Ding</div>
+                                    <div class="article-date">${escapeHtml(formattedDate)}</div>
+                                </div>
+                            </div>
+                            <a href="${escapeHtml(article.link)}" target="_blank" rel="noopener noreferrer" class="read-button">
+                                Read this post
+                            </a>
+                        </div>
+                        <div class="article-excerpt">
+                            ${escapeHtml(excerpt)}
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('article-preview').innerHTML = previewHtml;
+                
+            } catch (error) {
+                console.error('Error loading article preview:', error);
+                document.getElementById('article-preview').innerHTML = `
+                    <div class="error">
+                        <h2>Article not found</h2>
+                        <p>Sorry, we couldn't find the article you're looking for.</p>
+                        <p><a href="/">← Back to home</a></p>
+                    </div>
+                `;
+            }
+        }
+
+        // Load article when page loads
+        document.addEventListener('DOMContentLoaded', loadArticlePreview);
+    </script>
+</body>
+</html>

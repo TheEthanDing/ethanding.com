@@ -1003,8 +1003,14 @@
           textArea.innerHTML = excerpt;
           excerpt = textArea.value;
           
+          // Create slug from title
+          const slug = article.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+          
           return `
-            <a href="${escapeHtml(article.link)}" target="_blank" rel="noopener noreferrer" class="article-card">
+            <a href="/${slug}" class="article-card">
               <div class="article-content">
                 <div class="article-date">${escapeHtml(formattedDate)}</div>
                 <div class="article-title">${escapeHtml(decodeHtmlEntities(article.title))}</div>
