@@ -58,16 +58,16 @@ export default async (request, context) => {
     const templateResponse = await context.next();
     const html = await templateResponse.text();
     
-    // Replace the meta tags with populated ones
+    // Replace the meta tags with populated ones, but keep the IDs for client-side updates
     const modifiedHtml = html
-      .replace(/<title id="page-title">[^<]*<\/title>/, `<title>${title}</title>`)
-      .replace(/<meta id="og-title"[^>]*>/, `<meta property="og:title" content="${title}">`)
-      .replace(/<meta id="og-description"[^>]*>/, `<meta property="og:description" content="${description}">`)
-      .replace(/<meta id="og-image"[^>]*>/, `<meta property="og:image" content="${imageUrl}">`)
-      .replace(/<meta id="og-url"[^>]*>/, `<meta property="og:url" content="${currentUrl}">`)
-      .replace(/<meta id="twitter-title"[^>]*>/, `<meta name="twitter:title" content="${title}">`)
-      .replace(/<meta id="twitter-description"[^>]*>/, `<meta name="twitter:description" content="${description}">`)
-      .replace(/<meta id="twitter-image"[^>]*>/, `<meta name="twitter:image" content="${imageUrl}">`);
+      .replace(/<title id="page-title">[^<]*<\/title>/, `<title id="page-title">${title}</title>`)
+      .replace(/<meta id="og-title"[^>]*>/, `<meta id="og-title" property="og:title" content="${title}">`)
+      .replace(/<meta id="og-description"[^>]*>/, `<meta id="og-description" property="og:description" content="${description}">`)
+      .replace(/<meta id="og-image"[^>]*>/, `<meta id="og-image" property="og:image" content="${imageUrl}">`)
+      .replace(/<meta id="og-url"[^>]*>/, `<meta id="og-url" property="og:url" content="${currentUrl}">`)
+      .replace(/<meta id="twitter-title"[^>]*>/, `<meta id="twitter-title" name="twitter:title" content="${title}">`)
+      .replace(/<meta id="twitter-description"[^>]*>/, `<meta id="twitter-description" name="twitter:description" content="${description}">`)
+      .replace(/<meta id="twitter-image"[^>]*>/, `<meta id="twitter-image" name="twitter:image" content="${imageUrl}">`);
     
     return new Response(modifiedHtml, {
       headers: {
