@@ -283,11 +283,8 @@
                     throw new Error('No article slug found');
                 }
 
-                // Fetch articles from Substack RSS
-                const rssUrl = 'https://ethanding.substack.com/feed';
-                const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-                
-                const response = await fetch(apiUrl);
+                // The Railway server fetches and caches the Substack RSS feed.
+                const response = await fetch('/api/articles');
                 if (!response.ok) throw new Error('Failed to fetch articles');
                 
                 const data = await response.json();
@@ -321,7 +318,7 @@
                 excerpt = textArea.value.substring(0, 300) + '...';
                 
                 // Extract image
-                const imageUrl = extractImageFromContent(article.content || article.description || '');
+                const imageUrl = article.image || null;
                 
                 // Update meta tags
                 const currentUrl = window.location.href;

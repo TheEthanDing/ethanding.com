@@ -1,0 +1,22 @@
+{
+  "name": "Ethan Ding",
+  "role": "Cofounder & CEO",
+  "company": "TextQL",
+  "companyUrl": "https://textql.com/",
+  "previous": [
+    {
+      "name": "Bessemer",
+      "url": "https://bvp.com/"
+    },
+    {
+      "name": "Tackle",
+      "url": "https://tackle.io/"
+    }
+  ],
+  "buildingLabel": "Learn what I'm building",
+  "buildingUrl": "https://mandate.beehiiv.com/p/the-next-trillion-dollar-company",
+  "email": "ethan@textql.com",
+  "twitter": "https://twitter.com/theethanding",
+  "linkedin": "https://linkedin.com/in/theethanding",
+  "location": "Made in New York"
+}
