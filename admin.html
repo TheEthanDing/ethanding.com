@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Library desk · Ethan Ding</title>
+  <link rel="icon" href="/images/profile.png">
+  <style>
+    :root {
+      --ink: #171a1f;
+      --muted: #6d747d;
+      --line: #d7dde2;
+      --paper: #f3f6f5;
+      --card: #ffffff;
+      --blue: #3157c8;
+      --blue-soft: #e9efff;
+      --danger: #b63e3e;
+      --shadow: 0 18px 60px rgba(30, 42, 55, .09);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid rgba(49, 87, 200, .28); outline-offset: 2px; }
+    .hidden { display: none !important; }
+    .login { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+    .login-card { width: min(440px, 100%); background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .login-spine { height: 7px; background: var(--blue); }
+    .login-body { padding: 40px; }
+    .eyebrow { margin: 0 0 10px; color: var(--blue); font-size: 11px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2 { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, serif; font-weight: 600; letter-spacing: -.025em; }
+    h1 { margin: 0; font-size: clamp(34px, 6vw, 52px); line-height: .98; }
+    .login-copy { margin: 18px 0 30px; color: var(--muted); max-width: 34ch; }
+    label { display: block; color: #4f5660; font-size: 12px; font-weight: 650; }
+    input, textarea { width: 100%; margin-top: 7px; padding: 11px 12px; color: var(--ink); background: white; border: 1px solid #cbd2d8; border-radius: 3px; }
+    textarea { min-height: 86px; resize: vertical; }
+    input:focus, textarea:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px rgba(49, 87, 200, .12); }
+    .button { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: white; font-weight: 700; }
+    .button:hover { border-color: #aeb7bf; }
+    .button.primary { color: white; background: var(--blue); border-color: var(--blue); }
+    .button.danger { color: var(--danger); }
+    .login .button { width: 100%; margin-top: 18px; }
+    .error { min-height: 20px; margin: 12px 0 0; color: var(--danger); font-size: 12px; }
+    .shell { min-height: 100vh; }
+    .topbar { height: 72px; display: flex; align-items: center; gap: 22px; padding: 0 28px; background: rgba(243, 246, 245, .92); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px); }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 210px; }
+    .brand img { width: 34px; height: 34px; border-radius: 50%; }
+    .brand strong { font-family: "Iowan Old Style", "Palatino Linotype", serif; font-size: 18px; }
+    .tabs { display: flex; align-self: stretch; gap: 22px; }
+    .tab { padding: 0 2px; border: 0; border-bottom: 3px solid transparent; color: var(--muted); background: transparent; font-weight: 700; }
+    .tab.active { color: var(--ink); border-bottom-color: var(--blue); }
+    .top-actions { display: flex; gap: 9px; margin-left: auto; }
+    .workspace { max-width: 1440px; margin: 0 auto; padding: 24px 28px 42px; }
+    .ledger { display: grid; grid-template-columns: minmax(290px, 400px) minmax(440px, 1fr); min-height: calc(100vh - 138px); background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .book-index { border-right: 1px solid var(--line); min-width: 0; }
+    .index-header { padding: 22px; border-bottom: 1px solid var(--line); }
+    .index-title { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+    .index-title h2 { margin: 0; font-size: 28px; }
+    .count { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .search { margin: 0; padding-left: 34px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%23707982' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 11px center; }
+    .book-list { max-height: calc(100vh - 270px); overflow: auto; }
+    .year-mark { position: sticky; top: 0; z-index: 2; padding: 7px 20px; color: var(--blue); background: var(--blue-soft); border-top: 1px solid #d7e1ff; border-bottom: 1px solid #d7e1ff; font-size: 11px; font-weight: 800; letter-spacing: .12em; }
+    .book-row { width: 100%; display: grid; grid-template-columns: 38px 1fr auto; gap: 12px; align-items: center; padding: 12px 18px; text-align: left; color: inherit; background: white; border: 0; border-bottom: 1px solid #edf0f2; }
+    .book-row:hover { background: #f8fafb; }
+    .book-row.active { background: var(--blue-soft); box-shadow: inset 4px 0 0 var(--blue); }
+    .mini-cover { width: 34px; height: 48px; object-fit: cover; background: #e4e8eb; box-shadow: 0 2px 5px rgba(0,0,0,.14); }
+    .book-name { overflow: hidden; }
+    .book-name strong, .book-name span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .book-name span, .book-date { color: var(--muted); font-size: 12px; }
+    .editor { padding: clamp(28px, 5vw, 68px); overflow: auto; }
+    .editor-inner { max-width: 720px; margin: 0 auto; }
+    .editor-head { display: grid; grid-template-columns: 120px 1fr; gap: 28px; align-items: end; margin-bottom: 36px; }
+    .cover-box { width: 120px; aspect-ratio: 2 / 3; display: grid; place-items: center; overflow: hidden; color: var(--muted); background: #e5e9ec; box-shadow: 0 8px 22px rgba(20, 31, 42, .17); }
+    .cover-box img { width: 100%; height: 100%; object-fit: cover; }
+    .editor-head h2 { margin: 0 0 7px; font-size: clamp(32px, 5vw, 52px); line-height: 1; }
+    .editor-head p { margin: 0; color: var(--muted); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .span-2 { grid-column: 1 / -1; }
+    .form-actions { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--line); }
+    .cover-upload { margin-top: 12px; }
+    .cover-upload input { padding: 8px; font-size: 12px; }
+    .site-panel { max-width: 900px; margin: 0 auto; padding: 40px; background: white; border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .site-panel header { margin-bottom: 32px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+    .site-panel h2 { margin: 0 0 6px; font-size: 36px; }
+    .site-panel p { margin: 0; color: var(--muted); }
+    .toast { position: fixed; right: 22px; bottom: 22px; max-width: 380px; padding: 14px 18px; color: white; background: #20252b; border-radius: 3px; box-shadow: var(--shadow); z-index: 30; }
+    .unsaved::after { content: "Unsaved"; margin-left: 8px; color: var(--blue); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+    @media (max-width: 800px) {
+      .topbar { padding: 0 16px; }
+      .brand { min-width: 0; }
+      .brand strong { display: none; }
+      .workspace { padding: 12px; }
+      .ledger { display: block; }
+      .book-index { border-right: 0; }
+      .book-list { max-height: 42vh; }
+      .editor { padding: 28px 20px; border-top: 1px solid var(--line); }
+      .editor-head { grid-template-columns: 84px 1fr; }
+      .cover-box { width: 84px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .span-2 { grid-column: auto; }
+      .button-text { display: none; }
+      .site-panel { padding: 24px 20px; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .toast { animation: toast-in .2s ease-out; }
+      @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+    }
+  </style>
+</head>
+<body>
+  <main id="login" class="login">
+    <form id="login-form" class="login-card">
+      <div class="login-spine"></div>
+      <div class="login-body">
+        <p class="eyebrow">Private editor</p>
+        <h1>Your library desk.</h1>
+        <p class="login-copy">Update the books and words on ethanding.com. Everything you publish stays in your own repository.</p>
+        <label>Password<input id="password" type="password" autocomplete="current-password" required autofocus></label>
+        <button class="button primary" type="submit">Open the desk</button>
+        <p id="login-error" class="error" role="alert"></p>
+      </div>
+    </form>
+  </main>
+
+  <div id="app" class="shell hidden">
+    <header class="topbar">
+      <div class="brand"><img src="/images/profile.png" alt=""><strong>Library desk</strong></div>
+      <nav class="tabs" aria-label="Editor sections">
+        <button class="tab active" data-panel="books">Books</button>
+        <button class="tab" data-panel="site">Site copy</button>
+      </nav>
+      <div class="top-actions">
+        <a class="button" href="/" target="_blank">View <span class="button-text">site</span></a>
+        <button id="save" class="button primary">Save <span class="button-text">changes</span></button>
+        <button id="logout" class="button">Sign out</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section id="books-panel" class="ledger">
+        <aside class="book-index">
+          <div class="index-header">
+            <div class="index-title"><h2>Reading log</h2><span id="book-count-admin" class="count"></span></div>
+            <input id="search" class="search" type="search" placeholder="Find a title or author" aria-label="Search books">
+            <button id="add-book" class="button" style="width:100%; margin-top:10px">+ Add a book</button>
+          </div>
+          <div id="book-list" class="book-list"></div>
+        </aside>
+        <div class="editor">
+          <div id="book-editor" class="editor-inner"></div>
+        </div>
+      </section>
+
+      <section id="site-panel" class="site-panel hidden">
+        <header><p class="eyebrow">Homepage</p><h2>The words around the work.</h2><p>Change your introduction, links, and location without opening the code.</p></header>
+        <form id="site-form" class="form-grid">
+          <label>Name<input name="name"></label>
+          <label>Role<input name="role"></label>
+          <label>Company<input name="company"></label>
+          <label>Company URL<input name="companyUrl" type="url"></label>
+          <label class="span-2">Building link label<input name="buildingLabel"></label>
+          <label class="span-2">Building link URL<input name="buildingUrl" type="url"></label>
+          <label>Email<input name="email" type="email"></label>
+          <label>Location line<input name="location"></label>
+          <label>Twitter URL<input name="twitter" type="url"></label>
+          <label>LinkedIn URL<input name="linkedin" type="url"></label>
+          <label>Previous company 1<input name="previous0Name"></label>
+          <label>Previous company 1 URL<input name="previous0Url" type="url"></label>
+          <label>Previous company 2<input name="previous1Name"></label>
+          <label>Previous company 2 URL<input name="previous1Url" type="url"></label>
+        </form>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast hidden" role="status"></div>
+  <script src="/admin.js"></script>
+</body>
+</html>

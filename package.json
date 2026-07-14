@@ -2,9 +2,10 @@
   "name": "ethanding.com",
   "version": "1.0.0",
   "description": "",
-  "main": "test-airtable-auth.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "test": "node --test"
   },
   "repository": {
     "type": "git",
@@ -18,8 +19,7 @@
     "url": "https://github.com/TheEthanDing/ethanding.com/issues"
   },
   "homepage": "https://github.com/TheEthanDing/ethanding.com#readme",
-  "dependencies": {
-    "airtable": "^0.12.2",
-    "node-fetch": "^2.7.0"
+  "engines": {
+    "node": ">=20"
   }
 }

@@ -444,11 +444,11 @@
       <div class="header">
         <div class="profile-section">
           <img src="/images/profile.png" alt="Ethan Ding" class="profile-img" />
-          <h1>Ethan Ding</h1>
+          <h1 id="site-name">Ethan Ding</h1>
         </div>
-        <h2>I am the Cofounder & CEO of <a href="https://textql.com/" target="_blank" rel="noopener noreferrer">TextQL</a></h2>
-        <h2>Previously: <span><a href="https://bvp.com/" target="_blank" rel="noopener noreferrer">Bessemer</a>, </span><span><a href="https://tackle.io/" target="_blank" rel="noopener noreferrer">Tackle</a></span></h2>
-        <h2><a href="https://mandate.beehiiv.com/p/the-next-trillion-dollar-company" target="_blank" rel="noopener noreferrer">Learn what I'm building</a></h2>
+        <h2 id="site-role">I am the Cofounder & CEO of <a href="https://textql.com/" target="_blank" rel="noopener noreferrer">TextQL</a></h2>
+        <h2 id="site-previous">Previously: <span><a href="https://bvp.com/" target="_blank" rel="noopener noreferrer">Bessemer</a>, </span><span><a href="https://tackle.io/" target="_blank" rel="noopener noreferrer">Tackle</a></span></h2>
+        <h2><a id="site-building" href="https://mandate.beehiiv.com/p/the-next-trillion-dollar-company" target="_blank" rel="noopener noreferrer">Learn what I'm building</a></h2>
       </div>
       
       <section class="reading-section">
@@ -528,18 +528,18 @@
       
       <footer>
         <div class="social-links">
-          <a href="https://twitter.com/theethanding" target="_blank" rel="noopener noreferrer" aria-label="Twitter" class="social-link">
+          <a id="site-twitter" href="https://twitter.com/theethanding" target="_blank" rel="noopener noreferrer" aria-label="Twitter" class="social-link">
             <svg width="16" height="16" viewBox="0 0 24 24">
               <path fill="currentColor" d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
             </svg>
           </a>
-          <a href="mailto:ethan@textql.com" target="_blank" rel="noopener noreferrer" aria-label="Email" class="social-link">
+          <a id="site-email" href="mailto:ethan@textql.com" target="_blank" rel="noopener noreferrer" aria-label="Email" class="social-link">
             <svg width="16" height="16" viewBox="0 0 24 24">
               <path fill="currentColor" d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z"></path>
               <path fill="currentColor" d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z"></path>
             </svg>
           </a>
-          <a href="https://linkedin.com/in/theethanding" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="social-link">
+          <a id="site-linkedin" href="https://linkedin.com/in/theethanding" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="social-link">
             <svg width="16" height="16" viewBox="0 0 24 24">
               <path fill="currentColor" d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"></path>
             </svg>
@@ -549,7 +549,7 @@
           <svg viewBox="0 0 14 14" fill="currentColor" width="14" height="14">
             <path d="M7 0C4.1 0 1.8 2.3 1.8 5.2c0 3.9 5.2 8.8 5.2 8.8s5.2-4.9 5.2-8.8C12.2 2.3 9.9 0 7 0zm0 7.8c-1.4 0-2.6-1.2-2.6-2.6S5.6 2.6 7 2.6s2.6 1.2 2.6 2.6S8.4 7.8 7 7.8z"></path>
           </svg>
-          Made in New York
+          <span id="site-location">Made in New York</span>
         </button>
       </footer>
     </main>
@@ -558,30 +558,26 @@
       let displayCount = 10;
       let chartInstance = null;
       
-      // Fetch all books from Airtable API and display them
+      // Fetch books from the repository-owned data file.
       async function fetchAndDisplayBooks() {
         try {
-          // Using Cloudflare Worker to cache responses
-          const workerUrl = 'https://ethanding-books.ahaym.workers.dev';
-          
-          let offset = null;
-          
-          // Fetch all pages of records
-          do {
-            const url = offset 
-              ? `${workerUrl}?offset=${offset}`
-              : workerUrl;
-              
-            const response = await fetch(url);
-            
-            if (response.ok) {
-              const data = await response.json();
-              allBooks = allBooks.concat(data.records);
-              offset = data.offset;
-            } else {
-              throw new Error('Failed to fetch books');
+          const response = await fetch('/data/books.json');
+          if (!response.ok) throw new Error('Failed to fetch books');
+          const books = await response.json();
+          allBooks = books.map(book => ({
+            id: book.id,
+            fields: {
+              Book: book.title,
+              Author: book.authors,
+              'Date Started': book.dateStarted,
+              'Date Finished': book.dateFinished,
+              'Days Taken': book.daysTaken,
+              cover: book.cover ? [{
+                url: book.cover,
+                thumbnails: { small: { url: book.cover }, large: { url: book.cover } }
+              }] : []
             }
-          } while (offset);
+          }));
           
           // Calculate books read in past 365 days
           const today = new Date();
@@ -608,8 +604,7 @@
           
         } catch (error) {
           console.error('Error fetching books:', error);
-          document.getElementById('books-list').innerHTML = 
-            '<p>Unable to load books. <a href="https://airtable.com/embed/shrvFfepLidSzTkeI?backgroundColor=cyan&layout=card&viewControls=on" target="_blank">View on Airtable</a></p>';
+          document.getElementById('books-list').innerHTML = '<p>Unable to load books right now.</p>';
         }
       }
       
@@ -953,17 +948,34 @@
         return textArea.value;
       }
       
-      // Fetch books when page loads
+      async function fetchAndDisplaySiteCopy() {
+        try {
+          const response = await fetch('/data/site.json');
+          if (!response.ok) return;
+          const site = await response.json();
+          document.getElementById('site-name').textContent = site.name;
+          document.getElementById('site-role').innerHTML = `I am the ${escapeHtml(site.role)} of <a href="${escapeHtml(site.companyUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(site.company)}</a>`;
+          document.getElementById('site-previous').innerHTML = `Previously: ${site.previous.map(item => `<span><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.name)}</a></span>`).join(', ')}`;
+          const building = document.getElementById('site-building');
+          building.textContent = site.buildingLabel;
+          building.href = site.buildingUrl;
+          document.getElementById('site-email').href = `mailto:${site.email}`;
+          document.getElementById('site-twitter').href = site.twitter;
+          document.getElementById('site-linkedin').href = site.linkedin;
+          document.getElementById('site-location').textContent = site.location;
+        } catch (error) {
+          console.error('Error fetching site copy:', error);
+        }
+      }
+
+      // Fetch local content when page loads
       fetchAndDisplayBooks();
+      fetchAndDisplaySiteCopy();
       
       // Fetch articles from Substack
       async function fetchAndDisplayArticles() {
         try {
-          // Using RSS2JSON service to bypass CORS
-          const rssUrl = 'https://ethanding.substack.com/feed';
-          const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-          
-          const response = await fetch(apiUrl);
+          const response = await fetch('/api/articles');
           if (!response.ok) throw new Error('Failed to fetch articles');
           
           const data = await response.json();
