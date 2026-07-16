@@ -437,9 +437,78 @@
       .location-button:hover {
         color: #000;
       }
+      .railway-status {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 20;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.65rem;
+        border: 1px solid #dedede;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        color: #555;
+        font-size: 0.6875rem;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        text-decoration: none;
+        opacity: 0;
+        transform: translateY(-5px);
+        pointer-events: none;
+        transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease, color 180ms ease;
+        backdrop-filter: blur(8px);
+      }
+      .railway-status[data-active="true"] {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+      .railway-status:hover {
+        border-color: #aaa;
+        color: #111;
+      }
+      .railway-status:focus-visible {
+        outline: 2px solid #111;
+        outline-offset: 3px;
+      }
+      .railway-status-dot {
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: #16a34a;
+        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+      }
+      @media (max-width: 760px) {
+        .railway-status {
+          top: 0.75rem;
+          right: 0.75rem;
+        }
+        .container {
+          padding-top: 4rem;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .railway-status {
+          transition: none;
+        }
+      }
     </style>
   </head>
   <body>
+    <a
+      class="railway-status"
+      id="railway-status"
+      href="https://site-production-b02d.up.railway.app"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="This site is live on Railway. Open the Railway-hosted site."
+    >
+      <span class="railway-status-dot" aria-hidden="true"></span>
+      Hosted on Railway
+    </a>
     <main class="container">
       <div class="header">
         <div class="profile-section">
@@ -968,9 +1037,23 @@
         }
       }
 
+      async function verifyRailwayHosting() {
+        try {
+          const response = await fetch('/healthz', { cache: 'no-store' });
+          if (!response.ok) return;
+          const health = await response.json();
+          if (health.ok && health.hostedOn === 'railway') {
+            document.getElementById('railway-status').dataset.active = 'true';
+          }
+        } catch (error) {
+          console.error('Unable to verify hosting:', error);
+        }
+      }
+
       // Fetch local content when page loads
       fetchAndDisplayBooks();
       fetchAndDisplaySiteCopy();
+      verifyRailwayHosting();
       
       // Fetch articles from Substack
       async function fetchAndDisplayArticles() {

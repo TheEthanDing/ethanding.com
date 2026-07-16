@@ -233,7 +233,12 @@ async function handle(req, res) {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = decodeURIComponent(url.pathname);
 
-  if (pathname === '/healthz') return sendJson(res, 200, { ok: true });
+  if (pathname === '/healthz') {
+    return sendJson(res, 200, {
+      ok: true,
+      hostedOn: process.env.RAILWAY_ENVIRONMENT ? 'railway' : 'local',
+    });
+  }
   if (pathname === '/api/admin/session' && req.method === 'GET') return sendJson(res, 200, { authenticated: isAuthenticated(req), githubConfigured: Boolean(process.env.GITHUB_TOKEN) });
 
   if (pathname === '/api/admin/login' && req.method === 'POST') {
