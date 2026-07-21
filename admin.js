@@ -157,8 +157,11 @@ async function uploadCoverFile(file) {
     book.cover = result.path;
     setDirty();
     renderBooks();
-    toast(result.committed ? 'Cover uploaded and published.' : 'Cover saved locally.');
-  } catch (error) { toast(error.message); }
+    toast(result.committed ? 'Cover uploaded. Save changes to attach it to this book.' : 'Cover saved locally. Save changes when you are done.');
+  } catch (error) {
+    renderBookEditor();
+    toast(error.message);
+  }
 }
 
 function renderSite() {
