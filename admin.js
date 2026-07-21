@@ -153,11 +153,15 @@ async function uploadCoverFile(file) {
   prompt.innerHTML = '<strong>Uploading…</strong><span>Saving to your library</span>';
   toast('Uploading cover…');
   try {
-    const result = await api('/api/admin/cover', { method: 'POST', body: JSON.stringify({ dataUrl, fileName: book.title }) });
-    book.cover = result.path;
+    const coverResult = await api('/api/admin/cover', { method: 'POST', body: JSON.stringify({ dataUrl, fileName: book.title }) });
+    book.cover = coverResult.path;
     setDirty();
+    prompt.innerHTML = '<strong>Saving…</strong><span>Publishing this book</span>';
+    const booksResult = await api('/api/admin/books', { method: 'PUT', body: JSON.stringify({ books: state.books }) });
+    state.books.sort((a, b) => (b.dateFinished || '').localeCompare(a.dateFinished || ''));
+    setDirty(false);
     renderBooks();
-    toast(result.committed ? 'Cover uploaded. Save changes to attach it to this book.' : 'Cover saved locally. Save changes when you are done.');
+    toast(booksResult.committed ? 'Cover uploaded and published.' : 'Cover saved locally.');
   } catch (error) {
     renderBookEditor();
     toast(error.message);
