@@ -74,7 +74,15 @@ function renderBookEditor() {
   }
   $('#book-editor').innerHTML = `
     <div class="editor-head">
-      <div><div class="cover-box">${book.cover ? `<img src="${escapeHtml(book.cover)}" alt="">` : '<span>No cover</span>'}</div><label class="cover-upload">Replace cover<input id="cover-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label></div>
+      <label class="cover-drop ${book.cover ? 'has-cover' : ''}" id="cover-drop" for="cover-file">
+        <span class="cover-preview" id="cover-preview">${book.cover ? `<img src="${escapeHtml(book.cover)}" alt="${escapeHtml(book.title)} cover">` : ''}</span>
+        <span class="cover-prompt" id="cover-prompt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5"/></svg>
+          <strong>${book.cover ? 'Change cover' : 'Drop cover here'}</strong>
+          <span>${book.cover ? 'Drop or click' : 'or click to choose'}</span>
+        </span>
+        <input class="cover-input" id="cover-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Choose a cover image for ${escapeHtml(book.title)}">
+      </label>
       <div><p class="eyebrow">Book entry</p><h2>${escapeHtml(book.title || 'Untitled')}</h2><p>${escapeHtml(book.authors.join(', ') || 'Add the author below')}</p></div>
     </div>
     <form id="book-form" class="form-grid">
@@ -107,7 +115,17 @@ function renderBookEditor() {
     setDirty();
     renderBooks();
   });
-  $('#cover-file').addEventListener('change', uploadCover);
+  const coverInput = $('#cover-file');
+  const coverDrop = $('#cover-drop');
+  coverInput.addEventListener('change', () => uploadCoverFile(coverInput.files[0]));
+  coverDrop.addEventListener('dragenter', (event) => { event.preventDefault(); coverDrop.classList.add('is-dragging'); });
+  coverDrop.addEventListener('dragover', (event) => { event.preventDefault(); coverDrop.classList.add('is-dragging'); });
+  coverDrop.addEventListener('dragleave', () => coverDrop.classList.remove('is-dragging'));
+  coverDrop.addEventListener('drop', (event) => {
+    event.preventDefault();
+    coverDrop.classList.remove('is-dragging');
+    uploadCoverFile(event.dataTransfer.files[0]);
+  });
 }
 
 let renderTimer;
@@ -116,18 +134,24 @@ function renderBooksSoon() {
   renderTimer = setTimeout(() => { renderBooks(); }, 250);
 }
 
-async function uploadCover(event) {
-  const file = event.target.files[0];
+async function uploadCoverFile(file) {
   const book = currentBook();
   if (!file || !book) return;
+  if (!file.type.startsWith('image/')) return toast('Choose an image file for the cover.');
   if (file.size > 8 * 1024 * 1024) return toast('Choose an image smaller than 8 MB.');
-  toast('Uploading cover…');
   const dataUrl = await new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+  const preview = $('#cover-preview');
+  const drop = $('#cover-drop');
+  const prompt = $('#cover-prompt');
+  preview.innerHTML = `<img src="${dataUrl}" alt="${escapeHtml(book.title)} cover preview">`;
+  drop.classList.add('has-cover');
+  prompt.innerHTML = '<strong>Uploading…</strong><span>Saving to your library</span>';
+  toast('Uploading cover…');
   try {
     const result = await api('/api/admin/cover', { method: 'POST', body: JSON.stringify({ dataUrl, fileName: book.title }) });
     book.cover = result.path;
