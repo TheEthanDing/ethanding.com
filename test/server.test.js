@@ -31,6 +31,7 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /Ethan Ding/);
   assert.match(homepage, /href="\/healthcare-map"/);
   assert.match(homepage, /href="\/bi-pricing"/);
+  assert.match(homepage, /href="\/data-agent-stack"/);
 });
 
 test('serves the BI pricing comparison and its script', async () => {
@@ -40,6 +41,15 @@ test('serves the BI pricing comparison and its script', async () => {
   const script = await fetch(`${base}/bi-pricing.js`);
   assert.equal(script.status, 200);
   assert.match(await script.text(), /Power BI/);
+});
+
+test('serves the autonomous data agent stack and its script', async () => {
+  const response = await fetch(`${base}/data-agent-stack`);
+  assert.equal(response.status, 200);
+  assert.match(await response.text(), /So you want an autonomous data agent/);
+  const script = await fetch(`${base}/data-agent-stack.js`);
+  assert.equal(script.status, 200);
+  assert.match(await script.text(), /Snowflake/);
 });
 
 test('serves the healthcare ecosystem map and its script', async () => {
