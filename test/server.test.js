@@ -29,6 +29,16 @@ test('serves the homepage and health check', async () => {
   assert.equal(health.ok, true);
   const homepage = await fetch(base).then((response) => response.text());
   assert.match(homepage, /Ethan Ding/);
+  assert.match(homepage, /href="\/healthcare-map"/);
+});
+
+test('serves the healthcare ecosystem map and its script', async () => {
+  const response = await fetch(`${base}/healthcare-map`);
+  assert.equal(response.status, 200);
+  assert.match(await response.text(), /Who sells what to whom/);
+  const script = await fetch(`${base}/healthcare-map.js`);
+  assert.equal(script.status, 200);
+  assert.match(await script.text(), /const SEGMENTS/);
 });
 
 test('serves the repository-owned reading data', async () => {

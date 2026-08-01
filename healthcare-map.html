@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An interactive map of the US healthcare ecosystem, market segments, and cross-segment companies.">
+  <title>Healthcare Ecosystem Map · Ethan Ding</title>
+  <link rel="icon" href="/images/profile.png">
+  <style>
+    :root {
+      --bg: #080d16;
+      --surface: #101827;
+      --surface-2: #151f30;
+      --line: #243044;
+      --ink: #eef1f4;
+      --muted: #8290a3;
+      --faint: #4e5d72;
+      --focus: #a9c6ff;
+      --mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html { color-scheme: dark; }
+    body { margin: 0; color: var(--ink); background: var(--bg); font-family: var(--mono); font-size: 14px; line-height: 1.5; }
+    button, a { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+    .page { width: min(1180px, 100%); margin: 0 auto; padding: 24px clamp(18px, 4vw, 48px) 54px; }
+    .site-nav { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: clamp(52px, 8vw, 88px); color: var(--muted); font-size: 12px; }
+    .site-nav a { text-decoration: none; }
+    .site-nav a:hover { color: var(--ink); }
+    .edition { letter-spacing: .12em; text-transform: uppercase; }
+    .hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: end; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    .eyebrow { margin: 0 0 9px; color: var(--muted); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; }
+    h1 { max-width: 760px; margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(42px, 7vw, 78px); font-weight: 400; letter-spacing: -.045em; line-height: .94; }
+    .dek { max-width: 690px; margin: 18px 0 0; color: var(--muted); font-size: 13px; }
+    .market-total { text-align: right; }
+    .market-total strong { display: block; font-family: Georgia, "Times New Roman", serif; font-size: clamp(34px, 5vw, 54px); font-weight: 400; line-height: 1; }
+    .market-total span { color: var(--muted); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 24px 0 20px; }
+    .tabs { display: inline-flex; gap: 3px; padding: 3px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+    .tab { padding: 8px 14px; color: var(--muted); background: transparent; border: 0; border-radius: 3px; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+    .tab[aria-selected="true"] { color: var(--ink); background: var(--surface-2); }
+    .hint { color: var(--faint); font-size: 10px; }
+    .view[hidden] { display: none; }
+    .network-stage { position: relative; border-bottom: 1px solid var(--line); }
+    .network-stage svg { display: block; width: 100%; height: auto; min-height: 500px; }
+    .edge { fill: none; stroke: #2b384b; stroke-width: 1.3; opacity: .65; transition: opacity .18s ease, stroke .18s ease, stroke-width .18s ease; }
+    .edge.light { stroke-dasharray: 5 4; }
+    .edge.is-highlighted { stroke: #aab6c6; stroke-width: 2.5; opacity: 1; }
+    .edge.is-muted { opacity: .07; }
+    .edge-label { opacity: 0; pointer-events: none; transition: opacity .18s ease; }
+    .edge-label.is-highlighted { opacity: 1; }
+    .map-node { cursor: pointer; transition: opacity .18s ease; }
+    .map-node.external { cursor: default; }
+    .map-node.is-muted { opacity: .14; }
+    .node-ring { opacity: 0; fill: none; stroke-width: 2; transition: opacity .18s ease; }
+    .map-node:hover .node-ring, .map-node.is-active .node-ring, .map-node:focus .node-ring { opacity: .55; }
+    .node-circle { stroke-width: 1.2; }
+    .node-label { fill: var(--ink); font-family: var(--mono); font-size: 10px; font-weight: 600; text-anchor: middle; pointer-events: none; }
+    .node-value { fill: #c0c9d4; font-family: var(--mono); font-size: 9px; text-anchor: middle; pointer-events: none; }
+    .detail { margin-top: 20px; padding: 22px 0 8px; border-top: 1px solid var(--line); }
+    .detail-head { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start; margin-bottom: 22px; }
+    .detail h2 { margin: 0 0 6px; font-family: Georgia, "Times New Roman", serif; font-size: 30px; font-weight: 400; }
+    .detail p { max-width: 720px; margin: 0; color: var(--muted); font-size: 12px; }
+    .detail-total { text-align: right; }
+    .detail-total strong { display: block; font-size: 22px; }
+    .detail-total span { color: var(--faint); font-size: 9px; text-transform: uppercase; }
+    .company-row { display: grid; grid-template-columns: minmax(150px, 1fr) minmax(180px, 2fr) auto; gap: 14px; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(36, 48, 68, .62); }
+    .company-name { min-width: 0; }
+    .company-name strong, .company-name small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .company-name small { color: var(--faint); font-size: 9px; }
+    .bar-track { height: 10px; background: var(--surface); overflow: hidden; }
+    .bar-fill { height: 100%; opacity: .78; }
+    .company-numbers { color: var(--muted); font-size: 10px; white-space: nowrap; text-align: right; }
+    details { border-bottom: 1px solid var(--line); }
+    summary { display: flex; justify-content: space-between; gap: 18px; padding: 14px 0; cursor: pointer; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary strong { font-weight: 600; }
+    summary span { color: var(--faint); font-size: 10px; }
+    .nested-list { padding: 0 0 15px 18px; }
+    .bars-view { display: grid; gap: 28px; padding: 16px 0 28px; }
+    .segment-bar-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .segment-bar-head strong { font-size: 13px; }
+    .segment-bar-head span { color: var(--muted); font-size: 10px; }
+    .stack { display: flex; min-height: 34px; gap: 1px; overflow: hidden; background: var(--surface); }
+    .stack-piece { display: grid; place-items: center; min-width: 3px; color: var(--bg); font-size: 8px; font-weight: 700; overflow: hidden; white-space: nowrap; transition: filter .18s ease; }
+    .stack-piece:hover { filter: brightness(1.25); }
+    .company-key { display: flex; flex-wrap: wrap; gap: 3px 14px; margin-top: 7px; color: var(--faint); font-size: 9px; }
+    .company-key b { color: var(--muted); font-weight: 500; }
+    .cross-intro { max-width: 720px; margin: 12px 0 24px; color: var(--muted); font-family: Georgia, "Times New Roman", serif; font-size: 20px; }
+    .cross-list { border-top: 1px solid var(--line); }
+    .cross-row { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(260px, 2fr) auto; gap: 20px; align-items: center; padding: 17px 0; border-bottom: 1px solid var(--line); }
+    .cross-row h3 { margin: 0 0 3px; font-family: Georgia, "Times New Roman", serif; font-size: 20px; font-weight: 400; }
+    .cross-row p { margin: 0; color: var(--faint); font-size: 9px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { padding: 3px 7px; border: 1px solid var(--line); color: var(--muted); font-size: 9px; }
+    .cross-value { color: var(--muted); font-size: 10px; white-space: nowrap; text-align: right; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 38px; padding-top: 22px; border-top: 1px solid var(--line); }
+    .stat strong { display: block; font-family: Georgia, "Times New Roman", serif; font-size: 28px; font-weight: 400; }
+    .stat span { color: var(--faint); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+    .page-footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 60px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--faint); font-size: 10px; }
+    .page-footer a { text-decoration: none; }
+    .page-footer a:hover { color: var(--ink); }
+    @media (max-width: 760px) {
+      .page { padding-inline: 16px; }
+      .hero { grid-template-columns: 1fr; }
+      .market-total { text-align: left; }
+      .toolbar { align-items: flex-start; flex-direction: column; }
+      .tabs { width: 100%; }
+      .tab { flex: 1; padding-inline: 8px; }
+      .hint { display: none; }
+      .network-stage { overflow-x: auto; }
+      .network-stage svg { width: 760px; min-height: 0; }
+      .company-row { grid-template-columns: 1fr auto; }
+      .bar-track { grid-column: 1 / -1; grid-row: 2; }
+      .cross-row { grid-template-columns: 1fr auto; }
+      .tags { grid-column: 1 / -1; grid-row: 2; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="site-nav" aria-label="Site navigation">
+      <a href="/">← Ethan Ding</a>
+      <span class="edition">Interactive note · 2026</span>
+    </nav>
+
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Healthcare ecosystem</p>
+        <h1>Who sells what to whom.</h1>
+        <p class="dek">A working map of nine US healthcare segments. Bubble area follows annual revenue; arrows follow seller-to-buyer flow. Select a segment to inspect the companies inside it.</p>
+      </div>
+      <div class="market-total"><strong id="total-market">—</strong><span>combined annual revenue</span></div>
+    </header>
+
+    <div class="toolbar">
+      <div class="tabs" role="tablist" aria-label="Healthcare map views">
+        <button class="tab" id="tab-network" role="tab" aria-selected="true" aria-controls="view-network" data-view="network">Ecosystem</button>
+        <button class="tab" id="tab-bars" role="tab" aria-selected="false" aria-controls="view-bars" data-view="bars">Companies</button>
+        <button class="tab" id="tab-cross" role="tab" aria-selected="false" aria-controls="view-cross" data-view="cross">Cross-segment</button>
+      </div>
+      <span class="hint">Hover for flows · Select a bubble for detail</span>
+    </div>
+
+    <section class="view" id="view-network" role="tabpanel" aria-labelledby="tab-network">
+      <div class="network-stage" id="network-stage"></div>
+      <div id="segment-detail" aria-live="polite"></div>
+    </section>
+    <section class="view bars-view" id="view-bars" role="tabpanel" aria-labelledby="tab-bars" hidden></section>
+    <section class="view" id="view-cross" role="tabpanel" aria-labelledby="tab-cross" hidden>
+      <p class="cross-intro">Vertical integration is the strategy: payers acquire benefits and care delivery, while manufacturers stretch into devices, diagnostics, and data.</p>
+      <div class="cross-list" id="cross-list"></div>
+    </section>
+
+    <section class="stats" id="market-stats" aria-label="Map coverage"></section>
+    <footer class="page-footer"><span>Directional market map · figures are approximate</span><a href="/">ethanding.com</a></footer>
+  </main>
+  <script src="/healthcare-map.js"></script>
+</body>
+</html>

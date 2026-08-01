@@ -405,6 +405,27 @@
         gap: 2rem;
         margin-top: 4rem;
       }
+      .interactive-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.7rem 0;
+        color: #222;
+        font-size: 0.875rem;
+        text-decoration: none;
+        border-bottom: 1px solid #d8d8d8;
+        transition: color 0.2s, border-color 0.2s;
+      }
+      .interactive-link span {
+        color: #888;
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .interactive-link:hover {
+        color: #000;
+        border-color: #000;
+      }
       .social-links {
         display: flex;
         gap: 1rem;
@@ -527,6 +548,10 @@
       </section>
       
       <footer>
+        <a class="interactive-link" href="/healthcare-map">
+          <span>Interactive</span>
+          Healthcare ecosystem map →
+        </a>
         <div class="social-links">
           <a id="site-twitter" href="https://twitter.com/theethanding" target="_blank" rel="noopener noreferrer" aria-label="Twitter" class="social-link">
             <svg width="16" height="16" viewBox="0 0 24 24">
