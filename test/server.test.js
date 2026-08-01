@@ -35,6 +35,15 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /href="\/analytics-token-tam"/);
   assert.match(homepage, /href="\/sengoku-clans"/);
   assert.match(homepage, /href="\/semiconductor-wars"/);
+  assert.match(homepage, /href="\/airline-wars"/);
+});
+
+test('serves the U.S. airline consolidation visualization', async () => {
+  const response = await fetch(`${base}/airline-wars`);
+  assert.equal(response.status, 200);
+  const page = await response.text();
+  assert.match(page, /U\.S\. AIRLINES/);
+  assert.match(page, /Chain of Consolidation/);
 });
 
 test('serves the semiconductor wars visualization', async () => {

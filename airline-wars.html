@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wars of the Airlines · Ethan Ding</title>
+<meta name="description" content="An interactive history of U.S. airline consolidation and market share from 1955 to 2025.">
+<link rel="icon" href="/images/profile.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-sankey/0.12.3/d3-sankey.min.js"></script>
+<style>
+  :root{
+    --ink:#101318; --ink-2:#151a21; --ink-3:#1a212a;
+    --gold:#c9a24b; --gold-dim:#8a7340;
+    --paper:#dfe5e8; --paper-dim:#93a0a8;
+    --seal:#b3372a;
+    --hair:rgba(201,162,75,.22);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans:"Avenir Next","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--paper);font-family:var(--serif);padding:20px clamp(14px,3vw,44px) 40px;}
+  .site-nav{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:22px;
+            font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-dim);}
+  .site-nav a{color:var(--gold);text-decoration:none;border-bottom:1px solid transparent;padding:4px 0;}
+  .site-nav a:hover{border-color:var(--gold);}
+
+  header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;
+         border-bottom:1px solid var(--hair);padding-bottom:18px;margin-bottom:6px;}
+  h1{font-size:clamp(20px,2.8vw,32px);font-weight:600;letter-spacing:.04em;}
+  h1 .era{color:var(--gold);font-weight:400;}
+  .sub{color:var(--paper-dim);font-size:13.5px;margin-top:6px;max-width:780px;line-height:1.55;}
+  .sub b{color:var(--paper);font-weight:600;}
+  .legend-box{border:1px solid var(--hair);padding:10px 14px;background:var(--ink-2);min-width:250px;}
+  .legend-box .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+  .legend-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--paper-dim);margin-top:5px;}
+  .seal-dot{width:12px;height:12px;border-radius:50%;background:var(--seal);box-shadow:0 0 0 2px rgba(179,55,42,.3);flex:none;}
+  .sub-dot{width:11px;height:11px;border-radius:50%;background:transparent;border:2px solid var(--gold);flex:none;}
+  .gold-tick{width:12px;height:0;border-top:1px dashed var(--gold);flex:none;}
+
+  #chart-wrap,#sankey-wrap{position:relative;background:var(--ink-2);border:1px solid var(--hair);margin-top:16px;padding:6px 6px 0;}
+  #chart,#sankey{display:block;width:100%;height:auto;}
+  .tooltip{position:absolute;pointer-events:none;background:#0b0e12;border:1px solid var(--gold-dim);
+           padding:9px 12px;font-size:12.5px;line-height:1.5;color:var(--paper);display:none;z-index:5;max-width:300px;
+           box-shadow:0 6px 18px rgba(0,0,0,.55);}
+  .tooltip .yr{color:var(--gold);letter-spacing:.12em;font-size:11px;}
+  .tooltip .nm{font-size:14.5px;margin:2px 0 3px;}
+  .tooltip .pw{color:var(--paper-dim);}
+  .tooltip .fate-t{color:#d98a7f;margin-top:4px;}
+
+  .section-title{margin:32px 0 12px;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);
+                 display:flex;align-items:center;gap:14px;}
+  .section-title::after{content:"";flex:1;border-top:1px solid var(--hair);}
+  .section-sub{color:var(--paper-dim);font-size:13px;line-height:1.55;margin:-4px 0 12px;max-width:900px;}
+
+  #events{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px;}
+  .ev{background:var(--ink-3);border:1px solid rgba(201,162,75,.14);border-top:2px solid var(--gold-dim);
+      padding:12px 13px;font:inherit;font-size:12.5px;line-height:1.5;color:var(--paper-dim);cursor:pointer;
+      text-align:left;transition:border-color .15s, transform .15s;}
+  .ev:hover,.ev.active{border-color:var(--gold);transform:translateY(-2px);}
+  .ev:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .ev .yr{font-family:var(--sans);font-size:15px;color:var(--paper);letter-spacing:.02em;}
+  .ev .nm{color:var(--gold);font-size:13px;margin:3px 0 6px;font-weight:600;}
+  .ev.fall .yr::after{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--seal);margin-left:8px;}
+
+  #fates{width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.5;}
+  #fates th{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);text-align:left;
+            padding:8px 10px;border-bottom:1px solid var(--hair);}
+  #fates td{padding:8px 10px;border-bottom:1px solid rgba(223,229,232,.07);color:var(--paper-dim);vertical-align:top;}
+  #fates td:first-child{color:var(--paper);white-space:nowrap;font-weight:600;}
+  #fates .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:1px;}
+  #fates .k-destroyed{color:#d98a7f;} #fates .k-submitted{color:#d9c27f;} #fates .k-survived{color:#9dbf9a;} #fates .k-victor{color:#c9a24b;font-weight:600;}
+  #fates td.num{white-space:nowrap;font-family:var(--sans);}
+
+  #clans{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+  .clan{padding:12px 13px;border:1px solid rgba(223,229,232,.08);background:var(--ink-3);
+        border-left:5px solid var(--c);font-size:12.5px;line-height:1.55;color:var(--paper-dim);}
+  .clan .nm{color:var(--paper);font-size:14.5px;font-weight:600;letter-spacing:.03em;}
+  .clan .nm i{font-style:normal;color:var(--c);}
+  .clan .meta{margin-top:5px;}
+  .clan .meta b{color:var(--paper);font-weight:600;}
+  .clan .fate{margin-top:5px;padding-top:5px;border-top:1px dashed rgba(223,229,232,.12);}
+  .clan .fate.fall{color:#d98a7f;} .clan .fate.sub{color:#d9c27f;} .clan .fate.live{color:#9dbf9a;}
+
+  .fermi{margin-top:14px;border:1px dashed var(--gold-dim);padding:14px 16px;font-size:12.5px;line-height:1.7;color:var(--paper-dim);}
+  .fermi b{color:var(--gold);font-weight:600;}
+  footer{margin-top:18px;color:#5f6d76;font-size:11.5px;line-height:1.55;}
+  .table-scroll{overflow-x:auto;}
+  @media (max-width:760px){
+    .site-nav span{display:none}
+    #chart-wrap,#sankey-wrap,#regents-wrap,.table-scroll{overflow-x:auto}
+    #chart,#sankey,#regents{width:900px!important;max-width:none}
+    #fates{min-width:880px}
+  }
+  @media (prefers-reduced-motion:reduce){.ev{transition:none}.ev:hover{transform:none}}
+</style>
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="/">← Ethan Ding</a>
+  <span>Interactive industry history · 1955–2025</span>
+</nav>
+
+<header>
+  <div>
+    <h1>U.S. AIRLINES <span class="era">(1955–2025)</span> — POWER OF THE GREAT CARRIERS, IN MARKET SHARE</h1>
+    <p class="sub">Power is measured in <b>share of all traffic flown by U.S. scheduled airlines</b> (revenue passenger-miles, domestic + international) —
+      the metric the industry itself lives and dies by. A rule of thumb at today's volumes: <b>1 share point ≈ 10 million passengers a year</b>.
+      The stack always totals 100%: when a carrier dies, its passengers don't vanish — they're re-flown by someone else.
+      Hover any band <i>or any fall seal</i> for details; click a timeline event to mark its year.</p>
+  </div>
+  <div class="legend-box">
+    <div class="t">Reading the chart</div>
+    <div class="legend-row"><span class="seal-dot"></span>Carrier dies — liquidation or forced asset sale</div>
+    <div class="legend-row"><span class="sub-dot"></span>Merged / acquired — absorbed by a survivor</div>
+    <div class="legend-row"><span class="gold-tick"></span>Key event marker (click cards below)</div>
+    <div class="legend-row" style="margin-top:8px">Band height = % of all U.S. airline traffic</div>
+  </div>
+</header>
+
+<div id="chart-wrap"><svg id="chart" role="img" aria-label="Stacked area chart showing U.S. airline traffic market share from 1955 to 2025"></svg><div class="tooltip" id="tt1"></div></div>
+
+<div class="section-title">Chain of Consolidation — Who Absorbed Whom</div>
+<p class="section-sub">Each ribbon is market share passing from the absorbed to the absorber.
+  <span style="color:#d98a7f">Red ribbons</span> = carrier destroyed — liquidation, strike death, or assets sold off a corpse. <span style="color:#d9c27f">Gold ribbons</span> = merger or acquisition — the carrier's people, fleet and routes live on under a new certificate. Hover any ribbon for the deal or collapse behind it. Every stream ends at one of today's six survivors.</p>
+<div id="sankey-wrap"><svg id="sankey" role="img" aria-label="Flow chart showing U.S. airlines merging, acquiring, and absorbing predecessor carriers"></svg><div class="tooltip" id="tt2"></div></div>
+
+<div class="section-title">Key Events Timeline</div>
+<div id="events"></div>
+
+<div class="section-title">The Southwest Anomaly — Smallest at Deregulation, Largest at Home</div>
+<div class="fermi">
+  <b>Why they got so powerful.</b> Three structural advantages, compounding for four decades.
+  <b>(1) Born outside the system:</b> flying only inside Texas from 1971, Southwest was exempt from CAB route and fare regulation — it spent the seven years before deregulation learning to run an airline on price while the trunks competed on legroom and carving stations. When the 1978 Act freed everyone, Southwest was the only carrier already built for the new world.
+  <b>(2) One fleet, one mission:</b> a single aircraft type (the 737) from day one, point-to-point flying instead of hubs, 10-minute turnarounds, no meals, no assigned seats. Its cost per seat-mile ran 25–40% below the legacies for decades — the "Southwest Effect" meant fares in any market it entered fell ~30% while traffic doubled.
+  <b>(3) No succession wars:</b> 47 consecutive profitable years (1973–2019) — a streak no other airline on Earth approaches — and not one Chapter 11, while every legacy rival passed through bankruptcy court at least once. Its famous fuel hedges paid out over $3.5B in the 2000s oil spike alone, funding growth exactly when the majors were shrinking in court.
+  <br><br>
+  <b>Why they stayed on top while the legacies bled.</b> Strategy: they never marched on the hubs. Southwest let United, American and Delta fight ruinous fortress-hub and transatlantic wars, and spent the difference digesting secondary airports — Love Field, Midway, Oakland, Baltimore. By 2010 the airline the trunks had once dismissed as a Texas commuter was boarding more domestic passengers than any carrier in America.
+  <br><br>
+  <b>Why the aura cracked.</b> The same simplicity that made them rich made them rigid. The December 2022 meltdown — 16,900 cancellations from an outdated crew-scheduling system — cost over $1B and its reputation for operational excellence. In 2024 the activist fund Elliott took a stake and forced out the old guard; by 2025 Southwest had abandoned open seating, added bag fees, and started red-eyes — dismantling, one by one, the heresies that had defined it for 50 years.
+</div>
+
+<div class="section-title">The 1978 Deregulation Act — Liberation, or Death Sentence?</div>
+<div class="fermi">
+  Handing the airlines their freedom looks like an obvious gift until you count the bodies. For 40 years the Civil Aeronautics Board had fixed every fare and awarded every route — no trunk carrier had gone bankrupt since 1938, and none had been allowed to, either. The 1978 Act was a <b>forced swap, not a gift</b>: carriers traded guaranteed profitability on a frozen map for the right to fly anywhere at any price — against anyone.
+  <br><br>
+  From Congress's chair, the logic was consumer surplus: <b>(1)</b> CAB-era fares were set so airlines competed by burning money on service (piano bars on 747s, carved roast beef in coach); <b>(2)</b> intrastate carriers like Southwest in Texas and PSA in California — outside CAB reach — were profitably charging half the regulated fare, proving the system was a cartel; <b>(3)</b> ~150 new airlines entered within seven years; and <b>(4)</b> real average fares fell roughly 45% over the following three decades, and flying went from a luxury (fewer than half of Americans had ever flown in 1971) to a bus with wings.
+  <br><br>
+  <b>The carriers paid for all of it.</b> Of the ten trunk airlines that woke up free in 1978, exactly three certificates were still flying under their own name by 2015 — United, American, Delta. Braniff died first (1982), then People Express devoured itself (1987), then the giants: Eastern and Pan Am in a single year (1991), TWA on its third bankruptcy (2001). The industry lost, cumulatively, more money in its first 30 deregulated years than it had made in the previous 40 regulated ones. And the final irony: after ~200 bankruptcies and the great merger wave, the Big Four of 2015 held a larger share of the market than the Big Four of 1978 ever had under regulation. The cartel was dead; long live the oligopoly.
+</div>
+
+<div class="section-title">The Bankruptcy Court Era (2001–2013) — Why the Big Four Happened</div>
+<p class="section-sub">After 9/11, every legacy carrier passed through Chapter 11 — using the court to shed pensions, aircraft leases and labor contracts — and every exit ended in a mega-merger. The bars show each legacy's share on the eve of consolidation (2005): <b style="color:#dfe5e8">no single carrier held even a sixth of the market</b>, and none could raise fares while eight majors fought. Six airlines entered the decade; four remained — holding ~80% of domestic traffic. Hover a bar for each carrier's path through the court.</p>
+<div id="regents-wrap" style="position:relative;background:var(--ink-2);border:1px solid var(--hair);padding:6px;">
+  <svg id="regents" role="img" aria-label="Bar chart comparing major U.S. airlines' market share before the consolidation wave" style="display:block;width:100%;height:auto;"></svg>
+  <div class="tooltip" id="tt3"></div>
+</div>
+
+<div class="section-title">How Every Great Carrier Ended</div>
+<p class="section-sub">The era's major airlines, in order of when they folded. "Folded" takes three forms: <span style="color:#d98a7f">destroyed</span> (liquidated, or assets stripped from a corpse), <span style="color:#d9c27f">absorbed</span> (merged into a survivor — fleet, people and routes live on), or <span style="color:#9dbf9a">still flying in 2025</span>. Note the pattern: of the fourteen largest airlines of 1978, not one died in a fair fight for passengers — every single one was killed or captured by balance sheets, strikes, and merger paper.</p>
+<div class="table-scroll"><table id="fates"></table></div>
+
+<div class="section-title">The Great Carriers — Peak Share &amp; Fate</div>
+<div id="clans"></div>
+
+<div class="fermi">
+  <b>How the share estimates were made (Fermi method):</b>
+  Anchors are CAB traffic statistics (pre-1978) and DOT Form 41 / T-100 data (after), by revenue passenger-miles across all U.S. scheduled carriers, domestic + international.
+  Documented checkpoints keep the bands honest: the Big Four trunks (United, American, TWA, Eastern) carried ≈ <b>70% of domestic trunk traffic in the mid-1950s</b>;
+  Capital was the <b>5th-largest U.S. airline</b> when United absorbed it (1961); Delta–Northwest created the <b>world's largest airline</b> (2008), a title American–US Airways took back (2013);
+  the Big Four of today (American, Delta, United, Southwest) hold ≈ <b>67–74% of domestic traffic</b> depending on the measure; Southwest has boarded the <b>most domestic passengers of any U.S. carrier since ~2010</b>.
+  Between checkpoints, shares are interpolated from fleet counts, enplanement tables, and hub capacity. International-heavy carriers (Pan Am above all) look smaller here than their fame suggests — share of passenger-miles understates a carrier that was banned from the domestic market. Error bars are roughly ±2–3 points.
+  <br><br>
+  <b>Two things that look wrong but aren't.</b>
+  <b>(1) The total never shrinks:</b> the stack always sums to 100% — traffic doesn't disappear when an airline dies, it's re-flown. The gray <i>Other carriers</i> band at the bottom is the rest of the industry: local-service airlines of the 1950s–60s (Mohawk, Lake Central, Bonanza…), the ~150 deregulation-era startups (Midway, Air Florida, ValuJet, ATA…), and today's ultra-low-cost and leisure fringe (Allegiant, Sun Country, Breeze, Avelo). Watch it swell after 1978 — that bulge <i>is</i> deregulation — then get squeezed as the startups die or are eaten, then swell again after 2010 as the ULCCs grow in the shadow of the oligopoly.
+  <b>(2) Pan Am at ~10% in 1955 is, if anything, generous.</b> Pan Am was traffic-poor by design: Washington's "Chosen Instrument" for international aviation was barred from carrying a single domestic passenger, so it had no feed for its own overseas flights. Its true asset was legitimacy — routes, treaties, and the most famous brand in world aviation — which is why, once deregulation burned that protection down, there was almost no domestic network underneath to fall back on.
+</div>
+
+<footer>Bands show share of revenue passenger-miles flown by U.S. scheduled carriers (regional affiliates flying under a major's code are counted with the major). The stack always totals 100%: when a carrier folds its traffic moves to another band, never off the chart. "Other carriers" = local-service, charter, startup and ultra-low-cost airlines not banded by name. Values are Fermi estimates for comparison, not audited data; ※ marks Pan Am's Chosen Instrument era, when its international monopoly gave it power far beyond its share of passenger-miles.</footer>
+
+<script>
+/* ================= DATA (% of all U.S. carrier RPMs) ================= */
+const CLANS = [
+ {id:"united", name:"United", color:"#35548f", region:"Chicago · hubs ORD, DEN, SFO, EWR, IAH, IAD",
+  peak:"1961–70s · ≈21–22% after absorbing Capital — the largest airline in the free world",
+  fate:{txt:"Victor — survived Ch.11 (2002–06), absorbed Continental (2010), and Pan Am's Pacific before that; one of the Big Four", kind:"live", yr:null, by:null},
+  pts:[[1955,15],[1960,15],[1961,21],[1970,21],[1978,21],[1986,18],[1991,18],[1995,17],[2000,16],[2002,14],[2005,12],[2010,11],[2011,17.5],[2015,15.5],[2020,14.5],[2025,17]]},
+
+ {id:"american", name:"American", color:"#c1442e", region:"Fort Worth · hubs DFW, CLT, ORD, PHL, MIA, PHX",
+  peak:"2013– · ≈20% after the US Airways merger — the world's largest airline",
+  suzerain:{a:2013,b:2025,note:"Since the 2013 merger, American has been the largest airline in the world by fleet and passengers — the position United and Delta each briefly held during the merger wave."},
+  fate:{txt:"Victor — held out of bankruptcy longest, filed Ch.11 in 2011 anyway, and was reverse-taken-over by US Airways' management in 2013; one of the Big Four", kind:"live", yr:null, by:null},
+  pts:[[1955,17],[1961,16],[1970,15.5],[1978,13.5],[1982,14.5],[1985,16],[1990,18],[1995,17.5],[2001,19],[2005,16],[2011,13],[2013,13.5],[2014,20],[2019,19],[2025,17.5]]},
+
+ {id:"delta", name:"Delta", color:"#8e2a4a", region:"Atlanta · hubs ATL, MSP, DTW, SLC, JFK, SEA",
+  peak:"2008– · ≈20% after Northwest — briefly the world's largest airline",
+  fate:{txt:"Victor — the quiet consolidator: Northeast (1972), Western (1987), Pan Am's Atlantic (1991), Northwest (2008); the industry's most profitable carrier since; one of the Big Four", kind:"live", yr:null, by:null},
+  pts:[[1955,5],[1961,6.5],[1972,9.5],[1978,11],[1987,13],[1991,14.5],[2000,15],[2005,13],[2008,13.5],[2009,20],[2015,17.5],[2020,17],[2025,18]]},
+
+ {id:"eastern", name:"Eastern", color:"#5b8ea6", region:"Miami · the East Coast trunk — 'The Great Silver Fleet'",
+  peak:"1950s–60s · ≈13% — for a time the most profitable airline in the world",
+  fate:{txt:"Bled by fare wars and labor war under Frank Lorenzo; crippled by the 1989 machinists' strike; liquidated January 1991", kind:"fall", yr:1991, by:"Deregulation fare wars; Texas Air asset-stripping; IAM strike"},
+  pts:[[1955,12],[1961,12.5],[1970,12],[1978,11],[1983,10],[1986,9],[1989,4],[1991,0]]},
+
+ {id:"twa", name:"TWA", color:"#9d8a3f", region:"New York / St. Louis · transatlantic & transcontinental",
+  peak:"1950s–60s · ≈11% — Hughes's airline; the Atlantic's glamour carrier",
+  fate:{txt:"Gutted by Icahn's 1988 leveraged buyout and the Karabu ticket deal; three bankruptcies; bought by American in 2001 and the STL hub dismantled", kind:"fall", yr:2001, by:"Carl Icahn (financially); American Airlines (absorption)"},
+  pts:[[1955,10],[1961,10.5],[1970,10.5],[1978,9],[1986,8.5],[1992,5.5],[1996,4],[2001,2.5],[2002,0]]},
+
+ {id:"panam", name:"Pan Am", color:"#3d8f80", region:"New York · the world — barred from domestic routes until 1979",
+  peak:"1950s–60s · ≈10% of RPMs, but the de facto U.S. flag carrier abroad",
+  suzerain:{a:1955,b:1978,note:"The 'Chosen Instrument': Washington's unofficial flag carrier held a near-monopoly on U.S. international aviation — it launched the 707 and the 747, ran embassies' worth of overseas stations, and its power vastly exceeded its share of passenger-miles. The same bargain barred it from carrying a single domestic passenger."},
+  fate:{txt:"Deregulation gave rivals its oceans but never gave it a domestic network; sold the Pacific (1985), then the Atlantic (1991) to survive; Lockerbie (1988) broke the brand; ceased operations December 1991", kind:"fall", yr:1991, by:"Deregulation; asset sales to United & Delta; Lockerbie"},
+  pts:[[1955,10],[1961,9.5],[1970,9],[1978,7],[1980,9],[1985,6],[1986,5],[1991,0]]},
+
+ {id:"northwest", name:"Northwest", color:"#96566b", region:"Minneapolis · hubs MSP, DTW, MEM · the Pacific pioneer",
+  peak:"1986–2000s · ≈7.5% after absorbing Republic",
+  fate:{txt:"Filed Ch.11 the same afternoon as Delta (Sept 14, 2005); emerged only to merge into Delta in 2008 — creating the world's largest airline", kind:"sub", yr:2008, by:"Delta (merger)"},
+  pts:[[1955,4],[1970,5],[1978,5],[1986,7.5],[1992,7],[2000,7],[2005,6.5],[2008,6.5],[2009,0]]},
+
+ {id:"continental", name:"Continental", color:"#e6c15a", region:"Houston · hubs IAH, EWR, CLE",
+  peak:"2000s · ≈8% — the best-run legacy of the pre-merger decade",
+  fate:{txt:"Twice bankrupted under Lorenzo (1983, 1990), then the industry's turnaround story ('From Worst to First'); merged into United 2010 — Continental's CEO ended up running the combined airline", kind:"sub", yr:2010, by:"United (merger of equals in name)"},
+  pts:[[1955,2],[1970,3.5],[1978,4],[1982,5],[1987,9],[1991,7.5],[1995,7],[2000,8],[2005,7.5],[2010,7],[2011,0]]},
+
+ {id:"braniff", name:"Braniff", color:"#c94f7c", region:"Dallas · Texas, Latin America — the 'flying colors' fleet",
+  peak:"1979 · ≈5% — doubled its route map in a single year after deregulation",
+  fate:{txt:"Expanded faster than any airline in history the moment routes were freed — then fuel doubled and rates spiked; first great deregulation casualty, ceased operations May 1982", kind:"fall", yr:1982, by:"Its own expansion; the 1980–82 recession; American at DFW"},
+  pts:[[1955,3],[1968,3.5],[1978,4],[1980,5],[1982,0]]},
+
+ {id:"national", name:"National", color:"#86a83e", region:"Miami · East Coast–Florida, 'Fly Me' campaign",
+  peak:"1960s–70s · ≈3.5% — Miami's hometown trunk",
+  fate:{txt:"Prize of deregulation's first bidding war — Pan Am outbid Texas International and Eastern to finally buy itself a domestic network, 1980", kind:"sub", yr:1980, by:"Pan Am (acquisition)"},
+  pts:[[1955,3.5],[1970,3.2],[1978,3],[1980,0]]},
+
+ {id:"western", name:"Western", color:"#a08050", region:"Los Angeles · the West, SLC hub — oldest name in U.S. aviation",
+  peak:"1960s–70s · ≈4% — 'The o-o-only way to fly'",
+  fate:{txt:"Merged into Delta in 1987, handing it the Salt Lake City hub and the West", kind:"sub", yr:1987, by:"Delta (acquisition)"},
+  pts:[[1955,3.5],[1970,4],[1978,3.5],[1986,3.5],[1987,0]]},
+
+ {id:"capital", name:"Capital", color:"#7a8a5a", region:"Washington D.C. · the East — 5th-largest U.S. airline of the 1950s",
+  peak:"1955 · ≈5.5% — pioneer of the Viscount turboprop",
+  fate:{txt:"Choked by debt on its Viscount fleet; absorbed by United in 1961 — the largest airline merger in history at the time", kind:"sub", yr:1961, by:"United (rescue merger)"},
+  pts:[[1955,5.5],[1960,5],[1961,0]]},
+
+ {id:"northeast", name:"Northeast", color:"#6f7d8a", region:"Boston · New England & Florida — the 'Yellowbirds'",
+  peak:"1960s · ≈2% — perennially the weakest trunk",
+  fate:{txt:"Merged into Delta in 1972, giving it Boston and the New York–Florida runs", kind:"sub", yr:1972, by:"Delta (acquisition)"},
+  pts:[[1955,1.8],[1971,1.5],[1972,0]]},
+
+ {id:"usairways", name:"US Airways (Allegheny)", color:"#6f7d8a00", region:"", peak:"", fate:{txt:"",kind:"sub",yr:null,by:null}, pts:null},
+
+ {id:"usair", name:"US Airways", color:"#7d8a99", region:"Pittsburgh → Arlington · hubs PIT, PHL, CLT, PHX — born Allegheny",
+  peak:"1989–90s · ≈6.5% after swallowing PSA and Piedmont",
+  fate:{txt:"Twice through Ch.11 (2002, 2004); rescued by a reverse takeover from tiny America West (2005); then executed the same trick on a far bigger corpse — taking over American out of its bankruptcy, 2013", kind:"sub", yr:2013, by:"American (merger — with US Airways' team in command)"},
+  pts:[[1955,0.8],[1968,1.2],[1972,2],[1978,2.5],[1987,4.5],[1989,6.5],[1995,6.5],[2000,6.5],[2004,5],[2005,6.8],[2013,6.5],[2014,0]]},
+
+ {id:"americawest", name:"America West", color:"#7a5a6e", region:"Phoenix · hubs PHX, LAS — deregulation's biggest startup survivor",
+  peak:"2000s · ≈2.5% — the only post-1978 startup to reach major status and live",
+  fate:{txt:"Merged with US Airways in 2005 — the smaller airline's management took over the combined carrier, and eight years later took over American too", kind:"sub", yr:2005, by:"US Airways (reverse takeover — AWA's team in command)"},
+  pts:[[1983,0.1],[1990,2],[2000,2.5],[2005,2.3],[2006,0]]},
+
+ {id:"peoplex", name:"People Express", color:"#5a7a5a", region:"Newark · no-frills, $23 fares, 'the fastest-growing airline in history'",
+  peak:"1985 · ≈3% — from zero to a top-ten airline in four years",
+  fate:{txt:"Grew too fast, bought old Frontier and Britt, drowned in debt and yield-managed to death by American's SABRE pricing; sold to Texas Air and folded into Continental, 1987", kind:"fall", yr:1987, by:"American's yield management; Texas Air (absorption)"},
+  pts:[[1981,0.1],[1984,2],[1985,3],[1986,2.5],[1987,0]]},
+
+ {id:"southwest", name:"Southwest", color:"#e08a3c", region:"Dallas Love Field · point-to-point, one fleet, no hubs",
+  peak:"2010s · ≈12–13% systemwide — the most domestic passengers of any airline in America",
+  fate:{txt:"Victor — 47 straight profitable years, zero bankruptcies; the largest domestic carrier since ~2010; remade under activist pressure 2024–25 (assigned seats, bag fees) — one of the Big Four", kind:"live", yr:null, by:null},
+  pts:[[1971,0.1],[1978,0.4],[1985,1.2],[1990,2.5],[1995,4.5],[2000,7],[2005,9],[2011,10.5],[2012,12.3],[2019,12],[2025,12]]},
+
+ {id:"airtran", name:"AirTran (ValuJet)", color:"#6e8a7d", region:"Atlanta · low-cost — reborn from the 1996 ValuJet disaster",
+  peak:"2000s · ≈2% — the thorn in Delta's Atlanta fortress",
+  fate:{txt:"Bought by Southwest in 2011 — Southwest's ticket into Atlanta and its first international routes", kind:"sub", yr:2011, by:"Southwest (acquisition)"},
+  pts:[[1993,0.1],[1997,0.7],[2000,1],[2005,1.8],[2011,1.8],[2012,0]]},
+
+ {id:"jetblue", name:"JetBlue", color:"#5a7a9e", region:"New York JFK · the premium-feeling low-cost carrier",
+  peak:"2010s · ≈4.5% — TVs in every seat, and the last big independent in New York",
+  fate:{txt:"Still flying — but its Northeast alliance with American (2023) and its acquisition of Spirit (2024) were both killed in court, leaving it strategically boxed in", kind:"live", yr:null, by:null},
+  pts:[[2000,0.2],[2005,2],[2010,3],[2015,4],[2019,4.5],[2025,4.5]]},
+
+ {id:"alaska", name:"Alaska", color:"#4a7a6a", region:"Seattle · the West Coast — quietly the industry's best operator",
+  peak:"2024– · ≈5.5% after Hawaiian — the fifth force",
+  fate:{txt:"Still flying — absorbed Virgin America (2016) and Hawaiian (2024); the only carrier outside the Big Four with a fortress of its own", kind:"live", yr:null, by:null},
+  pts:[[1955,0.2],[1978,0.4],[1990,1],[2000,2],[2010,2.5],[2016,3],[2017,4.3],[2023,4.3],[2024,5.6],[2025,5.6]]},
+
+ {id:"virgin", name:"Virgin America", color:"#a04a7a", region:"San Francisco · mood lighting and Silicon Valley loyalty",
+  peak:"2016 · ≈1.4% — small, beloved, unprofitable for most of its life",
+  fate:{txt:"Alaska outbid JetBlue for it in 2016 (≈$2.6B) largely to keep it away from JetBlue; the brand was retired by 2018", kind:"sub", yr:2016, by:"Alaska (acquisition)"},
+  pts:[[2007,0.1],[2010,0.8],[2016,1.4],[2017,0]]},
+
+ {id:"hawaiian", name:"Hawaiian", color:"#8a5a8a", region:"Honolulu · inter-island monopoly and the long Pacific thin routes",
+  peak:"2010s · ≈1.5% — 90+ years under one name",
+  fate:{txt:"Battered by the Maui fires and Pacific overcapacity; acquired by Alaska Air Group in 2024 — the brand keeps flying under a shared certificate", kind:"sub", yr:2024, by:"Alaska Air Group (acquisition)"},
+  pts:[[1955,0.3],[2000,0.8],[2010,1.2],[2023,1.4],[2024,0]]},
+
+ {id:"spirit", name:"Spirit", color:"#cbb63a", region:"Fort Lauderdale · the yellow ultra-low-cost machine",
+  peak:"2019–22 · ≈3% — the fastest-growing U.S. airline of the 2010s",
+  fate:{txt:"Its merger with JetBlue was blocked in court (Jan 2024) on antitrust grounds; filed Ch.11 that November — the first major U.S. airline bankruptcy since 2011 — and emerged smaller in 2025", kind:"live", yr:null, by:null},
+  pts:[[1992,0.05],[2007,0.5],[2015,1.8],[2019,2.8],[2022,3],[2024,2.8],[2025,2.3]]},
+
+ {id:"frontier", name:"Frontier (1994)", color:"#5e8a5a", region:"Denver · ULCC — the name revived from a 1986 casualty",
+  peak:"2020s · ≈3% — Denver's low-cost animal-tails fleet",
+  fate:{txt:"Still flying — repeatedly circling Spirit for a merger (2022 lost to JetBlue's bid, 2024–25 renewed offers rejected)", kind:"live", yr:null, by:null},
+  pts:[[1994,0.1],[2000,0.6],[2010,1.3],[2015,1.8],[2019,2.4],[2025,3]]},
+
+ {id:"other", name:"Other carriers", color:"#6b6b66", region:"Local-service lines of the CAB era (Mohawk, Bonanza, Lake Central…), ~150 deregulation startups (Midway, Air Florida, ATA…), and today's ULCC fringe (Allegiant, Sun Country, Breeze, Avelo)",
+  peak:"—", fate:{txt:"The churn layer: hundreds of certificates born and destroyed; the bulge after 1978 is deregulation itself", kind:"live", yr:null, by:null},
+  pts:null /* remainder to 100% */},
+];
+/* drop the placeholder */
+const REAL = CLANS.filter(c=>c.id!=="usairways");
+
+const ORDER = ["other","frontier","spirit","hawaiian","virgin","alaska","jetblue","airtran","southwest","peoplex","americawest","usair","northeast","capital","western","national","braniff","continental","northwest","panam","twa","eastern","delta","american","united"];
+const TOTAL = 100;
+/* total annual passengers (millions of enplanements), for the tooltip conversion */
+const PAX = [[1955,42],[1960,58],[1965,95],[1970,170],[1975,205],[1978,275],[1980,297],[1985,382],[1990,466],[1995,548],[2000,666],[2002,612],[2005,739],[2008,743],[2010,720],[2015,798],[2019,926],[2020,369],[2022,853],[2024,983],[2025,1000]];
+
+const ERAS = [
+ {a:1955,b:1978,l1:"The Regulated Era (CAB)",l2:"1955–1978"},
+ {a:1978,b:1991,l1:"Deregulation Shakeout",l2:"1978–1991"},
+ {a:1991,b:2001,l1:"Fare Wars & Fortress Hubs",l2:"1991–2001"},
+ {a:2001,b:2013,l1:"Bankruptcy & Consolidation",l2:"2001–2013"},
+ {a:2013,b:2025,l1:"The Big Four Oligopoly",l2:"2013–2025"},
+];
+
+const EVENTS = [
+ {yr:1958, label:"1958", name:"The Jet Age begins", fall:false,
+  txt:"Pan Am's 707 crosses the Atlantic; National flies the first domestic jet weeks later. Trip times halve, capacity explodes, and the piston-era pecking order starts to dissolve."},
+ {yr:1961, label:"1961", name:"United absorbs Capital", fall:false,
+  txt:"The 5th-largest U.S. airline, drowning in Viscount debt, is rescue-merged into United — the biggest airline merger in history to date. United becomes the largest airline in the West."},
+ {yr:1971, label:"1971", name:"Southwest's first flight", fall:false,
+  txt:"A three-737 Texas intrastate carrier — outside CAB jurisdiction — starts flying Dallas–Houston–San Antonio on price. The trunks don't notice for a decade."},
+ {yr:1978, label:"1978", name:"Airline Deregulation Act", fall:false,
+  txt:"Carter signs the Act; the CAB's route and fare controls are abolished and the board itself is scheduled to die. ~150 new airlines enter; the great shakeout begins."},
+ {yr:1981, label:"1981", name:"PATCO strike", fall:false,
+  txt:"Reagan fires 11,345 striking air-traffic controllers. Capacity is capped for years — punishing exactly the carriers that had just expanded fastest."},
+ {yr:1982, label:"1982", name:"Braniff collapses", fall:true,
+  txt:"The airline that doubled its map on deregulation day runs out of cash in the recession — the first trunk carrier to die since 1938. American inherits DFW."},
+ {yr:1986, label:"1985–87", name:"The first merger wave", fall:false,
+  txt:"Republic→Northwest, Ozark→TWA, Western→Delta, PSA & Piedmont→US Air, People Express & old Frontier→Continental, Pan Am's Pacific→United. The CAB's map is redrawn in 30 months."},
+ {yr:1989, label:"1989", name:"Eastern struck; Icahn strips TWA", fall:false,
+  txt:"The machinists walk out at Lorenzo's Eastern and never come back; Icahn takes TWA private in a leveraged buyout that loads it with the debt that eventually kills it."},
+ {yr:1991, label:"1991", name:"Eastern & Pan Am die", fall:true,
+  txt:"In one year, two of the four most storied names in aviation cease operations. United and Delta buy the ocean routes off Pan Am's corpse; nothing buys Eastern."},
+ {yr:1995, label:"1992–96", name:"Fare wars & the ValuJet scare", fall:false,
+  txt:"The majors lose more money in 1990–94 than the industry had earned in its entire prior history. ValuJet 592 (1996) nearly kills the low-cost movement — the airline is reborn as AirTran."},
+ {yr:2001, label:"2001", name:"9/11 · TWA absorbed", fall:true,
+  txt:"American completes its purchase of thrice-bankrupt TWA months before the attacks; traffic collapses 30%+ and Congress creates the bailout board. Every legacy heads toward the courthouse."},
+ {yr:2003, label:"2002–05", name:"The bankruptcy era", fall:false,
+  txt:"United files the largest airline Ch.11 ever (2002); US Airways files twice; Delta and Northwest file on the same afternoon (Sept 14, 2005). Pensions are dumped, fleets shrunk, contracts torn up."},
+ {yr:2008, label:"2005–08", name:"AWA–US Airways · Delta–Northwest", fall:false,
+  txt:"Tiny America West reverse-takes-over US Airways out of bankruptcy (2005); Delta and Northwest merge (2008) into the world's largest airline. The consolidation playbook is proven."},
+ {yr:2010, label:"2010–11", name:"United–Continental · Southwest–AirTran", fall:false,
+  txt:"United and Continental combine under Continental's management; Southwest buys AirTran and finally enters Atlanta. Eight majors have become five."},
+ {yr:2013, label:"2013", name:"American–US Airways: consolidation complete", fall:true,
+  txt:"US Airways' team takes over American inside its bankruptcy, creating the world's largest airline. The Big Four now carry ~80% of U.S. domestic traffic — a concentration the CAB never permitted."},
+ {yr:2016, label:"2016", name:"Alaska buys Virgin America", fall:false,
+  txt:"Alaska outbids JetBlue (≈$2.6B) and becomes the fifth-largest U.S. airline — the only credible power outside the Big Four."},
+ {yr:2020, label:"2020", name:"COVID-19", fall:true,
+  txt:"Traffic falls ~96% in April; $54B in federal payroll support keeps every major alive. For the first time, a great extinction produces zero deaths — the oligopoly is too systemic to fail."},
+ {yr:2024, label:"2024–25", name:"Spirit breaks · Alaska–Hawaiian", fall:true,
+  txt:"A judge blocks JetBlue–Spirit on antitrust grounds; Spirit files Ch.11 within the year — the first major failure since 2011. Alaska's Hawaiian deal clears, and Elliott forces Southwest to abandon 50 years of heresy."},
+];
+
+const FATES = [
+ {c:"Capital", col:"#7a8a5a", peak:"≈5.5% · 5th-largest U.S. airline (1950s)", yr:"1961", how:"Bet the fleet on Viscount turboprops and drowned in the debt; rescue-merged into United — the largest airline merger to date.", by:"United", kind:"submitted"},
+ {c:"Mohawk & the locals", col:"#6b6b66", peak:"Local-service carriers of the CAB era", yr:"1968–72", how:"The CAB deliberately merged the small fry upward: Mohawk into Allegheny (1972), Bonanza & Pacific into Air West, Lake Central into Allegheny — building the future US Air.", by:"Allegheny & peers (CAB-blessed mergers)", kind:"submitted"},
+ {c:"Northeast", col:"#6f7d8a", peak:"≈2% · the weakest trunk", yr:"1972", how:"Perennially unprofitable 'Yellowbirds' merged into Delta, handing it Boston and New York–Florida.", by:"Delta", kind:"submitted"},
+ {c:"National", col:"#86a83e", peak:"≈3.5% · Miami's trunk", yr:"1980", how:"Deregulation's first bidding war — Pan Am paid a huge premium to finally own a domestic network. The network never meshed.", by:"Pan Am", kind:"submitted"},
+ {c:"Braniff", col:"#c94f7c", peak:"≈5% · the flying-colors fleet (1979)", yr:"1982", how:"Doubled its route map the moment routes were free, straight into 20% interest rates and doubled fuel. First trunk death since 1938.", by:"Its own expansion; the 1980–82 recession", kind:"destroyed"},
+ {c:"Frontier (original)", col:"#5e8a5a", peak:"≈2% · Denver", yr:"1986", how:"Caught in the Denver fare wars against Continental and United; sold to People Express, dead within a year. The name was revived by new owners in 1994.", by:"People Express → Texas Air", kind:"destroyed"},
+ {c:"People Express", col:"#5a7a5a", peak:"≈3% · fastest-growing airline in history", yr:"1987", how:"$23 fares and no-frills genius, but it bought Frontier and Britt with junk debt just as American's SABRE yield management learned to match its fares seat-by-seat. Sold to Texas Air, folded into Continental.", by:"American (yield management); Texas Air (absorption)", kind:"destroyed"},
+ {c:"Western", col:"#a08050", peak:"≈4% · oldest airline name in America", yr:"1987", how:"Merged into Delta — the SLC hub was the prize.", by:"Delta", kind:"submitted"},
+ {c:"Republic", col:"#8a7d6e", peak:"≈3% · itself a 1979 merger of three locals", yr:"1986", how:"North Central + Southern + Hughes Airwest, glued together by deregulation, sold to Northwest seven years later — handing it Detroit and Memphis.", by:"Northwest", kind:"submitted"},
+ {c:"Ozark", col:"#9e9450", peak:"≈1.5% · St. Louis", yr:"1986", how:"TWA bought its hometown rival for hub dominance at STL — a fortress that was itself dismantled 15 years later.", by:"TWA", kind:"submitted"},
+ {c:"PSA", col:"#d98a7f", peak:"California intrastate legend — the smile on the nose", yr:"1987", how:"The airline Southwest copied. Sold to US Air, which repainted the smiles gray and abandoned most of California within five years.", by:"US Air", kind:"submitted"},
+ {c:"Piedmont", col:"#7d5ba6", peak:"≈3% · the best-run airline of the 1980s", yr:"1989", how:"US Air's largest bite — the merger that built the CLT fortress hub and, by most accounts, gave US Air chronic indigestion for a decade.", by:"US Air", kind:"submitted"},
+ {c:"Eastern", col:"#5b8ea6", peak:"≈13% · once the most profitable airline on Earth", yr:"1991", how:"A decade of labor war culminating under Lorenzo, who moved its best assets to Continental; the 1989 IAM strike finished it. Liquidated with nothing left to sell.", by:"Texas Air (asset-stripping); IAM strike; fare wars", kind:"destroyed"},
+ {c:"Pan Am", col:"#3d8f80", peak:"The Chosen Instrument — U.S. flag carrier to the world", yr:"1991", how:"Deregulation gave rivals its oceans but no one gave it a domestic network. Sold the Pacific to United (1985), the Atlantic to Delta (1991); Lockerbie broke what remained. Ceased operations that December.", by:"Deregulation; United & Delta (asset purchases)", kind:"destroyed"},
+ {c:"Midway, Air Florida & the startups", col:"#6b6b66", peak:"~150 new entrants, 1978–85", yr:"1981–95", how:"Almost all dead within a decade — outpriced by hub feed, frequent-flyer lock-in, and CRS screen bias. Deregulation's cannon fodder.", by:"The hub-and-spoke majors", kind:"destroyed"},
+ {c:"TWA", col:"#9d8a3f", peak:"≈11% · Hughes's Atlantic glamour carrier", yr:"2001", how:"Icahn's 1988 LBO loaded it with debt and the Karabu deal bled its yields for a decade. Three bankruptcies; bought by American, which dismantled the St. Louis hub within two years.", by:"Carl Icahn (financially); American (absorption)", kind:"destroyed"},
+ {c:"ValuJet / AirTran", col:"#6e8a7d", peak:"≈2% · Atlanta low-cost", yr:"2011", how:"Nearly destroyed by the Flight 592 crash (1996); reborn as AirTran, prospered in Delta's shadow, and sold to Southwest — its ticket into Atlanta.", by:"Southwest", kind:"submitted"},
+ {c:"America West", col:"#7a5a6e", peak:"≈2.5% · the startup that made it", yr:"2005", how:"The only post-deregulation startup to reach major status and survive; its management team used the US Airways merger as a ladder — and eight years later ran American.", by:"US Airways (reverse takeover — AWA in command)", kind:"submitted"},
+ {c:"Northwest", col:"#96566b", peak:"≈7.5% · MSP/DTW fortress, Pacific pioneer", yr:"2008", how:"Filed Ch.11 the same day as Delta; merged into Delta on emergence, creating the world's largest airline.", by:"Delta", kind:"submitted"},
+ {c:"Continental", col:"#e6c15a", peak:"≈8% · 'From Worst to First'", yr:"2010", how:"Bankrupted twice under Lorenzo, then the industry's great turnaround; merged into United with Continental's CEO running the result.", by:"United", kind:"submitted"},
+ {c:"US Airways", col:"#7d8a99", peak:"≈7% · the serial acquirer (né Allegheny)", yr:"2013", how:"Absorbed PSA, Piedmont, Trump Shuttle, America West — then pulled off the greatest reverse takeover in the industry, capturing American inside its own bankruptcy. The name died; the team won.", by:"American (merger — US Airways' management in command)", kind:"submitted"},
+ {c:"Virgin America", col:"#a04a7a", peak:"≈1.4% · Silicon Valley's airline", yr:"2016", how:"Beloved, rarely profitable; Alaska outbid JetBlue and retired the brand by 2018.", by:"Alaska", kind:"submitted"},
+ {c:"Hawaiian", col:"#8a5a8a", peak:"≈1.5% · 90+ years under one name", yr:"2024", how:"Maui fires and Pacific overcapacity forced a sale; acquired by Alaska Air Group, the brand still flying under a shared certificate.", by:"Alaska Air Group", kind:"submitted"},
+ {c:"Spirit", col:"#cbb63a", peak:"≈3% · fastest-growing airline of the 2010s", yr:"2024 (Ch.11)", how:"Its JetBlue merger was blocked on antitrust grounds; filed Ch.11 within the year — the first major failure since 2011 — and emerged smaller in 2025. Still flying, still circled by Frontier.", by:"— (bankruptcy; independence intact, for now)", kind:"survived"},
+ {c:"JetBlue", col:"#5a7a9e", peak:"≈4.5% · New York's independent", yr:"—", how:"Still flying — but the courts killed both its American alliance and its Spirit acquisition, leaving it the largest carrier with no obvious move.", by:"—", kind:"survived"},
+ {c:"Alaska", col:"#4a7a6a", peak:"≈5.5% with Hawaiian (2024)", yr:"—", how:"The fifth force: quietly the industry's best operator, now spanning the West Coast and the Pacific.", by:"—", kind:"survived"},
+ {c:"Frontier (1994)", col:"#5e8a5a", peak:"≈3% · Denver ULCC", yr:"—", how:"Still flying and still hunting Spirit — the last obvious consolidation play on the board.", by:"—", kind:"survived"},
+ {c:"Southwest", col:"#e08a3c", peak:"Largest domestic carrier since ~2010", yr:"—", how:"The victor from below: 47 straight profitable years, zero bankruptcies — now being remade by activist investors into the thing it swore it would never be.", by:"—", kind:"victor"},
+ {c:"Delta", col:"#8e2a4a", peak:"World's largest (2008); most profitable since", yr:"—", how:"The quiet consolidator: Northeast, Western, Pan Am's Atlantic, Northwest — four meals over 36 years, none of them fatal to the eater.", by:"—", kind:"victor"},
+ {c:"United", col:"#35548f", peak:"Largest airline in the West for four decades", yr:"—", how:"Bought Capital (1961), Pan Am's Pacific (1985), and Continental (2010); survived the biggest bankruptcy in airline history in between.", by:"—", kind:"victor"},
+ {c:"American", col:"#c1442e", peak:"World's largest airline since 2013", yr:"—", how:"Inherited DFW from Braniff, Latin America from Eastern, the Atlantic legacy of TWA — then was itself captured, in bankruptcy, by the management of an airline a third its size. The certificate won; the old guard lost.", by:"—", kind:"victor"},
+];
+
+/* Sankey: share (% points) flowing from the absorbed to the absorber */
+const SK_NODES = ["Capital","Northeast","National","Texas Int'l","Braniff","Frontier (orig.)","People Express","Western","Republic","Ozark","PSA","Piedmont","Eastern","Pan Am","TWA","America West","AirTran","Virgin America","Hawaiian","US Airways","Northwest","Continental","Pan Am ✝","United","American","Delta","Southwest","Alaska"];
+const SK_COLORS = {"Capital":"#7a8a5a","Northeast":"#6f7d8a","National":"#86a83e","Texas Int'l":"#a3743f","Braniff":"#c94f7c","Frontier (orig.)":"#5e8a5a","People Express":"#5a7a5a","Western":"#a08050","Republic":"#8a7d6e","Ozark":"#9e9450","PSA":"#d98a7f","Piedmont":"#7d5ba6","Eastern":"#5b8ea6","Pan Am":"#3d8f80","Pan Am ✝":"#3d8f80","TWA":"#9d8a3f","America West":"#7a5a6e","AirTran":"#6e8a7d","Virgin America":"#a04a7a","Hawaiian":"#8a5a8a","US Airways":"#7d8a99","Northwest":"#96566b","Continental":"#e6c15a","United":"#35548f","American":"#c1442e","Delta":"#8e2a4a","Southwest":"#e08a3c","Alaska":"#4a7a6a"};
+const SK_LINKS = [
+ {s:"Capital",t:"United",v:5, kind:"sub", e:"1961 — the 5th-largest U.S. airline rescue-merged into United; the biggest airline merger in history at the time"},
+ {s:"Northeast",t:"Delta",v:1.5, kind:"sub", e:"1972 — Delta gains Boston and the New York–Florida runs"},
+ {s:"National",t:"Pan Am",v:3, kind:"sub", e:"1980 — Pan Am wins deregulation's first bidding war to finally buy a domestic network"},
+ {s:"Texas Int'l",t:"Continental",v:1, kind:"sub", e:"1982 — Frank Lorenzo's Texas Air takes control of Continental"},
+ {s:"Braniff",t:"American",v:3.5, kind:"fall", e:"1982 — first trunk death since 1938; American inherits dominance at DFW"},
+ {s:"Frontier (orig.)",t:"People Express",v:1, kind:"fall", e:"1986 — bought in desperation mid-fare-war; dead within a year"},
+ {s:"People Express",t:"Continental",v:2.5, kind:"fall", e:"1987 — Texas Air buys the collapsing People Express and folds it (Frontier included) into Continental"},
+ {s:"Western",t:"Delta",v:3.5, kind:"sub", e:"1987 — Delta gains the Salt Lake City hub and the West"},
+ {s:"Republic",t:"Northwest",v:3, kind:"sub", e:"1986 — Northwest gains Detroit and Memphis"},
+ {s:"Ozark",t:"TWA",v:1.5, kind:"sub", e:"1986 — TWA takes its St. Louis hometown rival"},
+ {s:"PSA",t:"US Airways",v:1.5, kind:"sub", e:"1987 — the California legend Southwest copied, repainted gray"},
+ {s:"Piedmont",t:"US Airways",v:3, kind:"sub", e:"1989 — the largest airline merger to date; builds the Charlotte fortress"},
+ {s:"Eastern",t:"Continental",v:1.5, kind:"fall", e:"1986–91 — Texas Air strips Eastern's best assets (incl. its reservation system) to Continental before the 1991 liquidation"},
+ {s:"Eastern",t:"American",v:2, kind:"fall", e:"1990 — the Latin American route network sold off the dying Eastern"},
+ {s:"Pan Am",t:"United",v:2.5, kind:"fall", e:"1985 Pacific division · 1991 Heathrow & Latin routes — sold piecemeal to survive"},
+ {s:"Pan Am",t:"Delta",v:2.5, kind:"fall", e:"1991 — Atlantic routes and the Shuttle; Delta's cash couldn't save the rest, and Pan Am ceased that December"},
+ {s:"TWA",t:"American",v:2.5, kind:"fall", e:"2001 — bought out of its third bankruptcy; the St. Louis hub dismantled within two years"},
+ {s:"America West",t:"US Airways",v:2.5, kind:"sub", e:"2005 — reverse takeover: tiny AWA's management runs the combined US Airways"},
+ {s:"Northwest",t:"Delta",v:6.5, kind:"sub", e:"2008 — creates the world's largest airline"},
+ {s:"Continental",t:"United",v:7, kind:"sub", e:"2010 — merged, with Continental's CEO running the combined United"},
+ {s:"AirTran",t:"Southwest",v:1.8, kind:"sub", e:"2011 — Southwest buys its way into Atlanta and its first international routes"},
+ {s:"US Airways",t:"American",v:6.5, kind:"sub", e:"2013 — the great reverse takeover: US Airways' team captures American inside its bankruptcy. Consolidation complete — the Big Four hold ~80% of domestic traffic"},
+ {s:"Virgin America",t:"Alaska",v:1.4, kind:"sub", e:"2016 — Alaska outbids JetBlue ≈$2.6B; the brand retired by 2018"},
+ {s:"Hawaiian",t:"Alaska",v:1.4, kind:"sub", e:"2024 — approved; Hawaiian keeps flying as a brand of Alaska Air Group"},
+];
+
+/* ================= STACKED AREA CHART ================= */
+const Y0=1955, Y1=2025;
+const years = d3.range(Y0, Y1+1);
+const byId = Object.fromEntries(REAL.map(c=>[c.id,c]));
+
+function powerAt(clan, y){
+  const p = clan.pts;
+  if(!p || y < p[0][0] || y > p[p.length-1][0]) return 0;
+  for(let i=0;i<p.length-1;i++){
+    const [x0,v0]=p[i],[x1,v1]=p[i+1];
+    if(y>=x0 && y<=x1) return x1===x0 ? v1 : v0 + (v1-v0)*(y-x0)/(x1-x0);
+  }
+  return 0;
+}
+function paxAt(y){ return powerAt({pts:PAX}, y); }
+
+const rows = years.map(y=>{
+  const r = {year:y}; let named=0;
+  ORDER.forEach(id=>{ if(id!=="other"){ r[id]=powerAt(byId[id],y); named+=r[id]; }});
+  r.other = Math.max(TOTAL - named, 0);   /* total is ALWAYS 100% — traffic never disappears */
+  return r;
+});
+
+const W=1500, H=580, M={t:64,r:24,b:36,l:60};
+const svg = d3.select("#chart").attr("viewBox",`0 0 ${W} ${H}`);
+const x = d3.scaleLinear([Y0,Y1],[M.l,W-M.r]);
+const maxY = 100;
+const yS = d3.scaleLinear([0,maxY],[H-M.b,M.t]);
+
+const series = d3.stack().keys(ORDER)(rows);
+const area = d3.area().x(d=>x(d.data.year)).y0(d=>yS(d[0])).y1(d=>yS(d[1])).curve(d3.curveBasis);
+
+/* era bands */
+const eraG = svg.append("g");
+ERAS.forEach((e,i)=>{
+  if(i>0) eraG.append("line").attr("x1",x(e.a)).attr("x2",x(e.a)).attr("y1",M.t-6).attr("y2",H-M.b)
+    .attr("stroke","rgba(223,229,232,.28)").attr("stroke-dasharray","2 5");
+  const cx=(x(e.a)+x(e.b))/2;
+  eraG.append("text").attr("x",cx).attr("y",22).attr("text-anchor","middle")
+    .attr("fill","#dfe5e8").attr("font-size",13.5).attr("letter-spacing","2").text(e.l1.toUpperCase());
+  eraG.append("text").attr("x",cx).attr("y",40).attr("text-anchor","middle")
+    .attr("fill","#8a7340").attr("font-size",11.5).attr("letter-spacing","1.5").text(e.l2);
+});
+
+/* grid + axes (% share) */
+d3.range(0,101,10).forEach(v=>{
+  svg.append("line").attr("x1",M.l).attr("x2",W-M.r).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke","rgba(223,229,232,.07)");
+  svg.append("text").attr("x",M.l-8).attr("y",yS(v)+4).attr("text-anchor","end")
+    .attr("fill","#5f6d76").attr("font-size",11).attr("font-family","var(--sans)").text(v+"%");
+});
+svg.append("text").attr("transform",`translate(16,${(M.t+H-M.b)/2}) rotate(-90)`).attr("text-anchor","middle")
+  .attr("fill","#93a0a8").attr("font-size",11.5).attr("letter-spacing","1.5").text("SHARE OF U.S. AIRLINE TRAFFIC (RPMs)");
+d3.range(1955,2026,5).forEach(t=>{
+  svg.append("text").attr("x",x(t)).attr("y",H-12).attr("text-anchor","middle")
+    .attr("fill","#93a0a8").attr("font-size",12.5).attr("font-family","var(--sans)").text(t);
+});
+
+/* bands */
+const paths = svg.append("g").selectAll("path").data(series).join("path")
+  .attr("d",area).attr("fill",d=>byId[d.key].color).attr("fill-opacity",.92)
+  .attr("stroke","#101318").attr("stroke-width",.7).style("cursor","crosshair");
+
+/* in-band labels at widest point */
+series.forEach(s=>{
+  let best={w:0,i:0};
+  s.forEach((d,i)=>{const w=d[1]-d[0]; if(w>best.w) best={w,i};});
+  const d=s[best.i];
+  if(best.w>3){
+    const yr=d.data.year;
+    const lx=Math.max(M.l+90, Math.min(W-M.r-90, x(yr)));
+    svg.append("text").attr("x",lx).attr("y",yS((d[0]+d[1])/2)+4.5)
+      .attr("text-anchor","middle").attr("fill","#0b0e12").attr("font-size",best.w>11?16:(best.w>5?12.5:10))
+      .attr("font-weight",700).attr("letter-spacing","1.5").attr("pointer-events","none")
+      .text(byId[s.key].name.toUpperCase())
+      .clone(true).attr("fill","rgba(223,229,232,.94)").attr("dy",-1);
+  }
+});
+
+/* Chosen Instrument annotation */
+svg.append("text").attr("x",x(1966)).attr("y",yS(89)).attr("text-anchor","middle")
+  .attr("fill","#c9a24b").attr("font-size",10.5).attr("letter-spacing","1").attr("pointer-events","none")
+  .text("※ THE CHOSEN INSTRUMENT — U.S. FLAG CARRIER ABROAD");
+
+/* fall / merger seals — hoverable */
+const tt1 = document.getElementById("tt1");
+const wrap1 = document.getElementById("chart-wrap");
+function showTip(tt, wrap, ev, html){
+  tt.style.display="block"; tt.innerHTML=html;
+  const r=wrap.getBoundingClientRect();
+  let tx=ev.clientX-r.left+16, ty=ev.clientY-r.top-10;
+  if(tx>r.width-310) tx-=330;
+  tt.style.left=tx+"px"; tt.style.top=ty+"px";
+}
+let sealIdx=0;
+REAL.filter(c=>c.fate.yr).forEach(c=>{
+  const s = series.find(s=>s.key===c.id);
+  if(!s) return;
+  const yr = Math.min(c.fate.yr, Y1);
+  let j = yr - Y0;
+  while(j>0 && (s[j][1]-s[j][0])<0.4) j--;
+  const mid=(s[j][0]+s[j][1])/2;
+  const isSub = c.fate.kind==="sub";
+  const stagger = yr>=1980 ? -(10 + (sealIdx++ % 3)*12) : -10;
+  const g=svg.append("g").style("cursor","help");
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",12).attr("fill","transparent");
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",5.5)
+    .attr("fill",isSub?"transparent":"#b3372a").attr("stroke",isSub?"#c9a24b":"#101318").attr("stroke-width",isSub?2:1.5);
+  g.append("text").attr("x",x(yr)).attr("y",yS(mid)+stagger)
+    .attr("text-anchor", yr>2012?"end":"middle")
+    .attr("fill",isSub?"#d9c27f":"#e8b0a6").attr("font-size",10.5).attr("letter-spacing","1")
+    .text(c.name.toUpperCase()+" · "+c.fate.yr);
+  g.on("mousemove",ev=>{
+     showTip(tt1,wrap1,ev,
+      `<div class="yr">${c.fate.yr} · ${isSub?"MERGED / ACQUIRED":"CARRIER DIES"}</div>
+       <div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="fate-t" style="color:${isSub?'#d9c27f':'#d98a7f'}">${c.fate.txt}</div>
+       ${c.fate.by?`<div class="pw" style="margin-top:4px"><b style="color:#dfe5e8">Taken by:</b> ${c.fate.by}</div>`:""}`);
+   }).on("mouseleave",()=>{tt1.style.display="none";});
+});
+
+/* event marker */
+const marker = svg.append("g").style("display","none").attr("pointer-events","none");
+marker.append("line").attr("y1",M.t-4).attr("y2",H-M.b).attr("stroke","#c9a24b").attr("stroke-width",1).attr("stroke-dasharray","3 4");
+const markerLabel = marker.append("text").attr("y",M.t+8).attr("fill","#c9a24b").attr("font-size",11).attr("letter-spacing","1.5");
+
+/* hover crosshair + band tooltip */
+const cross = svg.append("line").attr("y1",M.t).attr("y2",H-M.b)
+  .attr("stroke","rgba(223,229,232,.35)").attr("stroke-width",1).style("display","none").attr("pointer-events","none");
+
+paths.on("mousemove",function(ev,d){
+    paths.attr("fill-opacity",s=>s.key===d.key?1:.35);
+    const [mx]=d3.pointer(ev,svg.node());
+    const yr=Math.max(Y0,Math.min(Y1,Math.round(x.invert(mx))));
+    cross.style("display",null).attr("x1",x(yr)).attr("x2",x(yr));
+    const row=rows[yr-Y0], c=byId[d.key], v=row[d.key];
+    const pax=(v/100*paxAt(yr));
+    const suz = c.suzerain && yr>=c.suzerain.a && yr<=c.suzerain.b
+      ? `<div class="pw" style="margin-top:5px;color:#d9c27f">※ ${c.suzerain.note}</div>` : "";
+    showTip(tt1,wrap1,ev,
+      `<div class="yr">${yr}</div><div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="pw">≈ <b style="color:#dfe5e8">${v.toFixed(1)}%</b> of U.S. airline traffic</div>
+       <div class="pw">≈ ${pax.toFixed(0)} million passengers that year</div>
+       <div class="pw" style="margin-top:4px">${c.region}</div>${suz}`);
+  })
+  .on("mouseleave",()=>{paths.attr("fill-opacity",.92); cross.style("display","none"); tt1.style.display="none";});
+
+/* ================= SANKEY ================= */
+(function(){
+  const SW=1500, SH=640, SM={t:16,r:190,b:16,l:170};
+  const s = d3.select("#sankey").attr("viewBox",`0 0 ${SW} ${SH}`);
+  const NODES = SK_NODES.filter(n=>n!=="Pan Am ✝");
+  const nodes = NODES.map(n=>({name:n}));
+  const idx = Object.fromEntries(NODES.map((n,i)=>[n,i]));
+  const links = SK_LINKS.map(l=>({source:idx[l.s],target:idx[l.t],value:l.v,kind:l.kind,e:l.e,s:l.s,t:l.t}));
+  const sk = d3.sankey().nodeWidth(16).nodePadding(16)
+    .extent([[SM.l,SM.t],[SW-SM.r,SH-SM.b]]);
+  const graph = sk({nodes:nodes.map(d=>({...d})), links:links.map(d=>({...d}))});
+
+  const tt2=document.getElementById("tt2"), wrap2=document.getElementById("sankey-wrap");
+
+  s.append("g").selectAll("path").data(graph.links).join("path")
+    .attr("d",d3.sankeyLinkHorizontal())
+    .attr("fill","none")
+    .attr("stroke",d=>d.kind==="fall"?"#b3372a":"#c9a24b")
+    .attr("stroke-opacity",.38)
+    .attr("stroke-width",d=>Math.max(1.5,d.width))
+    .style("cursor","help")
+    .on("mousemove",function(ev,d){
+      d3.select(this).attr("stroke-opacity",.75);
+      showTip(tt2,wrap2,ev,
+        `<div class="yr">${d.kind==="fall"?"DESTROYED / ASSETS TAKEN":"MERGER / ACQUISITION"}</div>
+         <div class="nm"><span style="color:${SK_COLORS[d.s]}">${d.s}</span> → <span style="color:${SK_COLORS[d.t]}">${d.t}</span></div>
+         <div class="pw">≈ ${d.value} share points</div>
+         <div class="pw" style="margin-top:4px">${d.e}</div>`);
+    })
+    .on("mouseleave",function(){d3.select(this).attr("stroke-opacity",.38); tt2.style.display="none";});
+
+  const ng = s.append("g").selectAll("g").data(graph.nodes).join("g");
+  ng.append("rect")
+    .attr("x",d=>d.x0).attr("y",d=>d.y0)
+    .attr("width",d=>d.x1-d.x0).attr("height",d=>Math.max(2,d.y1-d.y0))
+    .attr("fill",d=>SK_COLORS[d.name]).attr("stroke","#101318");
+  ng.append("text")
+    .attr("x",d=>d.x0 < SW/2 ? d.x0-8 : d.x1+8)
+    .attr("y",d=>(d.y0+d.y1)/2+4)
+    .attr("text-anchor",d=>d.x0 < SW/2 ? "end":"start")
+    .attr("fill","#dfe5e8").attr("font-size",13).attr("letter-spacing",".5")
+    .text(d=>d.name);
+})();
+
+/* ================= THE BANKRUPTCY COURT ERA ================= */
+(function(){
+  const R=[
+   {n:"American", koku:16, col:"#c1442e", role:"Ch.11: 2011–13 (the last holdout)", side:"→ merged with US Airways, 2013",
+    fate:"Refused bankruptcy for a decade while rivals shed billions in obligations in court — then filed anyway in 2011 with the industry's worst cost base. US Airways' management captured it during the case. Emerged as the world's largest airline, run by the smallest legacy's team.", cls:"#d9c27f"},
+   {n:"Delta", koku:13, col:"#8e2a4a", role:"Ch.11: 2005–07", side:"→ absorbed Northwest, 2008",
+    fate:"Filed the same afternoon as Northwest (Sept 14, 2005), fought off a hostile bid from US Airways while in court, and emerged to buy Northwest within a year — the merger that proved the playbook. The most profitable U.S. airline ever since.", cls:"#9dbf9a"},
+   {n:"United", koku:12, col:"#35548f", role:"Ch.11: 2002–06 (largest airline bankruptcy ever)", side:"→ merged with Continental, 2010",
+    fate:"Three years in court — the longest and largest airline bankruptcy in history. Terminated all four employee pension plans, dumping $6.6B on the federal PBGC, the biggest pension default in U.S. history to that point. Emerged lean enough to merge as an equal.", cls:"#d9c27f"},
+   {n:"Continental", koku:7.5, col:"#e6c15a", role:"Ch.11: 1983, 1990 — clean after 9/11", side:"→ merged into United, 2010",
+    fate:"The veteran: bankrupted twice under Lorenzo in the deregulation wars, then the industry's turnaround story ('From Worst to First'). The only legacy to stay out of court after 9/11 — and its CEO ended up running the combined United.", cls:"#d9c27f"},
+   {n:"US Airways", koku:7, col:"#7d8a99", role:"Ch.11: 2002 and again 2004", side:"→ took over American, 2013",
+    fate:"Twice through the court in three years and nearly liquidated; saved by a reverse takeover from tiny America West in 2005. That management team then pulled off the same maneuver on American — the smallest legacy's officers ended the era running the largest airline on Earth.", cls:"#9dbf9a"},
+   {n:"Northwest", koku:6.5, col:"#96566b", role:"Ch.11: 2005–07", side:"→ merged into Delta, 2008",
+    fate:"Filed hours after Delta on the same day. Emerged with costs cut — and merged straight into Delta, handing over the Pacific network it had pioneered since the 1940s.", cls:"#d9c27f"},
+  ];
+  const RW=1500, RH=330, RM={t:20,r:300,b:30,l:230};
+  const s=d3.select("#regents").attr("viewBox",`0 0 ${RW} ${RH}`);
+  const rx=d3.scaleLinear([0,17],[RM.l,RW-RM.r]);
+  const ry=d3.scaleBand(R.map(d=>d.n),[RM.t,RH-RM.b]).padding(0.32);
+  const tt3=document.getElementById("tt3"), wrap3=document.getElementById("regents-wrap");
+
+  [4,8,12,16].forEach(v=>{
+    s.append("line").attr("x1",rx(v)).attr("x2",rx(v)).attr("y1",RM.t).attr("y2",RH-RM.b).attr("stroke","rgba(223,229,232,.07)");
+    s.append("text").attr("x",rx(v)).attr("y",RH-10).attr("text-anchor","middle")
+      .attr("fill","#5f6d76").attr("font-size",11).attr("font-family","var(--sans)").text(v+"% share (2005)");
+  });
+
+  R.forEach(d=>{
+    const g=s.append("g").style("cursor","help");
+    g.append("rect").attr("x",rx(0)).attr("y",ry(d.n)).attr("width",rx(d.koku)-rx(0)).attr("height",ry.bandwidth())
+      .attr("fill",d.col).attr("fill-opacity",.92).attr("stroke","#101318");
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+4).attr("text-anchor","end")
+      .attr("fill","#dfe5e8").attr("font-size",13.5).text(d.n);
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+18).attr("text-anchor","end")
+      .attr("fill","#8a7340").attr("font-size",10).attr("letter-spacing","1").text(d.role.toUpperCase());
+    g.append("text").attr("x",rx(d.koku)+10).attr("y",ry(d.n)+ry.bandwidth()/2+4)
+      .attr("fill",d.cls).attr("font-size",12).attr("font-family","var(--sans)")
+      .text(d.koku.toFixed(1)+"% · "+d.side);
+    g.on("mousemove",ev=>showTip(tt3,wrap3,ev,
+       `<div class="yr">${d.role.toUpperCase()} · ≈${d.koku}% SHARE IN 2005</div>
+        <div class="nm" style="color:${d.col}">${d.n}</div>
+        <div class="pw">${d.fate}</div>`))
+     .on("mouseleave",()=>{tt3.style.display="none";});
+  });
+})();
+
+/* ================= EVENTS ================= */
+const evWrap=document.getElementById("events");
+EVENTS.forEach(e=>{
+  const div=document.createElement("button");
+  div.type="button";
+  div.dataset.year=e.yr;
+  div.className="ev"+(e.fall?" fall":"");
+  div.innerHTML=`<div class="yr">${e.label}</div><div class="nm">${e.name}</div>${e.txt}`;
+  div.onclick=()=>{
+    document.querySelectorAll(".ev").forEach(n=>n.classList.remove("active"));
+    div.classList.add("active");
+    marker.style("display",null);
+    marker.select("line").attr("x1",x(e.yr)).attr("x2",x(e.yr));
+    markerLabel.attr("text-anchor",e.yr>2010?"end":"start")
+      .attr("x",e.yr>2010?x(e.yr)-6:x(e.yr)+6).text(e.name.toUpperCase()+" · "+e.label);
+    document.getElementById("chart-wrap").scrollIntoView({behavior:"smooth",block:"center"});
+  };
+  evWrap.appendChild(div);
+});
+
+/* ================= FATES TABLE ================= */
+const KIND_LBL={destroyed:"Destroyed",submitted:"Absorbed",survived:"Still flying",victor:"Victor — Big Four"};
+const tbl=document.getElementById("fates");
+tbl.innerHTML=`<tr><th>Carrier</th><th>Peak</th><th>Folded</th><th>How it ended</th><th>Taken / absorbed by</th><th>Outcome</th></tr>`+
+ FATES.map(f=>`<tr>
+   <td><span class="sw" style="background:${f.col}"></span>${f.c}</td>
+   <td>${f.peak}</td>
+   <td class="num">${f.yr}</td>
+   <td>${f.how}</td>
+   <td>${f.by}</td>
+   <td class="k-${f.kind}">${KIND_LBL[f.kind]}</td></tr>`).join("");
+
+/* ================= CARRIER CARDS ================= */
+const clWrap=document.getElementById("clans");
+REAL.filter(c=>c.id!=="other").forEach(c=>{
+  const div=document.createElement("div");
+  div.className="clan"; div.style.setProperty("--c",c.color);
+  const fk=c.fate.kind==="fall"?"fall":(c.fate.kind==="sub"?"sub":"live");
+  div.innerHTML=`<div class="nm"><i>✈</i> ${c.name}</div>
+    <div class="meta"><b>Core:</b> ${c.region}<br><b>Peak:</b> ${c.peak}</div>
+    <div class="fate ${fk}">${c.fate.txt}</div>`;
+  clWrap.appendChild(div);
+});
+</script>
+</body>
+</html>
