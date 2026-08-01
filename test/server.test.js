@@ -33,6 +33,15 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /href="\/bi-pricing"/);
   assert.match(homepage, /href="\/data-agent-stack"/);
   assert.match(homepage, /href="\/analytics-token-tam"/);
+  assert.match(homepage, /href="\/sengoku-clans"/);
+});
+
+test('serves the Sengoku clan power visualization', async () => {
+  const response = await fetch(`${base}/sengoku-clans`);
+  assert.equal(response.status, 200);
+  const page = await response.text();
+  assert.match(page, /POWER OF THE GREAT CLANS/);
+  assert.match(page, /Chain of Conquest/);
 });
 
 test('serves the BI pricing comparison and its script', async () => {

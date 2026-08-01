@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sengoku Clans · Ethan Ding</title>
+<meta name="description" content="An interactive history of the great clans of Japan's Sengoku period, measured in koku from 1467 to 1615.">
+<link rel="icon" href="/images/profile.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-sankey/0.12.3/d3-sankey.min.js"></script>
+<style>
+  :root{
+    --ink:#161310; --ink-2:#1e1a15; --ink-3:#26211a;
+    --gold:#c9a24b; --gold-dim:#8a7340;
+    --paper:#e8dfc9; --paper-dim:#a89e86;
+    --seal:#b3372a;
+    --hair:rgba(201,162,75,.22);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans:"Avenir Next","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--paper);font-family:var(--serif);padding:20px clamp(14px,3vw,44px) 40px;}
+  .site-nav{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:22px;
+            font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-dim);}
+  .site-nav a{color:var(--gold);text-decoration:none;border-bottom:1px solid transparent;padding:4px 0;}
+  .site-nav a:hover{border-color:var(--gold);}
+
+  header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;
+         border-bottom:1px solid var(--hair);padding-bottom:18px;margin-bottom:6px;}
+  h1{font-size:clamp(20px,2.8vw,32px);font-weight:600;letter-spacing:.04em;}
+  h1 .era{color:var(--gold);font-weight:400;}
+  .sub{color:var(--paper-dim);font-size:13.5px;margin-top:6px;max-width:780px;line-height:1.55;}
+  .sub b{color:var(--paper);font-weight:600;}
+  .legend-box{border:1px solid var(--hair);padding:10px 14px;background:var(--ink-2);min-width:250px;}
+  .legend-box .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+  .legend-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--paper-dim);margin-top:5px;}
+  .seal-dot{width:12px;height:12px;border-radius:50%;background:var(--seal);box-shadow:0 0 0 2px rgba(179,55,42,.3);flex:none;}
+  .sub-dot{width:11px;height:11px;border-radius:50%;background:transparent;border:2px solid var(--gold);flex:none;}
+  .gold-tick{width:12px;height:0;border-top:1px dashed var(--gold);flex:none;}
+
+  #chart-wrap,#sankey-wrap{position:relative;background:var(--ink-2);border:1px solid var(--hair);margin-top:16px;padding:6px 6px 0;}
+  #chart,#sankey{display:block;width:100%;height:auto;}
+  .tooltip{position:absolute;pointer-events:none;background:#0f0d0a;border:1px solid var(--gold-dim);
+           padding:9px 12px;font-size:12.5px;line-height:1.5;color:var(--paper);display:none;z-index:5;max-width:300px;
+           box-shadow:0 6px 18px rgba(0,0,0,.55);}
+  .tooltip .yr{color:var(--gold);letter-spacing:.12em;font-size:11px;}
+  .tooltip .nm{font-size:14.5px;margin:2px 0 3px;}
+  .tooltip .pw{color:var(--paper-dim);}
+  .tooltip .fate-t{color:#d98a7f;margin-top:4px;}
+
+  .section-title{margin:32px 0 12px;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);
+                 display:flex;align-items:center;gap:14px;}
+  .section-title::after{content:"";flex:1;border-top:1px solid var(--hair);}
+  .section-sub{color:var(--paper-dim);font-size:13px;line-height:1.55;margin:-4px 0 12px;max-width:900px;}
+
+  #events{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px;}
+  .ev{background:var(--ink-3);border:1px solid rgba(201,162,75,.14);border-top:2px solid var(--gold-dim);
+      padding:12px 13px;font:inherit;font-size:12.5px;line-height:1.5;color:var(--paper-dim);cursor:pointer;
+      text-align:left;transition:border-color .15s, transform .15s;}
+  .ev:hover,.ev.active{border-color:var(--gold);transform:translateY(-2px);}
+  .ev:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .ev .yr{font-family:var(--sans);font-size:15px;color:var(--paper);letter-spacing:.02em;}
+  .ev .nm{color:var(--gold);font-size:13px;margin:3px 0 6px;font-weight:600;}
+  .ev.fall .yr::after{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--seal);margin-left:8px;}
+
+  /* fates table */
+  #fates{width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.5;}
+  #fates th{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);text-align:left;
+            padding:8px 10px;border-bottom:1px solid var(--hair);}
+  #fates td{padding:8px 10px;border-bottom:1px solid rgba(232,223,201,.07);color:var(--paper-dim);vertical-align:top;}
+  #fates td:first-child{color:var(--paper);white-space:nowrap;font-weight:600;}
+  #fates .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:1px;}
+  #fates .k-destroyed{color:#d98a7f;} #fates .k-submitted{color:#d9c27f;} #fates .k-survived{color:#9dbf9a;} #fates .k-victor{color:#c9a24b;font-weight:600;}
+  #fates td.num{white-space:nowrap;font-family:var(--sans);}
+
+  #clans{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+  .clan{padding:12px 13px;border:1px solid rgba(232,223,201,.08);background:var(--ink-3);
+        border-left:5px solid var(--c);font-size:12.5px;line-height:1.55;color:var(--paper-dim);}
+  .clan .nm{color:var(--paper);font-size:14.5px;font-weight:600;letter-spacing:.03em;}
+  .clan .nm i{font-style:normal;color:var(--c);}
+  .clan .meta{margin-top:5px;}
+  .clan .meta b{color:var(--paper);font-weight:600;}
+  .clan .fate{margin-top:5px;padding-top:5px;border-top:1px dashed rgba(232,223,201,.12);}
+  .clan .fate.fall{color:#d98a7f;} .clan .fate.sub{color:#d9c27f;} .clan .fate.live{color:#9dbf9a;}
+
+  .fermi{margin-top:14px;border:1px dashed var(--gold-dim);padding:14px 16px;font-size:12.5px;line-height:1.7;color:var(--paper-dim);}
+  .fermi b{color:var(--gold);font-weight:600;}
+  footer{margin-top:18px;color:#736a56;font-size:11.5px;line-height:1.55;}
+  .table-scroll{overflow-x:auto;}
+  @media (max-width:760px){
+    .site-nav span{display:none}
+    #chart-wrap,#sankey-wrap,#regents-wrap,.table-scroll{overflow-x:auto}
+    #chart,#sankey,#regents{width:900px!important;max-width:none}
+    #fates{min-width:880px}
+  }
+  @media (prefers-reduced-motion:reduce){.ev{transition:none}.ev:hover{transform:none}}
+</style>
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="/">← Ethan Ding</a>
+  <span>Interactive history · 1467–1615</span>
+</nav>
+
+<header>
+  <div>
+    <h1>SENGOKU PERIOD <span class="era">(1467–1615)</span> — POWER OF THE GREAT CLANS, MEASURED IN KOKU</h1>
+    <p class="sub">Power is measured in <b>koku of assessed rice yield</b> (石高, <i>kokudaka</i>) under each clan's direct control —
+      the unit the era itself used to size domains and levy armies. One koku fed one person for a year;
+      a rule of thumb of the period: <b>10,000 koku ≈ 250 fielded soldiers</b>. Japan's total assessed yield was
+      ≈ 18.5 million koku (Taikō survey, 1598), held constant here as the frame. Hover any band <i>or any fall seal</i> for details;
+      click a timeline event to mark its year.</p>
+  </div>
+  <div class="legend-box">
+    <div class="t">Reading the chart</div>
+    <div class="legend-row"><span class="seal-dot"></span>Clan destroyed / power broken — hover for details</div>
+    <div class="legend-row"><span class="sub-dot"></span>Forced submission — clan survives, reduced</div>
+    <div class="legend-row"><span class="gold-tick"></span>Key event marker (click cards below)</div>
+    <div class="legend-row" style="margin-top:8px">Band height = millions of koku held</div>
+  </div>
+</header>
+
+<div id="chart-wrap"><svg id="chart" role="img" aria-label="Stacked area chart showing the power of major Japanese clans from 1467 to 1615, measured in millions of koku"></svg><div class="tooltip" id="tt1"></div></div>
+
+<div class="section-title">Chain of Conquest — Who Defeated Whom</div>
+<p class="section-sub">Each ribbon is land (in millions of koku) passing from the defeated to the victor.
+  <span style="color:#d98a7f">Red ribbons</span> = clan destroyed or usurped. <span style="color:#d9c27f">Gold ribbons</span> = forced submission or transfer — the clan survives, reduced, under the victor's suzerainty. Hover any ribbon for the battle or event behind it. Every stream ends at the Tokugawa.</p>
+<div id="sankey-wrap"><svg id="sankey" role="img" aria-label="Flow chart showing land passing from defeated clans to their conquerors"></svg><div class="tooltip" id="tt2"></div></div>
+
+<div class="section-title">Key Events Timeline</div>
+<div id="events"></div>
+
+<div class="section-title">The Hōjō Anomaly — Strongest in the East, Last to Fall</div>
+<div class="fermi">
+  <b>Why they were so powerful.</b> Three structural advantages, compounding for a century.
+  <b>(1) The best land in Japan:</b> the eight Kantō provinces assessed at ≈2.4M koku — for scale, Takeda Shingen's entire home province of Kai was 0.23M; the Hōjō were farming a prize ten times the size of their rivals' bases.
+  <b>(2) Five generations without a succession war</b> (Sōun → Ujitsuna → Ujiyasu → Ujimasa → Ujinao, 1493–1590) while every rival tore itself apart — Shingen had to depose his own father, Kenshin's death triggered the Otate civil war, the Imagawa fought two succession crises.
+  <b>(3) The era's most modern administration:</b> cadastral surveys, fixed taxes at "four to the lord, six to the people" (≈40%, low for the age), rational magistrates and post-stations — peasants fled <i>into</i> Hōjō territory. Behind it all sat Odawara, a fortress-city that shrugged off sieges by both Uesugi Kenshin (1561) and Takeda Shingen (1569).
+  <br><br>
+  <b>Why they stayed on top while Takeda, Uesugi and Oda warred.</b> Strategy: they never marched on Kyoto. Kenshin and Shingen bled each other white in five battles at Kawanakajima and endless Kantō campaigns; Nobunaga fought a decade of wars in the center. The Hōjō fought defensive, regional wars and spent the difference digesting the Kantō. By 1589 they were at their all-time peak — ≈2M koku — having never lost their home.
+  <br><br>
+  <b>Why they fell.</b> The same strategy that made them rich made them alone. The map inverted: instead of the biggest of several regional powers, by 1589 they were the <i>only</i> independent power left, facing a unified ≈16M-koku Japan. They misread Hideyoshi as one more regional rival who could be stalled — delaying homage, haggling over hostages — until a retainer's seizure of Nagurumi Castle (1589), in violation of Hideyoshi's peace edict, handed him his casus belli. Their war council debated fight-or-submit so interminably that <i>Odawara hyōjō</i> ("an Odawara conference") is still the Japanese idiom for a meeting that decides nothing. In 1590, ~210,000 troops and a naval blockade surrounded Odawara; it surrendered in three months without a decisive battle. Ujimasa was ordered to seppuku, and the 2M-koku Kantō was handed to Tokugawa Ieyasu — the transfer that made Ieyasu the largest landholder in Japan.
+</div>
+
+<div class="section-title">The 1590 Kantō Transfer — Reward, or Exile?</div>
+<div class="fermi">
+  Handing Ieyasu the richest region in Japan looks insane until you see what Hideyoshi took in exchange. It was a <b>forced swap, not a gift</b>: Ieyasu had to surrender his five ancestral provinces — Mikawa, Tōtōmi, Suruga, Kai, Shinano (≈1.4M koku) — the lands where his family had ruled for generations and where every village headman and retainer network was personally loyal to him. In return he got ≈2.5M koku of <b>freshly conquered, unpacified territory</b>, a ruined castle town in a marsh (Edo), and an administration to rebuild from zero.
+  <br><br>
+  From Hideyoshi's chair, the logic was containment: <b>(1)</b> it uprooted Ieyasu from a 40-year power base; <b>(2)</b> it moved him 300 km farther from Kyoto and Osaka, behind the Hakone mountain passes; <b>(3)</b> Hideyoshi packed Ieyasu's <i>old</i> provinces with his own loyalists (Yamauchi, Horio, Nakamura and others in the Tōkaidō castles), building a wall between Ieyasu and the capital; and <b>(4)</b> destroying Ieyasu wasn't on the menu — Komaki–Nagakute (1584) had already proven Ieyasu could beat Toyotomi armies in the field, so Hideyoshi bought him instead. Land was the only currency of loyalty in this system: Hideyoshi kept just ≈2.2M koku directly and ruled by granting the rest.
+  <br><br>
+  <b>The gamble failed on every axis.</b> The Kantō turned out to be under-assessed and Edo boomed; the clean-sheet move let Ieyasu build the most rationalized domain administration in Japan, unencumbered by old obligations; the Hakone "wall" worked both ways, making his base unattackable; and the moment Hideyoshi died, the Tōkaidō buffer lords defected east. The exile became the throne — Edo, the marsh town, became Tokyo.
+</div>
+
+<div class="section-title">The Regency of 1598 — Why Sekigahara Happened</div>
+<p class="section-sub">Hideyoshi died leaving a five-year-old heir and a Council of Five Regents (go-tairō) sworn to protect him, checked by five commissioners (go-bugyō) led by Ishida Mitsunari. The bars show why the arrangement was doomed: <b style="color:#e8dfc9">Ieyasu alone held more land than the next two regents combined</b>, and the only elder with the stature to restrain him — Maeda Toshiie — died within a year of Hideyoshi. Ishida, a 190k-koku administrator, tried to rally the rest against Ieyasu: three of the five regents ended up on the losing side. Hover a bar for each man's fate.</p>
+<div id="regents-wrap" style="position:relative;background:var(--ink-2);border:1px solid var(--hair);padding:6px;">
+  <svg id="regents" role="img" aria-label="Bar chart comparing the land holdings of the five regents and Ishida Mitsunari in 1598" style="display:block;width:100%;height:auto;"></svg>
+  <div class="tooltip" id="tt3"></div>
+</div>
+
+<div class="section-title">How Every Great Clan Ended</div>
+<p class="section-sub">All of the era's major houses, in order of when they folded. "Folded" takes three forms: <span style="color:#d98a7f">destroyed</span> (line extinguished or stripped of all land), <span style="color:#d9c27f">submitted</span> (surrendered independence, kept a reduced domain), or <span style="color:#9dbf9a">survived to the Meiji era (1868)</span>. Note the ending: the two great clans the Tokugawa merely reduced rather than destroyed — the Mōri (Chōshū) and Shimazu (Satsuma) — returned 268 years later to lead the revolution that destroyed the Tokugawa shogunate.</p>
+<div class="table-scroll"><table id="fates"></table></div>
+
+<div class="section-title">The Great Clans — Peak Holdings &amp; Fate</div>
+<div id="clans"></div>
+
+<div class="fermi">
+  <b>How the koku estimates were made (Fermi method):</b>
+  Province-level kokudaka from the 1598 Taikō survey are the anchors — e.g. Kai ≈ 228k, Shinano ≈ 408k, Echigo ≈ 391k, Owari ≈ 572k, Musashi ≈ 667k, Satsuma ≈ 283k.
+  Each clan's holding in a given year ≈ (provinces fully held) + (fractions of contested provinces) + a premium for non-land income where it was decisive
+  (Ōuchi's China tally trade, Takeda's gold mines, Oda's control of the capital region's commerce ≈ +10–20%).
+  Documented checkpoints keep the estimates honest: Mōri Terumoto assessed at <b>1.12M koku</b> (1591); Tokugawa Ieyasu's Kantō transfer at <b>≈ 2.5M koku</b> (1590) —
+  making Ieyasu larger than Hideyoshi's own direct domain of <b>≈ 2.2M koku</b> plus ≈ 2M held by Toyotomi house kin; Uesugi Kagekatsu moved to Aizu at <b>1.2M koku</b> (1598);
+  Shimazu confirmed at <b>≈ 0.6M koku</b> after their 1587 submission; Mōri cut to <b>0.37M</b> and Uesugi to <b>0.3M</b> in the 1600–01 post-Sekigahara reckoning.
+  Pre-survey decades use the same land at its later assessed yield, so early figures are koku-<i>equivalents</i>. Error bars are roughly ±30%.
+  <br><br>
+  <b>Two things that look wrong but aren't.</b>
+  <b>(1) The total never shrinks:</b> the stack always sums to 18.5M koku — land doesn't disappear when a clan falls, it's regranted. The bottom of the chart shows this explicitly: <i>Independent minor clans</i> (gray — hundreds of unaligned houses in 1467, squeezed to exactly zero at Odawara in 1590) drain into three vassal bands tinted by their master's color — <i>Oda vassal lords</i> (1568–82), reborn as <i>Toyotomi vassal lords</i> after Honnō-ji, converted almost overnight into <i>Tokugawa vassal lords</i> at Sekigahara, when ≈6.5M confiscated koku were regranted to the Eastern army. Watch the tint change hands at 1582 and 1600: those recolorings <i>are</i> the transfers of national power — often the very same lords (Fukushima, Kuroda, Hosokawa) under a new master.
+  <b>(2) The Ashikaga at ~11% of Japan in 1467 is, if anything, generous.</b> The Muromachi shogunate was land-poor by design: its direct demesne (goryōsho) was small and scattered, and it financed itself by taxing Kyoto's moneylenders and sake brewers, Ming trade licenses, and its monopoly on appointing shugo. Its true asset was legitimacy — which is why, once the Ōnin War burned that legitimacy down, there was almost no land underneath to fall back on.
+</div>
+
+<footer>Bands show land under each clan's direct control (including house vassals), not suzerainty — which is why the Toyotomi band stays near 4.5M koku even while Hideyoshi, as kanpaku, commanded the service of every daimyō in Japan (1590–98, marked ※ on the chart). The stack always totals 18.5M koku: when a clan falls its land moves to another band, never off the chart. "Independent minor clans" = unaligned houses (zero after Odawara, 1590); "Hegemon's vassals" = domains granted or confirmed by Oda, then Toyotomi, then Tokugawa. Values are Fermi estimates for comparison, not survey data.</footer>
+
+<script>
+/* ================= DATA (millions of koku) ================= */
+const CLANS = [
+ {id:"ashikaga", name:"Ashikaga Shogunate", color:"#8d7ba8", region:"Kyoto (nominal national rule)",
+  peak:"Pre-1467 · ≈2M koku-equiv. of shogunal land + loyal-shugo levies",
+  suzerain:{a:1467,b:1500,note:"A generous estimate: the Muromachi bakufu was land-poor by design — its direct demesne (goryōsho) was small and scattered, and it lived off Kyoto commerce taxes (moneylenders, sake brewers), Ming trade, and the institutional power to appoint shugo. Its real asset was legitimacy, not acreage."},
+  fate:{txt:"Shogunate abolished 1573 — last shogun Yoshiaki expelled from Kyoto", kind:"fall", yr:1573, by:"Oda Nobunaga"},
+  pts:[[1467,2.0],[1477,1.2],[1493,0.8],[1520,0.5],[1550,0.35],[1567,0.35],[1568,0.45],[1572,0.35],[1573,0]]},
+
+ {id:"yamana", name:"Yamana", color:"#9d8a3f", region:"Tajima · Inaba (western Honshū)",
+  peak:"1460s–70s · ≈0.9M koku — Sōzen leads the Western Army in the Ōnin War",
+  fate:{txt:"Broken in the Ōnin War; last castles (Tottori) fall 1580–81", kind:"fall", yr:1580, by:"Oda forces under Hashiba (Toyotomi) Hideyoshi"},
+  pts:[[1467,0.9],[1473,0.7],[1477,0.55],[1500,0.35],[1540,0.25],[1560,0.2],[1573,0.12],[1580,0]]},
+
+ {id:"hosokawa", name:"Hosokawa", color:"#7d5ba6", region:"Kinai · Shikoku (kanrei to the shogun)",
+  peak:"1477–1507 · ≈1.8M koku — Katsumoto & Masamoto run the shogunate",
+  fate:{txt:"Main line usurped by its own Miyoshi deputies, 1549 (a cadet branch survived to Meiji as lords of Kumamoto)", kind:"fall", yr:1549, by:"Miyoshi Nagayoshi (their own deputy)"},
+  pts:[[1467,1.3],[1477,1.6],[1493,1.8],[1507,1.5],[1520,1.2],[1540,1.0],[1549,0.5],[1558,0.2],[1568,0]]},
+
+ {id:"ouchi", name:"Ōuchi", color:"#b0486b", region:"Suō · Nagato (Yamaguchi)",
+  peak:"1500s–1540s · ≈1.1M koku + China tally-trade wealth",
+  fate:{txt:"Yoshitaka forced to seppuku in the 1551 Tainei-ji coup; line extinguished 1557", kind:"fall", yr:1557, by:"Sue Harukata (coup) → Mōri Motonari (extinction)"},
+  pts:[[1467,0.7],[1490,0.8],[1508,1.0],[1528,0.95],[1540,1.05],[1550,1.15],[1551,0.7],[1554,0.35],[1557,0]]},
+
+ {id:"mori", name:"Mōri", color:"#3d8f80", region:"Aki → all Chūgoku",
+  peak:"1566–82 · ≈1.2M koku (assessed 1.12M in 1591)",
+  fate:{txt:"Submits to Hideyoshi (1582 truce, formal 1585); cut to 0.37M koku by Tokugawa after Sekigahara — survives as Chōshū", kind:"sub", yr:1585, by:"Toyotomi Hideyoshi (submission); Tokugawa Ieyasu (reduction)"},
+  pts:[[1523,0.08],[1540,0.2],[1551,0.3],[1555,0.6],[1557,0.85],[1566,1.1],[1571,1.2],[1578,1.15],[1582,1.0],[1591,1.12],[1600,1.12],[1601,0.37],[1615,0.37]]},
+
+ {id:"hojo", name:"Hōjō", color:"#5b8ea6", region:"Sagami → the Kantō (Odawara)",
+  peak:"1580s · ≈2M koku — five generations of Kantō expansion",
+  fate:{txt:"Destroyed at the Siege of Odawara, 1590 — the last holdout; their Kantō lands were granted to Ieyasu", kind:"fall", yr:1590, by:"Toyotomi Hideyoshi (≈200,000 troops)"},
+  pts:[[1493,0.1],[1516,0.3],[1524,0.5],[1541,0.8],[1554,1.1],[1561,1.0],[1569,1.3],[1580,1.7],[1589,2.0],[1590,0]]},
+
+ {id:"imagawa", name:"Imagawa", color:"#86a83e", region:"Suruga · Tōtōmi · Mikawa",
+  peak:"1540s–1560 · ≈1M koku — Yoshimoto, 'foremost archer of the Tōkaidō'",
+  fate:{txt:"Yoshimoto killed at Okehazama 1560; domain partitioned by Takeda and Tokugawa by 1569", kind:"fall", yr:1569, by:"Oda Nobunaga (Okehazama); Takeda & Tokugawa (partition)"},
+  pts:[[1467,0.45],[1500,0.5],[1526,0.6],[1540,0.75],[1554,0.9],[1560,1.0],[1561,0.55],[1565,0.25],[1569,0]]},
+
+ {id:"takeda", name:"Takeda", color:"#c1442e", region:"Kai · Shinano",
+  peak:"1572–73 · ≈1.2M koku + Kai gold mines",
+  fate:{txt:"Cavalry broken at Nagashino 1575; clan annihilated at Tenmokuzan, March 1582", kind:"fall", yr:1582, by:"Oda Nobunaga & Tokugawa Ieyasu"},
+  pts:[[1467,0.25],[1520,0.25],[1541,0.25],[1550,0.45],[1555,0.6],[1561,0.7],[1569,0.9],[1572,1.2],[1573,1.15],[1575,0.9],[1580,0.7],[1582,0]]},
+
+ {id:"uesugi", name:"Uesugi", color:"#35548f", region:"Echigo → Aizu (1598)",
+  peak:"1577 · ≈1.15M koku under Kenshin; assessed 1.2M at Aizu (1598)",
+  fate:{txt:"Kenshin dies 1578 (Otate succession war); submits to Hideyoshi 1586; cut to 0.3M koku (Yonezawa) after Sekigahara — survives to Meiji", kind:"sub", yr:1586, by:"Toyotomi Hideyoshi (submission); Tokugawa Ieyasu (reduction)"},
+  pts:[[1467,0.3],[1546,0.35],[1551,0.4],[1555,0.6],[1561,0.9],[1570,1.0],[1577,1.15],[1578,0.7],[1582,0.55],[1590,0.9],[1598,1.2],[1600,1.2],[1601,0.3],[1615,0.3]]},
+
+ {id:"shimazu", name:"Shimazu", color:"#8a5a33", region:"Satsuma · Ōsumi → most of Kyūshū",
+  peak:"1586–87 · ≈1.6M koku after crushing Ryūzōji and Ōtomo",
+  fate:{txt:"Submits to Hideyoshi's 1587 Kyūshū invasion; kept ≈0.6M koku, survived Sekigahara and lasted to Meiji — Satsuma later co-led the Restoration", kind:"sub", yr:1587, by:"Toyotomi Hideyoshi (≈200,000-strong Kyūshū campaign)"},
+  pts:[[1467,0.3],[1526,0.32],[1550,0.35],[1570,0.5],[1578,0.9],[1584,1.2],[1586,1.6],[1587,0.6],[1600,0.6],[1609,0.7],[1615,0.7]]},
+
+ {id:"oda", name:"Oda", color:"#e08a3c", region:"Owari → central Japan (~20 provinces)",
+  peak:"1582 · ≈7.5M koku with house vassals — 40% of Japan",
+  fate:{txt:"Nobunaga assassinated at Honnō-ji, June 1582; within two years Hideyoshi had taken the succession — Oda heirs reduced to minor lords", kind:"fall", yr:1582, by:"Akechi Mitsuhide (assassination); Toyotomi Hideyoshi (succession)"},
+  pts:[[1467,0.1],[1551,0.15],[1560,0.3],[1567,0.9],[1568,1.5],[1570,2.0],[1573,3.2],[1575,4.5],[1580,6.5],[1582,7.5],[1583,2.0],[1585,0.5],[1590,0]]},
+
+ {id:"toyotomi", name:"Toyotomi", color:"#e6c15a", region:"Osaka · the Kinai (direct + house kin)",
+  peak:"1590–98 · ≈4.5M koku direct/house — plus suzerainty over all 18.5M as kanpaku",
+  suzerain:{a:1585,b:1598,note:"As kanpaku, Hideyoshi could also levy every vassal daimyō — ≈16M further koku. The 1590 Odawara host of ~210,000 was drawn from all Japan (Tokugawa, Mōri, Ukita, Uesugi and Maeda contingents included), not from Toyotomi lands alone."},
+  fate:{txt:"Hideyoshi dies 1598; crushed at Sekigahara 1600 and cut to 0.65M koku at Osaka; the house is annihilated in the Sieges of Osaka, 1615 — Hideyori's seppuku ends the line", kind:"fall", yr:1615, by:"Tokugawa Ieyasu (Sekigahara 1600; Siege of Osaka 1615)"},
+  pts:[[1582,0.5],[1583,3.0],[1585,4.0],[1587,4.3],[1590,4.5],[1598,4.3],[1600,0.65],[1614,0.65],[1615,0]]},
+
+ {id:"maeda", name:"Maeda", color:"#a08050", region:"Kaga · Etchū · Noto",
+  peak:"1598 · 0.83M koku — regent, and Ieyasu's only real check",
+  fate:{txt:"Never independent — a lifelong Oda→Toyotomi lieutenant. After Toshiie's death (1599) his heir submitted to Ieyasu without battle; rewarded with Kaga at 1.02M koku, the richest non-Tokugawa domain, surviving to Meiji", kind:"sub", yr:1600, by:"Tokugawa Ieyasu (intimidation, not battle)"},
+  pts:[[1575,0.1],[1581,0.22],[1583,0.45],[1585,0.6],[1590,0.77],[1598,0.83],[1600,0.83],[1601,1.02],[1615,1.19]]},
+
+ {id:"ukita", name:"Ukita", color:"#5a7a9e", region:"Bizen · Mimasaka (Okayama)",
+  peak:"1590s · 0.57M koku — regent; Hideyoshi's ward",
+  fate:{txt:"Rose entirely under Oda/Toyotomi patronage. Led the largest Western division (~17,000) at Sekigahara; attainted, exiled to Hachijō island — where Hideie lived until 1655, the last Sekigahara daimyō alive", kind:"fall", yr:1600, by:"Tokugawa Ieyasu"},
+  pts:[[1573,0.2],[1577,0.3],[1582,0.4],[1585,0.5],[1590,0.57],[1600,0.57]]},
+
+ {id:"tokugawa", name:"Tokugawa", color:"#1f5c45", region:"Mikawa → the Kantō (Edo)",
+  peak:"1600 · ≈4M+ koku and rising — hegemon after Sekigahara",
+  suzerain:{a:1600,b:1615,note:"After Sekigahara, Ieyasu in turn commands the levy of every confirmed daimyō — the position Hideyoshi held, now his."},
+  fate:{txt:"Victor — already Japan's largest landholder from 1590 (≈2.5M koku); establishes the shogunate in 1603, ruling until 1868", kind:"live", yr:null, by:null},
+  pts:[[1467,0.05],[1560,0.3],[1566,0.35],[1570,0.5],[1575,0.6],[1582,1.3],[1584,1.4],[1590,2.5],[1598,2.56],[1600,4.0],[1603,5.0],[1615,6.5]]},
+
+ {id:"other", name:"Independent minor clans", color:"#6b6b66", region:"Unaligned shugo, kokujin & regional houses — hundreds of them in 1467, zero by 1590",
+  peak:"—", fate:{txt:"One by one destroyed or forced to swear service; the Hōjō's fall in 1590 leaves no independent power in Japan", kind:"live", yr:null, by:null},
+  pts:null /* interpolated from IND_ANCHOR, capped by what's left of the 18.5M total */},
+
+ {id:"vassals_oda", name:"Oda vassal lords", color:"#8a6a45", region:"Lords confirmed in Nobunaga's sphere — Kinai houses, Ise, Ōmi, allied kokujin",
+  peak:"—", fate:{txt:"Confirmed by Nobunaga 1568–82; passed almost wholesale into Hideyoshi's service after Honnō-ji", kind:"live", yr:null, by:null}, pts:null},
+
+ {id:"vassals_toyo", name:"Toyotomi vassal lords", color:"#9a874a", region:"Hideyoshi's made men & confirmed daimyō — Fukushima, Katō, Asano, Kobayakawa, Hori, Nabeshima, Date, Satake, Mogami…",
+  peak:"—", fate:{txt:"The engine of unification: land taken from the fallen, regranted to sworn men. After 1598 these same lords split East vs. West — and most of the biggest fighters chose Ieyasu", kind:"live", yr:null, by:null}, pts:null},
+
+ {id:"vassals_toku", name:"Tokugawa vassal lords", color:"#41604e", region:"Eastern-army lords & daimyō confirmed after Sekigahara — Fukushima, Kuroda, Hosokawa, Ikeda, Tōdō, Yamauchi… (largely the same men, new master)",
+  peak:"—", fate:{txt:"Sekigahara's real prize: ≈6.5M koku confiscated from the West and regranted, converting the Toyotomi vassal system into the Tokugawa one almost overnight", kind:"live", yr:null, by:null}, pts:null},
+];
+
+const ORDER = ["vassals_toku","vassals_toyo","vassals_oda","other","shimazu","tokugawa","toyotomi","maeda","ukita","oda","uesugi","takeda","imagawa","hojo","mori","ouchi","hosokawa","yamana","ashikaga"];
+const TOTAL = 18.5;
+/* independent minors: how much of the unnamed remainder is still genuinely unaligned */
+const IND_ANCHOR = [[1467,12.3],[1500,12.7],[1550,12.7],[1560,11.5],[1568,9.0],[1573,6.5],[1577,5.0],[1582,3.4],[1585,2.0],[1587,1.0],[1590,0],[1600,0]];
+/* which hegemon the vassal remainder answers to (shares, normalized) */
+const HEGEMON_SHARE = {
+  vassals_oda:  [[1467,1],[1582,1],[1583,0.1],[1584,0]],
+  vassals_toyo: [[1582,0],[1583,0.9],[1584,1],[1598,1],[1600,0.15],[1614,0.08],[1615,0]],
+  vassals_toku: [[1598,0],[1600,0.85],[1614,0.92],[1615,1]],
+};
+
+const ERAS = [
+ {a:1467,b:1493,l1:"Ōnin War & Aftermath",l2:"1467–1493"},
+ {a:1493,b:1560,l1:"Rise of the Sengoku Daimyō",l2:"1493–1560"},
+ {a:1560,b:1582,l1:"Oda Rises",l2:"1560–1582"},
+ {a:1582,b:1600,l1:"Toyotomi → Sekigahara",l2:"1582–1600"},
+ {a:1600,b:1615,l1:"Tokugawa Peace",l2:"1600–1615"},
+];
+
+const EVENTS = [
+ {yr:1467, label:"1467–1477", name:"Ōnin War", fall:false,
+  txt:"Hosokawa (East) vs. Yamana (West) devastate Kyoto; both leaders die in 1473. Shogunal authority collapses and war spreads to the provinces."},
+ {yr:1493, label:"1493", name:"Gekokujō begins", fall:false,
+  txt:"Hosokawa Masamoto deposes the shogun (Meiō coup) while Hōjō Sōun seizes Izu — 'the low overthrow the high' becomes the age's rule."},
+ {yr:1543, label:"1543", name:"Portuguese reach Tanegashima", fall:false,
+  txt:"Arquebuses arrive in Japan; matchlock firearms and new trade begin reshaping warfare and daimyō economies."},
+ {yr:1551, label:"1551", name:"Tainei-ji Incident", fall:true,
+  txt:"Sue Harukata's coup forces Ōuchi Yoshitaka to seppuku, ending Ōuchi prosperity; the line is extinguished by 1557."},
+ {yr:1555, label:"1555", name:"Battle of Itsukushima", fall:false,
+  txt:"Mōri Motonari destroys Sue Harukata, then absorbs the old Ōuchi domains — the Mōri become hegemons of western Japan."},
+ {yr:1561, label:"1553–1564", name:"Battles of Kawanakajima", fall:false,
+  txt:"Takeda Shingen and Uesugi Kenshin fight five inconclusive battles for Shinano; the fourth (1561) is among the era's bloodiest."},
+ {yr:1560, label:"1560", name:"Battle of Okehazama", fall:true,
+  txt:"Nobunaga's 3,000 rout ~25,000 and kill Imagawa Yoshimoto. The Imagawa collapse; Matsudaira (Tokugawa) Ieyasu becomes independent."},
+ {yr:1568, label:"1568", name:"Nobunaga enters Kyoto", fall:false,
+  txt:"Nobunaga installs Ashikaga Yoshiaki as shogun and expels the Miyoshi — central Japan falls into the Oda orbit."},
+ {yr:1573, label:"1573", name:"Shogunate ends · Shingen dies", fall:true,
+  txt:"Nobunaga expels Yoshiaki, ending the Ashikaga shogunate, and destroys the Asakura and Azai. Takeda Shingen dies mid-campaign."},
+ {yr:1575, label:"1575", name:"Battle of Nagashino", fall:false,
+  txt:"Massed Oda–Tokugawa arquebus volleys behind palisades shatter the Takeda cavalry under Katsuyori."},
+ {yr:1582, label:"1582", name:"Tenmokuzan & Honnō-ji", fall:true,
+  txt:"March: the Takeda are annihilated. June: Akechi Mitsuhide assassinates Nobunaga at Honnō-ji; Hideyoshi avenges him at Yamazaki and takes the succession."},
+ {yr:1587, label:"1585–1587", name:"Shikoku & Kyūshū campaigns", fall:false,
+  txt:"Hideyoshi forces the Chōsokabe (1585) and the Shimazu (1587) to submit, folding western Japan into the Toyotomi order."},
+ {yr:1590, label:"1590", name:"Siege of Odawara", fall:true,
+  txt:"Hideyoshi's ~200,000-strong host destroys the Hōjō. Unification is complete; Ieyasu is transferred to the Kantō — 2.5M koku, Japan's largest domain."},
+ {yr:1598, label:"1598", name:"Hideyoshi dies", fall:false,
+  txt:"The regency for young Hideyori fractures into eastern and western factions, setting up the final contest."},
+ {yr:1600, label:"1600", name:"Battle of Sekigahara", fall:true,
+  txt:"Tokugawa Ieyasu crushes the western coalition in a single morning. ≈6.5M koku are confiscated from the West and regranted to the East; the Toyotomi are reduced to Osaka."},
+ {yr:1603, label:"1603", name:"Tokugawa shogunate established", fall:false,
+  txt:"Ieyasu takes the title of shogun and founds the Edo bakufu — then abdicates to his son Hidetada in 1605 to lock in the succession, while ruling from behind."},
+ {yr:1615, label:"1614–1615", name:"Sieges of Osaka", fall:true,
+  txt:"Provoked over a temple-bell inscription, Ieyasu besieges Osaka twice. The castle burns; Hideyori and his mother die, extinguishing the Toyotomi line. The same year, the one-castle-per-province edict closes the age of war."},
+];
+
+/* Fates of ALL major clans, incl. ones too small/regional to band on the chart */
+const FATES = [
+ {c:"Hosokawa (main line)", col:"#7d5ba6", peak:"≈1.8M koku · kanrei, ruled through the shogun", yr:"1549", how:"Usurped by their own Miyoshi deputies. Cadet branch (Fujitaka) served Oda→Toyotomi→Tokugawa and survived to Meiji as lords of Kumamoto (540k koku).", by:"Miyoshi Nagayoshi", kind:"destroyed"},
+ {c:"Ōuchi", col:"#b0486b", peak:"≈1.1M koku + China trade", yr:"1551 / 1557", how:"Yoshitaka forced to seppuku in the Tainei-ji coup; puppet line extinguished six years later.", by:"Sue Harukata → Mōri Motonari", kind:"destroyed"},
+ {c:"Sue", col:"#96566b", peak:"Ōuchi domains, briefly (≈1.1M)", yr:"1555", how:"Harukata annihilated at the Battle of Itsukushima.", by:"Mōri Motonari", kind:"destroyed"},
+ {c:"Imagawa", col:"#86a83e", peak:"≈1.0M koku (Suruga·Tōtōmi·Mikawa)", yr:"1560 → 1569", how:"Yoshimoto killed at Okehazama; domain partitioned. Ujizane lived on as a Tokugawa courtier (kōke) — the family outlasted its power.", by:"Oda Nobunaga; partition by Takeda & Tokugawa", kind:"destroyed"},
+ {c:"Amago", col:"#6f7d8a", peak:"≈0.7M koku (Izumo, San'in)", yr:"1566", how:"Starved out at the siege of Gassantoda Castle.", by:"Mōri Motonari", kind:"destroyed"},
+ {c:"Miyoshi", col:"#7a6a4a", peak:"≈1.2M koku · de facto rulers of the Kinai 1549–64", yr:"1568 / 1573", how:"Expelled from Kyoto when Nobunaga marched in; remnants crushed within five years.", by:"Oda Nobunaga", kind:"destroyed"},
+ {c:"Asakura & Azai", col:"#5a7a5a", peak:"≈0.8M koku combined (Echizen · Ōmi)", yr:"1573", how:"Both destroyed in one campaign — sieges of Ichijōdani and Odani. Nobunaga famously had their skulls lacquered.", by:"Oda Nobunaga", kind:"destroyed"},
+ {c:"Ashikaga Shogunate", col:"#8d7ba8", peak:"Nominal rulers of all Japan since 1338", yr:"1573", how:"Shogun Yoshiaki expelled from Kyoto; the 235-year shogunate abolished. Yoshiaki died a pensioner of Hideyoshi in 1597.", by:"Oda Nobunaga", kind:"destroyed"},
+ {c:"Yamana", col:"#9d8a3f", peak:"≈0.9M koku; once 'lords of a sixth of Japan'", yr:"1580–81", how:"A century of decline after the Ōnin War ends with the fall of Tottori Castle in Hideyoshi's western campaign.", by:"Oda forces (Hashiba Hideyoshi)", kind:"destroyed"},
+ {c:"Takeda", col:"#c1442e", peak:"≈1.2M koku (Kai·Shinano·Suruga)", yr:"1582", how:"Broken at Nagashino (1575); annihilated at Tenmokuzan — Katsuyori's seppuku ends the line as a power.", by:"Oda Nobunaga & Tokugawa Ieyasu", kind:"destroyed"},
+ {c:"Oda", col:"#e08a3c", peak:"≈7.5M koku — 40% of Japan in 1582", yr:"1582 → 1584", how:"Nobunaga assassinated at Honnō-ji. Hideyoshi outmaneuvered the Oda heirs (Shizugatake 1583, Komaki–Nagakute 1584); the clan lived on as minor lords.", by:"Akechi Mitsuhide; succession taken by Toyotomi Hideyoshi", kind:"destroyed"},
+ {c:"Akechi", col:"#8a8a6e", peak:"Nobunaga's realm — for 13 days", yr:"1582", how:"Mitsuhide defeated at Yamazaki less than two weeks after Honnō-ji; killed by peasants while fleeing.", by:"Toyotomi Hideyoshi", kind:"destroyed"},
+ {c:"Ryūzōji", col:"#5e6e5a", peak:"≈0.5M koku (Hizen, NW Kyūshū)", yr:"1584", how:"Takanobu killed at the Battle of Okitanawate; the domain passed to their Nabeshima deputies (gekokujō to the very end).", by:"Shimazu–Arima alliance", kind:"destroyed"},
+ {c:"Chōsokabe", col:"#4a7a6a", peak:"All Shikoku, ≈0.9M koku (1585)", yr:"1585 · destroyed 1615", how:"Submitted to Hideyoshi's Shikoku invasion, kept only Tosa (0.22M); stripped of everything after Sekigahara, and Morichika was executed after Osaka, 1615.", by:"Toyotomi Hideyoshi; extinguished by Tokugawa", kind:"submitted"},
+ {c:"Ōtomo", col:"#7a5a6e", peak:"6 provinces of Kyūshū, ≈1M koku (1570s)", yr:"1586 · abolished 1593", how:"Shattered by the Shimazu at Mimikawa (1578); saved by submitting to Hideyoshi, then stripped of their domain for cowardice in the Korea campaign.", by:"Shimazu (militarily); Toyotomi (abolition)", kind:"submitted"},
+ {c:"Shimazu", col:"#8a5a33", peak:"≈1.6M koku — most of Kyūshū (1586)", yr:"1587", how:"Submitted to Hideyoshi's 200,000-strong invasion; kept Satsuma·Ōsumi (≈0.6M). Survived Sekigahara despite fighting for the West.", by:"Toyotomi Hideyoshi", kind:"survived"},
+ {c:"Hōjō", col:"#5b8ea6", peak:"≈2.0M koku — the Kantō (1589)", yr:"1590", how:"Refused to submit; besieged at Odawara by ~200,000 and destroyed. Ujimasa ordered to seppuku; the last great independent clan.", by:"Toyotomi Hideyoshi", kind:"destroyed"},
+ {c:"Date", col:"#6e5a7a", peak:"≈1.1M koku conquered in the north (1589)", yr:"1590", how:"Masamune submitted at Odawara (arriving dressed for his own funeral); reduced to ≈0.6M, later Sendai. Survived to Meiji.", by:"Toyotomi Hideyoshi", kind:"survived"},
+ {c:"Mōri", col:"#3d8f80", peak:"≈1.2M koku — all Chūgoku", yr:"1582 / 1585 · reduced 1600", how:"Made peace with Hideyoshi days after Honnō-ji, formally submitted 1585. Nominal head of the Western Army in 1600 — cut from 1.12M to 0.37M koku (Chōshū). Survived to Meiji and co-led the Restoration.", by:"Toyotomi (submission); Tokugawa (reduction)", kind:"survived"},
+ {c:"Uesugi", col:"#35548f", peak:"≈1.15M koku under Kenshin; 1.2M at Aizu (1598)", yr:"1586 · reduced 1601", how:"Submitted to Hideyoshi after Kenshin's death and the Otate war. Ieyasu's 1600 campaign against them is what opened the Sekigahara war; cut to 0.3M koku at Yonezawa. Survived to Meiji.", by:"Toyotomi (submission); Tokugawa (reduction)", kind:"survived"},
+ {c:"Maeda", col:"#a08050", peak:"0.83M koku (Kaga·Etchū·Noto) · regent", yr:"1600 (submits)", how:"Toshiie — the only regent with the stature to check Ieyasu — died in 1599, eight months after Hideyoshi. His son Toshinaga submitted under invasion threat, sending his mother as hostage. Rewarded: Kaga grew to 1.02M koku, the largest non-Tokugawa domain, and survived to Meiji.", by:"Tokugawa Ieyasu (intimidation, not battle)", kind:"survived"},
+ {c:"Ukita", col:"#5a7a9e", peak:"0.57M koku (Okayama) · regent", yr:"1600", how:"Hideie — regent, Hideyoshi's ward, and commander of the largest Western division (~17,000) at Sekigahara. Stripped of everything and exiled to Hachijō island, where he lived until 1655 — the last Sekigahara daimyō left alive.", by:"Tokugawa Ieyasu", kind:"destroyed"},
+ {c:"Ishida", col:"#8a7d6e", peak:"0.19M koku (Sawayama) · go-bugyō commissioner", yr:"1600", how:"The Western Army's organizer — a brilliant administrator commanding lords five times his size, which is precisely why several wouldn't obey him on the day. Captured after the battle and executed in Kyoto.", by:"Tokugawa Ieyasu", kind:"destroyed"},
+ {c:"Konishi", col:"#6e8a7d", peak:"≈0.2M koku (southern Higo)", yr:"1600", how:"Christian daimyō and veteran of the Korea campaigns; fought at Sekigahara's center. Refused seppuku on religious grounds and was executed alongside Ishida.", by:"Tokugawa Ieyasu", kind:"destroyed"},
+ {c:"Kobayakawa", col:"#9e9450", peak:"≈0.36M koku (Chikuzen) · Mōri cadet branch", yr:"1602", how:"Hideaki's mid-battle defection with ~15,000 men decided Sekigahara for Ieyasu. Rewarded with Ukita's 0.55M-koku Okayama — then died two years later, 21 years old, without an heir. The house was abolished; the turncoat's line outlived the battle by two years.", by:"— (extinct by heirless death)", kind:"destroyed"},
+ {c:"Toyotomi", col:"#e6c15a", peak:"Suzerain of all 18.5M koku (1590–98)", yr:"1600 · destroyed 1615", how:"Western coalition crushed at Sekigahara; the house cut to a 0.65M-koku Osaka domain, then annihilated in the Siege of Osaka. Hideyori's seppuku ends the line.", by:"Tokugawa Ieyasu", kind:"destroyed"},
+ {c:"Tokugawa", col:"#1f5c45", peak:"≈2.5M koku (1590) → ≈4M+ (1600) → ≈6.4M with retainers (Edo era)", yr:"—", how:"The victor. Shogunate established 1603; ruled Japan for 265 years, until Satsuma and Chōshū — the two clans it had only reduced — overthrew it in 1868.", by:"—", kind:"victor"},
+];
+
+/* Sankey: land (M koku) flowing from the defeated to the victor */
+const SK_NODES = ["Ashikaga","Hosokawa","Miyoshi","Yamana","Ōuchi","Sue","Amago","Mōri","Imagawa","Asakura · Azai","Takeda","Hōjō","Uesugi","Ōtomo","Ryūzōji","Chōsokabe","Shimazu","Date","Maeda","Ukita","Ishida · Konishi","Oda","Akechi","Toyotomi","Tokugawa"];
+const SK_COLORS = {"Ashikaga":"#8d7ba8","Hosokawa":"#7d5ba6","Miyoshi":"#7a6a4a","Yamana":"#9d8a3f","Ōuchi":"#b0486b","Sue":"#96566b","Amago":"#6f7d8a","Mōri":"#3d8f80","Imagawa":"#86a83e","Asakura · Azai":"#5a7a5a","Takeda":"#c1442e","Hōjō":"#5b8ea6","Uesugi":"#35548f","Ōtomo":"#7a5a6e","Ryūzōji":"#5e6e5a","Chōsokabe":"#4a7a6a","Shimazu":"#8a5a33","Date":"#6e5a7a","Maeda":"#a08050","Ukita":"#5a7a9e","Ishida · Konishi":"#8a7d6e","Oda":"#e08a3c","Akechi":"#8a8a6e","Toyotomi":"#e6c15a","Tokugawa":"#1f5c45"};
+const SK_LINKS = [
+ {s:"Hosokawa",t:"Miyoshi",v:1.0, kind:"fall", e:"1549 — usurped from within by their deputy Miyoshi Nagayoshi"},
+ {s:"Miyoshi",t:"Oda",v:1.0, kind:"fall", e:"1568 — expelled from Kyoto by Nobunaga's march; remnants crushed by 1573"},
+ {s:"Ashikaga",t:"Oda",v:0.4, kind:"fall", e:"1573 — shogun Yoshiaki expelled; the shogunate abolished"},
+ {s:"Yamana",t:"Oda",v:0.2, kind:"fall", e:"1580–81 — Tottori falls to Hideyoshi's western campaign"},
+ {s:"Ōuchi",t:"Sue",v:1.1, kind:"fall", e:"1551 — Tainei-ji coup: Yoshitaka forced to seppuku"},
+ {s:"Sue",t:"Mōri",v:1.1, kind:"fall", e:"1555 — Battle of Itsukushima: Motonari destroys Harukata"},
+ {s:"Amago",t:"Mōri",v:0.6, kind:"fall", e:"1566 — siege of Gassantoda Castle"},
+ {s:"Imagawa",t:"Oda",v:0.2, kind:"fall", e:"1560 — Okehazama: Yoshimoto killed"},
+ {s:"Imagawa",t:"Takeda",v:0.45, kind:"fall", e:"1568–69 — Shingen seizes Suruga in the partition"},
+ {s:"Imagawa",t:"Tokugawa",v:0.35, kind:"fall", e:"1568–69 — Ieyasu takes Tōtōmi in the partition"},
+ {s:"Asakura · Azai",t:"Oda",v:0.8, kind:"fall", e:"1573 — sieges of Ichijōdani and Odani"},
+ {s:"Takeda",t:"Oda",v:0.8, kind:"fall", e:"1575 Nagashino → 1582 Tenmokuzan: the clan annihilated"},
+ {s:"Takeda",t:"Tokugawa",v:0.4, kind:"fall", e:"1582 — Ieyasu absorbs Suruga and (after Honnō-ji) Kai"},
+ {s:"Oda",t:"Akechi",v:0.3, kind:"fall", e:"June 1582 — Honnō-ji: Nobunaga assassinated"},
+ {s:"Akechi",t:"Toyotomi",v:0.3, kind:"fall", e:"13 days later — Yamazaki: Hideyoshi destroys Mitsuhide"},
+ {s:"Oda",t:"Toyotomi",v:6.7, kind:"fall", e:"1582–84 — Hideyoshi takes the Oda succession (Shizugatake, Komaki–Nagakute)"},
+ {s:"Oda",t:"Tokugawa",v:0.5, kind:"sub", e:"1582 — Ieyasu seizes Kai & Shinano in the post-Honnō-ji scramble"},
+ {s:"Mōri",t:"Toyotomi",v:1.12, kind:"sub", e:"1582 truce → 1585 formal submission; Terumoto keeps 1.12M koku as vassal"},
+ {s:"Uesugi",t:"Toyotomi",v:0.9, kind:"sub", e:"1586 — Kagekatsu submits; later moved to Aizu at 1.2M koku"},
+ {s:"Ryūzōji",t:"Shimazu",v:0.4, kind:"fall", e:"1584 — Okitanawate: Takanobu killed"},
+ {s:"Ōtomo",t:"Shimazu",v:0.5, kind:"fall", e:"1578 Mimikawa → 1586: driven back to Bungo"},
+ {s:"Ōtomo",t:"Toyotomi",v:0.2, kind:"sub", e:"1586 — Sōrin begs Hideyoshi's protection; house abolished 1593"},
+ {s:"Chōsokabe",t:"Toyotomi",v:0.75, kind:"sub", e:"1585 — Shikoku invasion; Motochika keeps only Tosa"},
+ {s:"Shimazu",t:"Toyotomi",v:1.0, kind:"sub", e:"1587 — Kyūshū invasion; Shimazu keep Satsuma·Ōsumi (≈0.6M)"},
+ {s:"Hōjō",t:"Toyotomi",v:2.0, kind:"fall", e:"1590 — Siege of Odawara: the Hōjō destroyed"},
+ {s:"Date",t:"Toyotomi",v:0.7, kind:"sub", e:"1590 — Masamune submits at Odawara"},
+ {s:"Toyotomi",t:"Maeda",v:0.83, kind:"sub", e:"1581–98 — Toshiie granted Noto, then Kaga·Etchū; made a regent"},
+ {s:"Toyotomi",t:"Ukita",v:0.57, kind:"sub", e:"1580s — Hideie, raised as Hideyoshi's ward, confirmed in Bizen·Mimasaka; made a regent"},
+ {s:"Maeda",t:"Tokugawa",v:0.83, kind:"sub", e:"1600 — submits after Toshiie's death (mother sent as hostage); rewarded — Kaga grows to 1.02M koku"},
+ {s:"Ukita",t:"Tokugawa",v:0.57, kind:"fall", e:"1600 — Sekigahara: attainted; Hideie exiled to Hachijō island"},
+ {s:"Ishida · Konishi",t:"Tokugawa",v:0.4, kind:"fall", e:"1600 — the Western Army's leaders executed in Kyoto; domains confiscated"},
+ {s:"Toyotomi",t:"Tokugawa",v:2.5, kind:"sub", e:"1590 — Hideyoshi transfers Ieyasu to the conquered Kantō: 2.5M koku"},
+ {s:"Toyotomi",t:"Tokugawa",v:6.0, kind:"fall", e:"1600 Sekigahara → 1615 Osaka: the Toyotomi order passes to the Tokugawa"},
+];
+
+/* ================= STACKED AREA CHART ================= */
+const Y0=1467, Y1=1615;
+const years = d3.range(Y0, Y1+1);
+const byId = Object.fromEntries(CLANS.map(c=>[c.id,c]));
+
+function powerAt(clan, y){
+  const p = clan.pts;
+  if(!p || y < p[0][0] || y > p[p.length-1][0]) return 0;
+  for(let i=0;i<p.length-1;i++){
+    const [x0,v0]=p[i],[x1,v1]=p[i+1];
+    if(y>=x0 && y<=x1) return x1===x0 ? v1 : v0 + (v1-v0)*(y-x0)/(x1-x0);
+  }
+  return 0;
+}
+
+const VASSAL_IDS = ["vassals_oda","vassals_toyo","vassals_toku"];
+const rows = years.map(y=>{
+  const r = {year:y}; let named=0;
+  ORDER.forEach(id=>{ if(id!=="other" && !VASSAL_IDS.includes(id)){ r[id]=powerAt(byId[id],y); named+=r[id]; }});
+  const rem = Math.max(TOTAL - named, 0);            /* total is ALWAYS 18.5M — land never disappears */
+  const ind = Math.min(powerAt({pts:IND_ANCHOR},y), rem);
+  r.other = ind;                                     /* still-independent minors */
+  const vas = rem - ind;                             /* everything else: granted/confirmed vassal domains */
+  let shares = VASSAL_IDS.map(id=>powerAt({pts:HEGEMON_SHARE[id]},y));
+  const sSum = shares.reduce((a,b)=>a+b,0) || 1;
+  VASSAL_IDS.forEach((id,i)=>{ r[id] = vas*shares[i]/sSum; });
+  return r;
+});
+
+const W=1500, H=580, M={t:64,r:24,b:36,l:60};
+const svg = d3.select("#chart").attr("viewBox",`0 0 ${W} ${H}`);
+const x = d3.scaleLinear([Y0,Y1],[M.l,W-M.r]);
+const maxY = d3.max(rows, r=>ORDER.reduce((a,id)=>a+r[id],0));
+const yS = d3.scaleLinear([0,maxY],[H-M.b,M.t]);
+
+const series = d3.stack().keys(ORDER)(rows);
+const area = d3.area().x(d=>x(d.data.year)).y0(d=>yS(d[0])).y1(d=>yS(d[1])).curve(d3.curveBasis);
+
+/* era bands */
+const eraG = svg.append("g");
+ERAS.forEach((e,i)=>{
+  if(i>0) eraG.append("line").attr("x1",x(e.a)).attr("x2",x(e.a)).attr("y1",M.t-6).attr("y2",H-M.b)
+    .attr("stroke","rgba(232,223,201,.28)").attr("stroke-dasharray","2 5");
+  const cx=(x(e.a)+x(e.b))/2;
+  eraG.append("text").attr("x",cx).attr("y",22).attr("text-anchor","middle")
+    .attr("fill","#e8dfc9").attr("font-size",13.5).attr("letter-spacing","2").text(e.l1.toUpperCase());
+  eraG.append("text").attr("x",cx).attr("y",40).attr("text-anchor","middle")
+    .attr("fill","#8a7340").attr("font-size",11.5).attr("letter-spacing","1.5").text(e.l2);
+});
+
+/* grid + axes (millions of koku) */
+d3.range(0,maxY+0.1,3).forEach(v=>{
+  svg.append("line").attr("x1",M.l).attr("x2",W-M.r).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke","rgba(232,223,201,.07)");
+  svg.append("text").attr("x",M.l-8).attr("y",yS(v)+4).attr("text-anchor","end")
+    .attr("fill","#736a56").attr("font-size",11).attr("font-family","var(--sans)").text(v+"M");
+});
+svg.append("text").attr("transform",`translate(16,${(M.t+H-M.b)/2}) rotate(-90)`).attr("text-anchor","middle")
+  .attr("fill","#a89e86").attr("font-size",11.5).attr("letter-spacing","1.5").text("MILLIONS OF KOKU HELD");
+d3.range(1470,1616,10).forEach(t=>{
+  svg.append("text").attr("x",x(t)).attr("y",H-12).attr("text-anchor","middle")
+    .attr("fill","#a89e86").attr("font-size",12.5).attr("font-family","var(--sans)").text(t);
+});
+
+/* bands */
+const paths = svg.append("g").selectAll("path").data(series).join("path")
+  .attr("d",area).attr("fill",d=>byId[d.key].color).attr("fill-opacity",.92)
+  .attr("stroke","#161310").attr("stroke-width",.7).style("cursor","crosshair");
+
+/* in-band labels at widest point */
+series.forEach(s=>{
+  let best={w:0,i:0};
+  s.forEach((d,i)=>{const w=d[1]-d[0]; if(w>best.w) best={w,i};});
+  const d=s[best.i];
+  if(best.w>0.55){
+    const yr=d.data.year;
+    const lx=Math.max(M.l+90, Math.min(W-M.r-90, x(yr)));
+    svg.append("text").attr("x",lx).attr("y",yS((d[0]+d[1])/2)+4.5)
+      .attr("text-anchor","middle").attr("fill","#0f0d0a").attr("font-size",best.w>2?16:(best.w>0.85?12.5:10))
+      .attr("font-weight",700).attr("letter-spacing","1.5").attr("pointer-events","none")
+      .text(byId[s.key].name.toUpperCase())
+      .clone(true).attr("fill","rgba(232,223,201,.94)").attr("dy",-1);
+  }
+});
+
+/* hegemon annotation */
+svg.append("text").attr("x",x(1594)).attr("y",yS(3.1)).attr("text-anchor","middle")
+  .attr("fill","#c9a24b").attr("font-size",10.5).attr("letter-spacing","1").attr("pointer-events","none")
+  .text("※ SUZERAIN OF ALL JAPAN 1590–98");
+
+/* fall / submission seals — hoverable */
+const tt1 = document.getElementById("tt1");
+const wrap1 = document.getElementById("chart-wrap");
+function showTip(tt, wrap, ev, html){
+  tt.style.display="block"; tt.innerHTML=html;
+  const r=wrap.getBoundingClientRect();
+  let tx=ev.clientX-r.left+16, ty=ev.clientY-r.top-10;
+  if(tx>r.width-310) tx-=330;
+  tt.style.left=tx+"px"; tt.style.top=ty+"px";
+}
+let sealIdx=0;
+CLANS.filter(c=>c.fate.yr).forEach(c=>{
+  const s = series.find(s=>s.key===c.id);
+  const yr = Math.min(c.fate.yr, Y1);
+  let j = yr - Y0;
+  while(j>0 && (s[j][1]-s[j][0])<0.06) j--;
+  const mid=(s[j][0]+s[j][1])/2;
+  const isSub = c.fate.kind==="sub";
+  const stagger = yr>=1573 ? -(10 + (sealIdx++ % 3)*12) : -10;
+  const g=svg.append("g").style("cursor","help");
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",12).attr("fill","transparent"); /* fat hover target */
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",5.5)
+    .attr("fill",isSub?"transparent":"#b3372a").attr("stroke",isSub?"#c9a24b":"#161310").attr("stroke-width",isSub?2:1.5);
+  g.append("text").attr("x",x(yr)).attr("y",yS(mid)+stagger)
+    .attr("text-anchor", yr>1588?"end":"middle")
+    .attr("fill",isSub?"#d9c27f":"#e8b0a6").attr("font-size",10.5).attr("letter-spacing","1")
+    .text(c.name.toUpperCase()+" · "+c.fate.yr);
+  g.on("mousemove",ev=>{
+     showTip(tt1,wrap1,ev,
+      `<div class="yr">${c.fate.yr} · ${isSub?"FORCED SUBMISSION":"CLAN FALLS"}</div>
+       <div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="fate-t" style="color:${isSub?'#d9c27f':'#d98a7f'}">${c.fate.txt}</div>
+       ${c.fate.by?`<div class="pw" style="margin-top:4px"><b style="color:#e8dfc9">Defeated by:</b> ${c.fate.by}</div>`:""}`);
+   }).on("mouseleave",()=>{tt1.style.display="none";});
+});
+
+/* event marker */
+const marker = svg.append("g").style("display","none").attr("pointer-events","none");
+marker.append("line").attr("y1",M.t-4).attr("y2",H-M.b).attr("stroke","#c9a24b").attr("stroke-width",1).attr("stroke-dasharray","3 4");
+const markerLabel = marker.append("text").attr("y",M.t+8).attr("fill","#c9a24b").attr("font-size",11).attr("letter-spacing","1.5");
+
+/* hover crosshair + band tooltip */
+const cross = svg.append("line").attr("y1",M.t).attr("y2",H-M.b)
+  .attr("stroke","rgba(232,223,201,.35)").attr("stroke-width",1).style("display","none").attr("pointer-events","none");
+
+paths.on("mousemove",function(ev,d){
+    paths.attr("fill-opacity",s=>s.key===d.key?1:.35);
+    const [mx]=d3.pointer(ev,svg.node());
+    const yr=Math.max(Y0,Math.min(Y1,Math.round(x.invert(mx))));
+    cross.style("display",null).attr("x1",x(yr)).attr("x2",x(yr));
+    const row=rows[yr-Y0], c=byId[d.key], v=row[d.key];
+    const troops=Math.round(v*1e6/1e4*250);
+    const suz = c.suzerain && yr>=c.suzerain.a && yr<=c.suzerain.b
+      ? `<div class="pw" style="margin-top:5px;color:#d9c27f">※ ${c.suzerain.note}</div>` : "";
+    showTip(tt1,wrap1,ev,
+      `<div class="yr">${yr}</div><div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="pw">≈ <b style="color:#e8dfc9">${v.toFixed(2)}M koku</b> (${(v/TOTAL*100).toFixed(0)}% of Japan)</div>
+       <div class="pw">≈ ${troops.toLocaleString()} soldiers from its own lands at full levy</div>
+       <div class="pw" style="margin-top:4px">${c.region}</div>${suz}`);
+  })
+  .on("mouseleave",()=>{paths.attr("fill-opacity",.92); cross.style("display","none"); tt1.style.display="none";});
+
+/* ================= SANKEY ================= */
+(function(){
+  const SW=1500, SH=640, SM={t:16,r:190,b:16,l:150};
+  const s = d3.select("#sankey").attr("viewBox",`0 0 ${SW} ${SH}`);
+  const nodes = SK_NODES.map(n=>({name:n}));
+  const idx = Object.fromEntries(SK_NODES.map((n,i)=>[n,i]));
+  const links = SK_LINKS.map(l=>({source:idx[l.s],target:idx[l.t],value:l.v,kind:l.kind,e:l.e,s:l.s,t:l.t}));
+  const sk = d3.sankey().nodeWidth(16).nodePadding(16)
+    .extent([[SM.l,SM.t],[SW-SM.r,SH-SM.b]]);
+  const graph = sk({nodes:nodes.map(d=>({...d})), links:links.map(d=>({...d}))});
+
+  const tt2=document.getElementById("tt2"), wrap2=document.getElementById("sankey-wrap");
+
+  s.append("g").selectAll("path").data(graph.links).join("path")
+    .attr("d",d3.sankeyLinkHorizontal())
+    .attr("fill","none")
+    .attr("stroke",d=>d.kind==="fall"?"#b3372a":"#c9a24b")
+    .attr("stroke-opacity",.38)
+    .attr("stroke-width",d=>Math.max(1.5,d.width))
+    .style("cursor","help")
+    .on("mousemove",function(ev,d){
+      d3.select(this).attr("stroke-opacity",.75);
+      showTip(tt2,wrap2,ev,
+        `<div class="yr">${d.kind==="fall"?"DESTROYED / TAKEN":"SUBMISSION / TRANSFER"}</div>
+         <div class="nm"><span style="color:${SK_COLORS[d.s]}">${d.s}</span> → <span style="color:${SK_COLORS[d.t]}">${d.t}</span></div>
+         <div class="pw">≈ ${d.value}M koku</div>
+         <div class="pw" style="margin-top:4px">${d.e}</div>`);
+    })
+    .on("mouseleave",function(){d3.select(this).attr("stroke-opacity",.38); tt2.style.display="none";});
+
+  const ng = s.append("g").selectAll("g").data(graph.nodes).join("g");
+  ng.append("rect")
+    .attr("x",d=>d.x0).attr("y",d=>d.y0)
+    .attr("width",d=>d.x1-d.x0).attr("height",d=>Math.max(2,d.y1-d.y0))
+    .attr("fill",d=>SK_COLORS[d.name]).attr("stroke","#161310");
+  ng.append("text")
+    .attr("x",d=>d.x0 < SW/2 ? d.x0-8 : d.x1+8)
+    .attr("y",d=>(d.y0+d.y1)/2+4)
+    .attr("text-anchor",d=>d.x0 < SW/2 ? "end":"start")
+    .attr("fill","#e8dfc9").attr("font-size",13).attr("letter-spacing",".5")
+    .text(d=>d.name);
+})();
+
+/* ================= REGENCY OF 1598 ================= */
+(function(){
+  const R=[
+   {n:"Tokugawa Ieyasu", koku:2.56, col:"#1f5c45", role:"Regent (go-tairō)", side:"EAST — victor",
+    fate:"Used the regency to build a coalition; crushed the West at Sekigahara. Shogun by 1603.", cls:"#9dbf9a"},
+   {n:"Mōri Terumoto", koku:1.12, col:"#3d8f80", role:"Regent (go-tairō)", side:"WEST — nominal commander-in-chief",
+    fate:"Named head of the Western Army but stayed in Osaka; his kinsman Kikkawa Hiroie had cut a secret deal, and the Mōri divisions at Sekigahara never charged. Cut to 0.37M koku.", cls:"#d9c27f"},
+   {n:"Uesugi Kagekatsu", koku:1.20, col:"#35548f", role:"Regent (go-tairō)", side:"WEST — fought in the north",
+    fate:"Ieyasu's punitive campaign against Uesugi's Aizu is what triggered the war. Fought Date and Mogami in the north, never reached Sekigahara. Cut to 0.3M koku.", cls:"#d9c27f"},
+   {n:"Maeda Toshiie", koku:0.83, col:"#a08050", role:"Regent (go-tairō)", side:"† died 1599",
+    fate:"The only elder Ieyasu could not bully — and he died eight months after Hideyoshi. His heir submitted; the Maeda were rewarded and became the richest non-Tokugawa house in Edo Japan.", cls:"#d9c27f"},
+   {n:"Ukita Hideie", koku:0.57, col:"#5a7a9e", role:"Regent (go-tairō)", side:"WEST — largest field division",
+    fate:"Led ~17,000 men in the center at Sekigahara. Attainted and exiled to Hachijō island; died there in 1655, the last surviving Sekigahara daimyō.", cls:"#d98a7f"},
+   {n:"Ishida Mitsunari", koku:0.19, col:"#8a7d6e", role:"Commissioner (go-bugyō)", side:"WEST — organizer",
+    fate:"The coalition's architect, with the smallest domain on this chart — lords five times his size resented taking his orders. Captured and executed, 1600.", cls:"#d98a7f"},
+  ];
+  const RW=1500, RH=330, RM={t:20,r:280,b:30,l:230};
+  const s=d3.select("#regents").attr("viewBox",`0 0 ${RW} ${RH}`);
+  const rx=d3.scaleLinear([0,2.7],[RM.l,RW-RM.r]);
+  const ry=d3.scaleBand(R.map(d=>d.n),[RM.t,RH-RM.b]).padding(0.32);
+  const tt3=document.getElementById("tt3"), wrap3=document.getElementById("regents-wrap");
+
+  [0.5,1,1.5,2,2.5].forEach(v=>{
+    s.append("line").attr("x1",rx(v)).attr("x2",rx(v)).attr("y1",RM.t).attr("y2",RH-RM.b).attr("stroke","rgba(232,223,201,.07)");
+    s.append("text").attr("x",rx(v)).attr("y",RH-10).attr("text-anchor","middle")
+      .attr("fill","#736a56").attr("font-size",11).attr("font-family","var(--sans)").text(v+"M koku");
+  });
+
+  R.forEach(d=>{
+    const g=s.append("g").style("cursor","help");
+    g.append("rect").attr("x",rx(0)).attr("y",ry(d.n)).attr("width",rx(d.koku)-rx(0)).attr("height",ry.bandwidth())
+      .attr("fill",d.col).attr("fill-opacity",.92).attr("stroke","#161310");
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+4).attr("text-anchor","end")
+      .attr("fill","#e8dfc9").attr("font-size",13.5).text(d.n);
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+18).attr("text-anchor","end")
+      .attr("fill","#8a7340").attr("font-size",10).attr("letter-spacing","1").text(d.role.toUpperCase());
+    g.append("text").attr("x",rx(d.koku)+10).attr("y",ry(d.n)+ry.bandwidth()/2+4)
+      .attr("fill",d.cls).attr("font-size",12).attr("font-family","var(--sans)")
+      .text(d.koku.toFixed(2)+"M · "+d.side);
+    g.on("mousemove",ev=>showTip(tt3,wrap3,ev,
+       `<div class="yr">${d.role.toUpperCase()} · ${d.koku.toFixed(2)}M KOKU</div>
+        <div class="nm" style="color:${d.col}">${d.n}</div>
+        <div class="pw">${d.fate}</div>`))
+     .on("mouseleave",()=>{tt3.style.display="none";});
+  });
+
+  /* divider between regents and commissioner */
+  const dy=(ry(R[4].n)+ry.bandwidth()+ry(R[5].n))/2;
+  s.append("line").attr("x1",RM.l-220).attr("x2",RW-RM.r+260).attr("y1",dy).attr("y2",dy)
+    .attr("stroke","rgba(201,162,75,.25)").attr("stroke-dasharray","3 5");
+})();
+
+/* ================= EVENTS ================= */
+const evWrap=document.getElementById("events");
+EVENTS.forEach(e=>{
+  const div=document.createElement("button");
+  div.type="button";
+  div.dataset.year=e.yr;
+  div.className="ev"+(e.fall?" fall":"");
+  div.innerHTML=`<div class="yr">${e.label}</div><div class="nm">${e.name}</div>${e.txt}`;
+  div.onclick=()=>{
+    document.querySelectorAll(".ev").forEach(n=>n.classList.remove("active"));
+    div.classList.add("active");
+    marker.style("display",null);
+    marker.select("line").attr("x1",x(e.yr)).attr("x2",x(e.yr));
+    markerLabel.attr("text-anchor",e.yr>1585?"end":"start")
+      .attr("x",e.yr>1585?x(e.yr)-6:x(e.yr)+6).text(e.name.toUpperCase()+" · "+e.label);
+    document.getElementById("chart-wrap").scrollIntoView({behavior:"smooth",block:"center"});
+  };
+  evWrap.appendChild(div);
+});
+
+/* ================= FATES TABLE ================= */
+const KIND_LBL={destroyed:"Destroyed",submitted:"Submitted, later broken",survived:"Submitted — survived to Meiji",victor:"Victor"};
+const tbl=document.getElementById("fates");
+tbl.innerHTML=`<tr><th>Clan</th><th>Peak</th><th>Folded</th><th>How it ended</th><th>Defeated / absorbed by</th><th>Outcome</th></tr>`+
+ FATES.map(f=>`<tr>
+   <td><span class="sw" style="background:${f.col}"></span>${f.c}</td>
+   <td>${f.peak}</td>
+   <td class="num">${f.yr}</td>
+   <td>${f.how}</td>
+   <td>${f.by}</td>
+   <td class="k-${f.kind}">${KIND_LBL[f.kind]}</td></tr>`).join("");
+
+/* ================= CLAN CARDS ================= */
+const clWrap=document.getElementById("clans");
+CLANS.filter(c=>c.id!=="other" && !c.id.startsWith("vassals")).forEach(c=>{
+  const div=document.createElement("div");
+  div.className="clan"; div.style.setProperty("--c",c.color);
+  const fk=c.fate.kind==="fall"?"fall":(c.fate.kind==="sub"?"sub":"live");
+  div.innerHTML=`<div class="nm"><i>◆</i> ${c.name}</div>
+    <div class="meta"><b>Core:</b> ${c.region}<br><b>Peak:</b> ${c.peak}</div>
+    <div class="fate ${fk}">${c.fate.txt}</div>`;
+  clWrap.appendChild(div);
+});
+</script>
+</body>
+</html>
