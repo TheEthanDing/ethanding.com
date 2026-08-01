@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wars of the Semis · Ethan Ding</title>
+<meta name="description" content="An interactive history of the great semiconductor companies, measured in global market share from 1955 to 2025.">
+<link rel="icon" href="/images/profile.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-sankey/0.12.3/d3-sankey.min.js"></script>
+<style>
+  :root{
+    --ink:#111310; --ink-2:#161a16; --ink-3:#1b211b;
+    --gold:#c9a24b; --gold-dim:#8a7340;
+    --paper:#e0e5da; --paper-dim:#98a394;
+    --seal:#b3372a;
+    --hair:rgba(201,162,75,.22);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans:"Avenir Next","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--paper);font-family:var(--serif);padding:20px clamp(14px,3vw,44px) 40px;}
+  .site-nav{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:22px;
+            font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-dim);}
+  .site-nav a{color:var(--gold);text-decoration:none;border-bottom:1px solid transparent;padding:4px 0;}
+  .site-nav a:hover{border-color:var(--gold);}
+
+  header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;
+         border-bottom:1px solid var(--hair);padding-bottom:18px;margin-bottom:6px;}
+  h1{font-size:clamp(20px,2.8vw,32px);font-weight:600;letter-spacing:.04em;}
+  h1 .era{color:var(--gold);font-weight:400;}
+  .sub{color:var(--paper-dim);font-size:13.5px;margin-top:6px;max-width:780px;line-height:1.55;}
+  .sub b{color:var(--paper);font-weight:600;}
+  .legend-box{border:1px solid var(--hair);padding:10px 14px;background:var(--ink-2);min-width:250px;}
+  .legend-box .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+  .legend-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--paper-dim);margin-top:5px;}
+  .seal-dot{width:12px;height:12px;border-radius:50%;background:var(--seal);box-shadow:0 0 0 2px rgba(179,55,42,.3);flex:none;}
+  .sub-dot{width:11px;height:11px;border-radius:50%;background:transparent;border:2px solid var(--gold);flex:none;}
+  .gold-tick{width:12px;height:0;border-top:1px dashed var(--gold);flex:none;}
+
+  #chart-wrap,#sankey-wrap{position:relative;background:var(--ink-2);border:1px solid var(--hair);margin-top:16px;padding:6px 6px 0;}
+  #chart,#sankey{display:block;width:100%;height:auto;}
+  .tooltip{position:absolute;pointer-events:none;background:#0c0e0c;border:1px solid var(--gold-dim);
+           padding:9px 12px;font-size:12.5px;line-height:1.5;color:var(--paper);display:none;z-index:5;max-width:300px;
+           box-shadow:0 6px 18px rgba(0,0,0,.55);}
+  .tooltip .yr{color:var(--gold);letter-spacing:.12em;font-size:11px;}
+  .tooltip .nm{font-size:14.5px;margin:2px 0 3px;}
+  .tooltip .pw{color:var(--paper-dim);}
+  .tooltip .fate-t{color:#d98a7f;margin-top:4px;}
+
+  .section-title{margin:32px 0 12px;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);
+                 display:flex;align-items:center;gap:14px;}
+  .section-title::after{content:"";flex:1;border-top:1px solid var(--hair);}
+  .section-sub{color:var(--paper-dim);font-size:13px;line-height:1.55;margin:-4px 0 12px;max-width:900px;}
+
+  #events{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px;}
+  .ev{background:var(--ink-3);border:1px solid rgba(201,162,75,.14);border-top:2px solid var(--gold-dim);
+      padding:12px 13px;font:inherit;font-size:12.5px;line-height:1.5;color:var(--paper-dim);cursor:pointer;
+      text-align:left;transition:border-color .15s, transform .15s;}
+  .ev:hover,.ev.active{border-color:var(--gold);transform:translateY(-2px);}
+  .ev:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .ev .yr{font-family:var(--sans);font-size:15px;color:var(--paper);letter-spacing:.02em;}
+  .ev .nm{color:var(--gold);font-size:13px;margin:3px 0 6px;font-weight:600;}
+  .ev.fall .yr::after{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--seal);margin-left:8px;}
+
+  #fates{width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.5;}
+  #fates th{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);text-align:left;
+            padding:8px 10px;border-bottom:1px solid var(--hair);}
+  #fates td{padding:8px 10px;border-bottom:1px solid rgba(224,229,218,.07);color:var(--paper-dim);vertical-align:top;}
+  #fates td:first-child{color:var(--paper);white-space:nowrap;font-weight:600;}
+  #fates .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:1px;}
+  #fates .k-destroyed{color:#d98a7f;} #fates .k-submitted{color:#d9c27f;} #fates .k-survived{color:#9dbf9a;} #fates .k-victor{color:#c9a24b;font-weight:600;}
+  #fates td.num{white-space:nowrap;font-family:var(--sans);}
+
+  #clans{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+  .clan{padding:12px 13px;border:1px solid rgba(224,229,218,.08);background:var(--ink-3);
+        border-left:5px solid var(--c);font-size:12.5px;line-height:1.55;color:var(--paper-dim);}
+  .clan .nm{color:var(--paper);font-size:14.5px;font-weight:600;letter-spacing:.03em;}
+  .clan .nm i{font-style:normal;color:var(--c);}
+  .clan .meta{margin-top:5px;}
+  .clan .meta b{color:var(--paper);font-weight:600;}
+  .clan .fate{margin-top:5px;padding-top:5px;border-top:1px dashed rgba(224,229,218,.12);}
+  .clan .fate.fall{color:#d98a7f;} .clan .fate.sub{color:#d9c27f;} .clan .fate.live{color:#9dbf9a;}
+
+  .fermi{margin-top:14px;border:1px dashed var(--gold-dim);padding:14px 16px;font-size:12.5px;line-height:1.7;color:var(--paper-dim);}
+  .fermi b{color:var(--gold);font-weight:600;}
+  footer{margin-top:18px;color:#66705f;font-size:11.5px;line-height:1.55;}
+  .table-scroll{overflow-x:auto;}
+  @media (max-width:760px){
+    .site-nav span{display:none}
+    #chart-wrap,#sankey-wrap,#regents-wrap,.table-scroll{overflow-x:auto}
+    #chart,#sankey,#regents{width:900px!important;max-width:none}
+    #fates{min-width:880px}
+  }
+  @media (prefers-reduced-motion:reduce){.ev{transition:none}.ev:hover{transform:none}}
+</style>
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="/">← Ethan Ding</a>
+  <span>Interactive industry history · 1955–2025</span>
+</nav>
+
+<header>
+  <div>
+    <h1>WARS OF THE SEMIS <span class="era">(1955–2025)</span> — POWER OF THE GREAT CHIPMAKERS, IN MARKET SHARE</h1>
+    <p class="sub">Power is measured in <b>share of global semiconductor industry revenue</b> — merchant chip sales plus foundry wafers, the
+      metric the industry ranks itself by. A rule of thumb at today's market: <b>1 share point ≈ $7 billion a year</b>.
+      The stack always totals 100%: when a chipmaker dies, its sockets don't vanish — they're refilled by someone else.
+      Hover any band <i>or any fall seal</i> for details; click a timeline event to mark its year.</p>
+  </div>
+  <div class="legend-box">
+    <div class="t">Reading the chart</div>
+    <div class="legend-row"><span class="seal-dot"></span>Chipmaker dies — dismantled or sold off a corpse</div>
+    <div class="legend-row"><span class="sub-dot"></span>Merged / carved out — absorbed by a survivor</div>
+    <div class="legend-row"><span class="gold-tick"></span>Key event marker (click cards below)</div>
+    <div class="legend-row" style="margin-top:8px">Band height = % of industry revenue</div>
+  </div>
+</header>
+
+<div id="chart-wrap"><svg id="chart" role="img" aria-label="Stacked area chart showing major semiconductor companies' global market share from 1955 to 2025"></svg><div class="tooltip" id="tt1"></div></div>
+
+<div class="section-title">Chain of Succession — Who Absorbed Whom</div>
+<p class="section-sub">Each ribbon is share passing from the absorbed to the absorber — or, in the founding decade, <i>people</i>: the genesis ribbons out of Shockley and Fairchild carry talent and technology, not booked revenue, because in this industry the engineers <i>were</i> the land.
+  <span style="color:#d98a7f">Red ribbons</span> = company destroyed — bankruptcy, dismantlement, or defection. <span style="color:#d9c27f">Gold ribbons</span> = merger, carve-out or acquisition. Hover any ribbon for the deal or collapse behind it. Note who is absent: <b>Samsung and Qualcomm have no ribbons at all</b> — the only great powers that grew purely by building, never by buying.</p>
+<div id="sankey-wrap"><svg id="sankey" role="img" aria-label="Flow chart showing semiconductor companies absorbing businesses, assets, and talent from predecessors"></svg><div class="tooltip" id="tt2"></div></div>
+
+<div class="section-title">Key Events Timeline</div>
+<div id="events"></div>
+
+<div class="section-title">The TSMC Anomaly — No Products, and All the Power</div>
+<div class="fermi">
+  <b>Why they got so powerful.</b> Three structural advantages, compounding for four decades.
+  <b>(1) The vow:</b> when Morris Chang — 56 years old, passed over for the top job at Texas Instruments — founded TSMC in 1987 to build Taiwan an industry, he made one promise the incumbents couldn't copy: <b>TSMC would never design a chip, never sell a product, never compete with a customer.</b> Every IDM that offered spare foundry capacity (IBM, Samsung, TI) was asking startups to hand their designs to a competitor. TSMC's emptiness was the moat.
+  <b>(2) Learning from everyone's war:</b> an IDM refines its process on its own products alone; TSMC refined its process on <i>every</i> customer's volume at once — Nvidia's GPUs, Qualcomm's modems, Apple's phones, AMD's CPUs, thousands of designs a year. By the 2010s its process learning curve compounded faster than anyone flying solo could match, and each fabless victory anywhere in the world was automatically a TSMC victory too.
+  <b>(3) No succession wars:</b> one founder at the helm for 31 years — with one legendary exception: in 2009, aged 77, Chang <i>un-retired</i>, removed his own hand-picked successor, and doubled capital spending into the teeth of the financial crisis to catch the smartphone wave. That single counter-cyclical bet — building capacity while everyone else cut — is arguably the greatest capital-allocation decision in the industry's history.
+  <br><br>
+  <b>Why they stayed on top while Intel, Japan and Korea warred.</b> Strategy: they never marched on Kyoto. Intel and AMD bled each other in the x86 wars; Japan and Korea annihilated each other in DRAM price crashes; everyone with a product fought everyone else with a product. TSMC fought no one — it armed all sides and banked the margin, spending the difference digesting the world's leading-edge capacity. "Real men have fabs," Jerry Sanders of AMD had scoffed. By 2020, almost no real men still did.
+  <br><br>
+  <b>Why the peak is also the exposure.</b> The same concentration that made them indispensable made them a single point of failure: ~90% of the world's leading-edge logic is produced on one island, within range of one strait, dependent on one Dutch company's EUV machines. The "silicon shield" cuts both ways — the fortress that no rival could take is now the fortress every superpower plans around.
+</div>
+
+<div class="section-title">Intel's 1985 Memory Exit — Surrender, or the Best Trade in Business History?</div>
+<div class="fermi">
+  Walking away from DRAM looks like a rout until you see what Intel kept. It was a <b>forced swap, not a choice freely made</b>: Intel had <i>invented</i> the DRAM in 1970 and been built on memory — but by 1984 Japan's VLSI-project champions (NEC, Hitachi, Toshiba, Fujitsu) were selling below cost with patient bank capital, and Intel was losing money on every chip. In the famous telling, Grove asked Moore: <i>"If the board threw us out and brought in new management, what would they do?" "Get out of memories." "Then why don't we walk out the door, come back in, and do it ourselves?"</i> Intel surrendered the business it was founded on — its five ancestral provinces — and kept one thing: the microprocessor, and with it the 1981 IBM PC design win.
+  <br><br>
+  From Grove's chair, the logic was concentration: <b>(1)</b> memory was a commodity war of capital endurance that American balance sheets could not win in 1985; <b>(2)</b> the microprocessor was differentiated, defensible, and — thanks to IBM's accidental gift of an open PC standard — about to become the tollbooth of the entire computer industry; <b>(3)</b> the x86 instruction set was a moat measured in decades of software, not months of process lead; and <b>(4)</b> Japan, focused on the memory prize, wasn't even contesting it. Land was the only currency of the old war; Intel switched currencies.
+  <br><br>
+  <b>The gamble paid on every axis — for thirty years.</b> The exile became the throne: from 1992 Intel was the #1 chipmaker on Earth for 25 consecutive years, at times capturing over 60% of the entire industry's profits on a sixth of its revenue. And then the same playbook was run against them. Intel passed on making the iPhone's chip in 2006 — a commodity too cheap, a margin too thin — and the mobile wave went fabless, feeding TSMC exactly the way the PC had fed Intel. AMD, dying, executed its own Kantō transfer in 2009: it gave up its ancestral fabs (spun off as GlobalFoundries) to survive as a design house — and the clean-sheet move let it come back a decade later, on TSMC's process, to besiege Intel's castle. The lesson Intel taught in 1985 — that what you surrender matters less than what the surrender lets you become — was learned best by its enemies.
+</div>
+
+<div class="section-title">The Leading-Edge Regency — Twenty-Five Claimants, Three Survivors</div>
+<p class="section-sub">In 2001, roughly 25 companies could manufacture a leading-edge logic chip. Each halving of the transistor node doubled the price of staying at the table — a fab that cost $1B in 2000 costs $20B+ today — and one by one the claimants folded their hands. The bars show how far down Moore's law each got before quitting (each unit = one halving from 90 nm): <b style="color:#e0e5da">only TSMC, Samsung and Intel still hold seats</b>, and only one of the three is not struggling. Hover a bar for each claimant's fate.</p>
+<div id="regents-wrap" style="position:relative;background:var(--ink-2);border:1px solid var(--hair);padding:6px;">
+  <svg id="regents" role="img" aria-label="Bar chart showing how far leading-edge semiconductor manufacturers progressed before exiting" style="display:block;width:100%;height:auto;"></svg>
+  <div class="tooltip" id="tt3"></div>
+</div>
+
+<div class="section-title">How Every Great Chipmaker Ended</div>
+<p class="section-sub">The era's major houses, in order of when they folded. "Folded" takes three forms: <span style="color:#d98a7f">destroyed</span> (bankrupt, dismantled, or scattered), <span style="color:#d9c27f">absorbed</span> (merged or carved out into a survivor), or <span style="color:#9dbf9a">still standing in 2025</span>. Note the pattern: almost no one on this table was beaten on engineering — they were beaten by <b>capital cycles</b>: whoever could keep spending through the bottom of a memory crash or a node transition took the land of whoever couldn't.</p>
+<div class="table-scroll"><table id="fates"></table></div>
+
+<div class="section-title">The Great Chipmakers — Peak Share &amp; Fate</div>
+<div id="clans"></div>
+
+<div class="fermi">
+  <b>How the share estimates were made (Fermi method):</b>
+  Anchors are the Dataquest/Gartner and IC Insights vendor rankings and WSTS market totals, by revenue across the merchant semiconductor market plus pure-play foundry.
+  Documented checkpoints keep the bands honest: TI was the <b>#1 merchant chipmaker from the late 1950s through the mid-1980s</b> (Fairchild briefly #2 at its mid-'60s peak);
+  <b>NEC held #1 from 1985 to 1991</b> and Japan as a whole peaked near <b>half the world market around 1988</b>; <b>Intel was #1 for 25 straight years (1992–2016)</b>, at times taking a majority of all industry profits;
+  <b>Samsung first dethroned Intel in 2017</b> on the memory super-cycle; <b>TSMC passed 60% of all foundry revenue and ~90% of leading-edge output</b> by the mid-2020s; and <b>Nvidia became the largest semiconductor company in history in 2024–25</b>, counting its chip content rather than full AI-system revenue. Between checkpoints, shares are interpolated from ranking tables and fab capacity. Error bars are roughly ±1–2 points.
+  <br><br>
+  <b>Two things that look wrong but aren't.</b>
+  <b>(1) Foundry share is double-counted — on purpose.</b> TSMC's wafers also appear inside Nvidia's, AMD's, Qualcomm's and Apple's costs, so a purist would net it out. It is drawn as its own band anyway, because control of the wafer <i>is</i> the story of the modern era: roughly 40 points of "fabless" share on this chart physically passes through the TSMC band on its way to a customer. Deduct it if you like — the shape of history doesn't change.
+  <b>(2) The biggest chipmakers of the early decades aren't on the chart at all.</b> Captive producers — <b>Western Electric</b> (AT&amp;T) in the transistor age and <b>IBM</b>, arguably the largest and most advanced semiconductor manufacturer on Earth through the 1970s–80s — sold nothing on the open market, so they hold no merchant share. Like the Muromachi shogunate, their power was real but sat outside the land system; when the vertical-integration order collapsed, there was no merchant business underneath to fall back on — IBM ultimately <i>paid</i> GlobalFoundries $1.5B to take its fabs away (2015).
+</div>
+
+<footer>Bands show share of global semiconductor industry revenue (merchant chip sales plus pure-play foundry; regional "Other Japan" = Fujitsu, Mitsubishi, Matsushita, Sharp, Sony, Oki, Rohm and peers; "Other chipmakers" = analog houses, MediaTek and Chinese vendors, trailing-edge foundries, and post-2019 Kioxia). The stack always totals 100%: when a house folds its share moves to another band, never off the chart. ※ marks hegemonies whose true power exceeded their revenue share — Intel's Wintel platform grip and TSMC's leading-edge monopoly. Values are Fermi estimates for comparison, not audited data.</footer>
+
+<script>
+/* ================= DATA (% of global semiconductor industry revenue) ================= */
+const CLANS = [
+ {id:"rca", name:"RCA & GE", color:"#7a6a4a", region:"Princeton & Syracuse · the vacuum-tube lords who owned the patents",
+  peak:"1955 · ≈16% combined — the incumbents of the tube age",
+  fate:{txt:"The old shugo: mastered the transistor's science, missed its business. GE bought RCA in 1986 and shut or sold the chip operations within two years — the remains passed through Harris and Intersil and ended up, decades later, inside Renesas", kind:"fall", yr:1987, by:"Their own conglomerate boards; Harris (asset purchase)"},
+  pts:[[1955,16],[1960,12],[1965,9],[1970,7],[1975,5],[1980,3.5],[1985,2.5],[1987,2],[1988,0]]},
+
+ {id:"ti", name:"Texas Instruments", color:"#9d8a3f", region:"Dallas · the first empire — #1 merchant chipmaker for ~25 years",
+  peak:"1960s · ≈15% — Kilby's IC, the silicon transistor, and military silicon",
+  fate:{txt:"Still standing — survived every era by retreating in time: out of DRAM (1998, sold to Micron), out of leading-edge logic (2007), into analog and embedded, where the margins never die", kind:"live", yr:null, by:null},
+  pts:[[1955,5],[1958,9],[1961,13],[1965,15],[1970,13],[1975,11],[1980,9],[1985,7],[1990,6],[1995,6.5],[2000,5.5],[2005,5.5],[2010,4.5],[2015,4],[2020,3.5],[2025,2.5]]},
+
+ {id:"fairchild", name:"Fairchild", color:"#8d7ba8", region:"Palo Alto · the mother of Silicon Valley — every band below descends from it",
+  peak:"1966 · ≈12% — the planar process, the first practical IC, and every founder who mattered",
+  suzerain:{a:1959,b:1970,note:"The Ashikaga of silicon: Fairchild's true asset was legitimacy, not revenue — the planar process, the IC patent, and the training ground that produced the founders of Intel, AMD, National, and (by lineage) hundreds of Valley firms. Once the talent walked out, there was almost nothing underneath."},
+  fate:{txt:"Usurped by its own deputies: Sporck left for National (1967), Noyce & Moore for Intel (1968), Sanders for AMD (1969). The husk passed to Schlumberger (1979) and was finally bought by National — its own child — in 1987", kind:"fall", yr:1987, by:"Its own alumni; National Semiconductor (purchase of the shell)"},
+  pts:[[1957,0.5],[1960,4],[1963,9],[1966,12],[1970,7],[1975,4],[1980,2.5],[1985,1.5],[1987,1],[1988,0]]},
+
+ {id:"motorola", name:"Motorola → Freescale", color:"#5b8ea6", region:"Phoenix & Austin · the 68000, embedded, and the car",
+  peak:"1960s–90s · ≈8–10% — the perennial #2 or #3 of the American age",
+  fate:{txt:"Spun off as Freescale in 2004, taken private in a disastrous 2006 LBO, and sold to NXP in 2015 — the great rival of Intel's youth ended as a Dutch subsidiary", kind:"sub", yr:2015, by:"NXP (acquisition)"},
+  pts:[[1955,4],[1960,7],[1965,10],[1970,9.5],[1975,9],[1980,8.5],[1985,8],[1990,8],[1995,8],[2000,6],[2004,4.5],[2005,4],[2010,2.6],[2015,2],[2016,0]]},
+
+ {id:"natsemi", name:"National Semiconductor", color:"#86a83e", region:"Santa Clara · Sporck's low-cost machine; 'the animals of Silicon Valley'",
+  peak:"1970s · ≈5% — the Valley's volume producer",
+  fate:{txt:"Bought the corpse of Fairchild, its own mother, in 1987; shrank to an analog house; absorbed by TI in 2011 for $6.5B", kind:"sub", yr:2011, by:"Texas Instruments (acquisition)"},
+  pts:[[1959,0.2],[1967,0.5],[1970,3],[1975,5],[1980,5],[1985,3.5],[1990,2.5],[1995,2],[2000,1.5],[2005,1],[2011,0.7],[2012,0]]},
+
+ {id:"intel", name:"Intel", color:"#35548f", region:"Santa Clara · x86, the fab lead, and the PC tollbooth",
+  peak:"1992–2016 · ≈16% and #1 for 25 straight years — at times >60% of all industry profits",
+  suzerain:{a:1993,b:2017,note:"The Wintel shogunate: Intel's grip on the PC platform commanded the economics of the whole industry far beyond its revenue — for stretches of the 1990s–2000s it captured the majority of ALL semiconductor profits on a sixth of the revenue, and its process lead set the clock every rival marched to."},
+  fate:{txt:"The wounded hegemon: missed mobile (2006), fumbled 10nm (2016–19), lost the process crown to TSMC and the revenue crown to Samsung and Nvidia. Now betting the company on the 18A node — with the U.S. government as a shareholder. The siege of Osaka is underway; the outcome is not", kind:"live", yr:null, by:null},
+  pts:[[1968,0.05],[1972,1],[1975,2.5],[1980,4],[1985,5],[1988,6],[1992,9],[1995,13],[2000,15.5],[2005,16],[2010,14.5],[2015,15],[2018,16],[2020,16.5],[2021,14],[2023,9],[2025,7.5]]},
+
+ {id:"amd", name:"AMD", color:"#c1442e", region:"Santa Clara · the eternal second source, twice nearly dead, twice reborn",
+  peak:"2020s · ≈4.5% — resurgent on chiplets and TSMC silicon",
+  fate:{txt:"Survivor from below: armed by IBM's 1981 second-source demand, saved by shedding its fabs (2009) and betting on Zen (2017); bought Xilinx for $49B (2022); now holds the x86 server ground Intel once owned outright", kind:"live", yr:null, by:null},
+  pts:[[1969,0.05],[1975,0.5],[1980,1.2],[1985,1.5],[1990,1.2],[1995,1.7],[2000,2.3],[2006,2.9],[2010,2.2],[2015,1.2],[2020,2.2],[2023,4],[2025,4.5]]},
+
+ {id:"nec", name:"NEC", color:"#b0486b", region:"Tokyo · the VLSI-project champion — world #1, 1985–1991",
+  peak:"1985–91 · ≈9% — the first non-American company to lead the industry",
+  fate:{txt:"Dismantled in the long retreat: DRAM spun into Elpida (1999, bankrupt 2012), logic merged into Renesas (2010). The house that dethroned America did not survive its own dethroning by Korea", kind:"fall", yr:2010, by:"Korean memory (militarily); Renesas & Elpida (dismemberment)"},
+  pts:[[1955,0.5],[1965,2],[1975,4],[1980,6],[1985,8.5],[1990,9],[1995,8],[2000,5.5],[2005,3.5],[2010,2.5],[2011,0]]},
+
+ {id:"toshiba", name:"Toshiba", color:"#8a5a33", region:"Tokyo · DRAM power, and the inventor of NAND flash (1987)",
+  peak:"~1990 · ≈8.5% — Japan's #2",
+  fate:{txt:"Invented the flash memory the whole mobile age runs on — then was forced to sell that crown jewel (as Kioxia, 2018) to pay for its Westinghouse nuclear catastrophe. Killed by an adjacent empire's debts, not by silicon", kind:"sub", yr:2018, by:"Bain consortium (forced carve-out of Kioxia)"},
+  pts:[[1955,0.5],[1965,1.5],[1975,3],[1980,5],[1985,7],[1990,8.5],[1995,7.5],[2000,5.5],[2005,4.5],[2010,4.3],[2015,3.5],[2018,3],[2019,0]]},
+
+ {id:"hitachi", name:"Hitachi", color:"#7d5ba6", region:"Tokyo · DRAM and microcontrollers",
+  peak:"~1990 · ≈7.5% — Japan's #3",
+  fate:{txt:"First of the Japanese majors to fold its hand: DRAM into Elpida (1999), logic merged with Mitsubishi's into Renesas (2003)", kind:"sub", yr:2003, by:"Renesas & Elpida (consolidation)"},
+  pts:[[1955,0.5],[1965,1.5],[1975,3],[1980,5],[1985,7],[1990,7.5],[1995,6.5],[2000,4.5],[2003,3.5],[2004,0]]},
+
+ {id:"otherjapan", name:"Other Japan", color:"#6d7a8a", region:"Fujitsu · Mitsubishi · Matsushita · Sharp · Sony · Oki · Rohm — the rest of the 1988 wave",
+  peak:"1988 · ≈20% — with NEC, Toshiba and Hitachi, Japan held nearly half the world market",
+  fate:{txt:"The long ebb: Fujitsu's flash JV (Spansion) went bankrupt in 2013; Mitsubishi merged into Renesas; Matsushita and Sharp withdrew; Sony survives in image sensors. From half the world to a few strongholds in 30 years", kind:"live", yr:null, by:null},
+  pts:[[1955,1],[1965,3],[1970,5],[1975,6],[1980,9],[1985,15],[1988,20],[1990,19],[1995,13],[2000,10],[2005,8],[2010,5],[2015,4],[2025,3.5]]},
+
+ {id:"renesas", name:"Renesas", color:"#8a7d6e", region:"Tokyo · the merger vessel — Hitachi + Mitsubishi (2003) + NEC (2010)",
+  peak:"2010 · ≈4% — Japan's logic remnants under one roof",
+  fate:{txt:"Still standing — bailed out by the Japanese state and its customers in 2012, rebuilt as an auto/embedded house; even the remains of RCA (via Intersil, 2017) rest here", kind:"live", yr:null, by:null},
+  pts:[[2003,3.5],[2010,4.2],[2015,2.4],[2020,1.7],[2025,1.7]]},
+
+ {id:"europe", name:"Europe (Philips→NXP · Siemens→Infineon · ST)", color:"#a08050", region:"Eindhoven · Munich · Geneva — the continental houses",
+  peak:"1980s–2000s · ≈8% combined",
+  fate:{txt:"Still standing, reduced — all three retreated from memory and leading-edge logic into auto, industrial and secure chips; Philips' greatest legacy proved to be elsewhere: it seeded TSMC in 1987 and its lithography unit became ASML, the sole maker of the EUV machines the whole leading edge depends on", kind:"live", yr:null, by:null},
+  pts:[[1955,6],[1965,7],[1975,8],[1985,8],[1990,8],[1995,7.5],[2000,8.5],[2005,8],[2010,6.5],[2015,5.5],[2020,5],[2025,5]]},
+
+ {id:"samsung", name:"Samsung", color:"#3d8f80", region:"Suwon · memory above all — the counter-cyclical fortress",
+  peak:"2017–18 · ≈15.5% — first to dethrone Intel",
+  fate:{txt:"Victor — entered DRAM in 1983 against every expert's advice, survived by investing hardest at the bottom of every crash until rivals died; #1 in memory since 1993; dethroned Intel in 2017. Its foundry, though, remains the perennial #2 that can't close the gap", kind:"live", yr:null, by:null},
+  pts:[[1983,0.05],[1985,0.3],[1990,1.5],[1993,3],[1995,6],[1998,4.5],[2000,5.5],[2005,7.5],[2010,9.5],[2015,11.5],[2018,15.5],[2019,12],[2021,13.5],[2023,10],[2025,10.5]]},
+
+ {id:"hynix", name:"SK Hynix", color:"#c26a3f", region:"Icheon · forged in the 1999 'Big Deal' from Hyundai + LG's chip arms",
+  peak:"2024–25 · ≈7.5% — the HBM crown in the AI era",
+  fate:{txt:"Victor — nearly died repeatedly in the 2000s memory wars, saved by creditors; then bet early on high-bandwidth memory and won the single most valuable socket of the AI age: the HBM stacked beside every Nvidia GPU", kind:"live", yr:null, by:null},
+  pts:[[1984,0.05],[1990,0.7],[1995,2.5],[1999,2.8],[2005,3.5],[2010,3.5],[2015,4.5],[2018,5.5],[2019,4],[2023,4.5],[2025,7.5]]},
+
+ {id:"micron", name:"Micron", color:"#5f7d9c", region:"Boise · the last American memory maker",
+  peak:"2018 · ≈6.5% — sole survivor of a field of dozens",
+  fate:{txt:"Still standing — nearly killed by 1985 dumping (its trade complaint triggered the U.S.–Japan chip war), then ate the dead for 30 years: TI's memory (1998), Elpida (2013), Inotera. Every other American DRAM maker is a memory", kind:"live", yr:null, by:null},
+  pts:[[1979,0.05],[1985,0.2],[1990,1],[1995,2.5],[2000,3],[2005,2.5],[2010,3],[2013,3.5],[2015,4.5],[2018,6.5],[2020,5],[2023,4],[2025,5]]},
+
+ {id:"tsmc", name:"TSMC", color:"#1f5c45", region:"Hsinchu · the pure-play foundry — no products, all customers",
+  peak:"2025 · ≈15% of industry revenue, >60% of foundry, ~90% of the leading edge",
+  suzerain:{a:2020,b:2025,note:"The foundry shogunate: every Nvidia GPU, every Apple chip, most of AMD and Qualcomm is physically made in TSMC fabs — roughly 40 points of 'fabless' share on this chart passes through this band on its way to a customer. Its revenue share understates a power closer to suzerainty over the whole leading edge."},
+  fate:{txt:"Victor — the Tokugawa of silicon: founded 1987 on a vow never to compete with its customers, it armed every side of every war and ended up holding the entire leading edge. The shogunate now rules from one island — which is both its fortress and its exposure", kind:"live", yr:null, by:null},
+  pts:[[1987,0.02],[1990,0.3],[1995,1],[2000,2.5],[2005,3.5],[2010,4.5],[2015,8],[2020,10.5],[2022,13],[2024,14.5],[2025,15]]},
+
+ {id:"nvidia", name:"Nvidia", color:"#7fa33c", region:"Santa Clara · GPUs → CUDA → the AI factory",
+  peak:"2024–25 · the largest semiconductor company in history",
+  fate:{txt:"Victor supreme — gekokujō complete: a games-chip startup 30 days from bankruptcy in 1996, it spent 15 unfashionable years building CUDA into a moat, and when the deep-learning wave broke (2012–2023) it owned the only shovel. Now worth more than the rest of the industry combined", kind:"live", yr:null, by:null},
+  pts:[[1993,0.01],[1998,0.1],[2000,0.3],[2005,1],[2010,1.1],[2015,1.4],[2020,3.5],[2022,4.5],[2023,7],[2024,12],[2025,14]]},
+
+ {id:"qualcomm", name:"Qualcomm", color:"#6e5a7a", region:"San Diego · CDMA patents → the smartphone modem tollbooth",
+  peak:"2014 · ≈5.5% — king of the mobile decade",
+  fate:{txt:"Still standing — the fabless champion of the smartphone age; survived a hostile takeover attempt by Broadcom (blocked by Washington, 2018) and China's veto of its own NXP bid the same year", kind:"live", yr:null, by:null},
+  pts:[[1998,0.2],[2000,0.5],[2005,1.5],[2010,2.5],[2014,5.5],[2016,4.5],[2020,4.5],[2025,5]]},
+
+ {id:"broadcom", name:"Broadcom (Avago)", color:"#a05a4a", region:"Palo Alto · networking silicon and custom AI ASICs — the serial acquirer",
+  peak:"2025 · ≈6.5% and rising on hyperscaler AI chips",
+  fate:{txt:"Still standing — the America West of semis: smaller Avago bought Broadcom for $37B (2016) and wore its name; now the quiet second winner of the AI era, building the custom accelerators the hyperscalers use to hedge Nvidia", kind:"live", yr:null, by:null},
+  pts:[[1998,0.1],[2000,0.5],[2005,1.2],[2010,2.3],[2016,4],[2020,4],[2023,5],[2025,6.5]]},
+
+ {id:"other", name:"Other chipmakers", color:"#6b6b66", region:"The tube-era houses (Sylvania, Philco, Raytheon…), the 1970s–80s minors (Mostek, Signetics, GI, AMI…), and today's fringe: MediaTek, ADI, Marvell, Kioxia, SMIC, UMC, GlobalFoundries",
+  peak:"—", fate:{txt:"The churn layer: hundreds of houses born and destroyed; huge in the fragmented founding decades, squeezed by each consolidation wave, refilled by each new region's entry", kind:"live", yr:null, by:null},
+  pts:null /* remainder to 100% */},
+];
+
+const ORDER = ["other","broadcom","qualcomm","nvidia","tsmc","micron","hynix","samsung","europe","renesas","otherjapan","hitachi","toshiba","nec","amd","intel","natsemi","motorola","fairchild","ti","rca"];
+const TOTAL = 100;
+/* global market size, USD billions, for the tooltip conversion */
+const MKT = [[1955,0.04],[1960,0.6],[1965,1.2],[1970,1.9],[1975,4.5],[1980,13],[1985,21],[1988,45],[1990,50],[1995,144],[2000,204],[2001,139],[2005,227],[2010,298],[2015,335],[2019,412],[2020,440],[2021,556],[2022,574],[2023,527],[2024,630],[2025,700]];
+
+const ERAS = [
+ {a:1955,b:1968,l1:"The Transistor Age",l2:"1955–1968"},
+ {a:1968,b:1980,l1:"The Fairchildren",l2:"1968–1980"},
+ {a:1980,b:1993,l1:"The Japanese Invasion",l2:"1980–1993"},
+ {a:1993,b:2010,l1:"The Intel Shogunate",l2:"1993–2010"},
+ {a:2010,b:2025,l1:"Foundry Wars & the AI Gold Rush",l2:"2010–2025"},
+];
+
+const EVENTS = [
+ {yr:1955, label:"1955", name:"Shockley goes west", fall:false,
+  txt:"William Shockley, co-inventor of the transistor, opens his lab in Mountain View to be near his mother — accidentally choosing the site of the future Valley. His genius recruits; his paranoia scatters them."},
+ {yr:1957, label:"1957", name:"The Traitorous Eight", fall:false,
+  txt:"Eight Shockley defectors — Noyce, Moore, Grinich, Blank, Kleiner, Hoerni, Last, Roberts — found Fairchild Semiconductor. Every great American house of the next era descends from this one defection."},
+ {yr:1959, label:"1958–59", name:"The integrated circuit", fall:false,
+  txt:"Kilby at TI and Noyce at Fairchild independently invent the IC; Hoerni's planar process makes it manufacturable. The unit of power changes from the transistor to the chip."},
+ {yr:1965, label:"1965", name:"Moore's Law", fall:false,
+  txt:"Gordon Moore's four-page article observes transistor counts doubling yearly. It becomes the industry's constitution: a treadmill that punishes anyone who pauses spending, ever."},
+ {yr:1968, label:"1968–69", name:"The Fairchildren exodus", fall:false,
+  txt:"Sporck had already left for National (1967); now Noyce and Moore found Intel, and Jerry Sanders — with seven colleagues — founds AMD. The mother house is emptied; gekokujō becomes the Valley's rule."},
+ {yr:1971, label:"1971", name:"Intel 4004", fall:false,
+  txt:"A Japanese calculator contract yields the first commercial microprocessor. Almost no one, including Intel, understands yet that this side project is the whole future."},
+ {yr:1978, label:"1976–80", name:"Japan's VLSI Project", fall:false,
+  txt:"MITI organizes NEC, Hitachi, Toshiba, Fujitsu and Mitsubishi into a state-backed research consortium with patient bank capital. The invasion fleet is laid down in plain sight."},
+ {yr:1981, label:"1981", name:"The IBM PC", fall:false,
+  txt:"IBM picks Intel's 8088 — and demands a second source, forcing Intel to license x86 to AMD. One clause in one contract arms Intel's longest war and its longest rival."},
+ {yr:1985, label:"1985", name:"The DRAM massacre", fall:true,
+  txt:"Japanese memory, dumped below cost, breaks the American ranks: Intel exits the DRAM business it invented, Mostek collapses and is sold for scrap, Micron files the trade complaint that starts the U.S.–Japan chip war."},
+ {yr:1987, label:"1987", name:"Fairchild dies · TSMC is born", fall:true,
+  txt:"The mother of the Valley is bought by National, its own child. The same year, in Hsinchu, Morris Chang founds TSMC on a vow: never compete with a customer. One era's source dies as the next era's is founded."},
+ {yr:1993, label:"1992–93", name:"Pentium — Intel takes #1", fall:false,
+  txt:"Intel passes NEC to become the world's largest chipmaker — a throne it holds for 25 consecutive years. 'Intel Inside' turns a component into the crown."},
+ {yr:1999, label:"1999", name:"Korea's Big Deal · Elpida formed", fall:false,
+  txt:"Seoul forces Hyundai and LG's chip arms into one house (the future SK Hynix); Japan folds NEC and Hitachi DRAM into Elpida. Both sides consolidate for the final memory war — only one side's vessel survives it."},
+ {yr:2007, label:"2006–07", name:"The iPhone passes Intel by", fall:false,
+  txt:"Intel declines to make Apple's phone chip — the volume looked too cheap. The mobile wave goes to ARM designs built by Samsung, then TSMC; the fabless era gets its killer app, and Intel's process treadmill loses its next customer base."},
+ {yr:2009, label:"2008–09", name:"AMD sheds its fabs · Qimonda dies", fall:true,
+  txt:"Dying AMD spins its fabs off as GlobalFoundries — 'real men have fabs' no more — and survives as a design house. Infineon's memory arm Qimonda is not so lucky: bankrupt in the crash, Europe exits DRAM forever."},
+ {yr:2012, label:"2012–13", name:"Elpida falls to Micron", fall:true,
+  txt:"Japan's consolidated DRAM champion goes bankrupt — the largest corporate failure in Japanese manufacturing history — and Micron buys it. Thirty years after the invasion began, Japan's memory war ends in total defeat."},
+ {yr:2017, label:"2016–18", name:"Intel stumbles · the field quits", fall:true,
+  txt:"Intel's 10nm node slips year after year while TSMC executes; Samsung dethrones Intel as #1 (2017); GlobalFoundries abandons 7nm (2018), leaving three claimants at the leading edge. The process crown changes islands."},
+ {yr:2022, label:"2020–22", name:"Silicon sovereignty", fall:false,
+  txt:"COVID shortages teach every government what ~90% leading-edge concentration in Taiwan means. The CHIPS Act showers fabs with subsidies; U.S. export controls freeze China's SMIC at 7nm. The daimyō now answer to shogunates with armies."},
+ {yr:2024, label:"2023–25", name:"The AI gold rush", fall:false,
+  txt:"Nvidia becomes the largest semiconductor company in history — and briefly the most valuable company on Earth. HBM crowns SK Hynix; Broadcom arms the hyperscalers' hedge; Intel bets everything on 18A with Washington as a shareholder."},
+];
+
+const FATES = [
+ {c:"Shockley Semiconductor", col:"#8a8a6e", peak:"The founding house — Nobel laureate, zero products shipped", yr:"1957 → 1969", how:"The founder's genius recruited the best engineers in America; his paranoia (lie detectors, public firings) drove all eight of the best out the door in 18 months. Limped on, sold twice, closed 1969.", by:"The Traitorous Eight (defection)", kind:"destroyed"},
+ {c:"Sylvania, Philco, Raytheon & the tube houses", col:"#6b6b66", peak:"Leaders of the transistor's first decade", yr:"1960s", how:"Mastered germanium, missed silicon and the IC; one by one exited or were absorbed as the planar process reset the game.", by:"TI, Fairchild, Motorola (the silicon generation)", kind:"destroyed"},
+ {c:"Fairchild", col:"#8d7ba8", peak:"≈12% (1966) · mother of the Valley", yr:"1987", how:"Usurped by its own deputies: Sporck to National, Noyce & Moore to Intel, Sanders to AMD, Hoerni to Intersil… The husk passed to Schlumberger, then was bought by National — its own child. (A reborn Fairchild spun out in 1997 was absorbed by ON Semi in 2016.)", by:"Its own alumni; National (purchase of the shell)", kind:"destroyed"},
+ {c:"RCA & GE", col:"#7a6a4a", peak:"≈16% (1955) · the tube-age incumbents", yr:"1987", how:"Owned the patents, funded the science, fumbled every product cycle; GE bought RCA and liquidated the chip operations. Remains → Harris → Intersil → Renesas (2017).", by:"Their own boards; Harris (asset purchase)", kind:"destroyed"},
+ {c:"Signetics", col:"#9e9450", peak:"IC pioneer, first pure-IC house (1961)", yr:"1975", how:"Sold to Philips — the first great American house to pass under a foreign flag, a quarter-century before it was fashionable.", by:"Philips", kind:"submitted"},
+ {c:"Mostek", col:"#96566b", peak:"≈2% · DRAM leader of the late 1970s", yr:"1985", how:"Valued at $345M in 1979; sold for $71M in the 1985 DRAM crash. The textbook casualty of the Japanese invasion — its remains went to Thomson and live on inside STMicro.", by:"Japanese DRAM (militarily); Thomson/ST (remains)", kind:"destroyed"},
+ {c:"National Semiconductor", col:"#86a83e", peak:"≈5% · the Valley's volume machine", yr:"2011", how:"Bought Fairchild's corpse in 1987, shrank gracefully into analog for two decades, absorbed by TI for $6.5B.", by:"Texas Instruments", kind:"submitted"},
+ {c:"Motorola → Freescale", col:"#5b8ea6", peak:"≈10% · the great #2 of the American age", yr:"2015", how:"Spun off (2004), gutted by a $17.6B LBO on the eve of the financial crisis (2006), sold to NXP (2015).", by:"Private equity (financially); NXP (absorption)", kind:"submitted"},
+ {c:"NEC", col:"#b0486b", peak:"≈9% · world #1, 1985–1991", yr:"2010", how:"The first non-American #1 — dismantled by the Korean counterattack: DRAM to Elpida (1999), logic to Renesas (2010).", by:"Korean memory; Renesas & Elpida (dismemberment)", kind:"destroyed"},
+ {c:"Hitachi", col:"#7d5ba6", peak:"≈7.5% · Japan's #3", yr:"2003", how:"DRAM to Elpida (1999); logic merged with Mitsubishi's into Renesas (2003) — the first Japanese major to fold.", by:"Renesas & Elpida (consolidation)", kind:"submitted"},
+ {c:"Mitsubishi Electric (semis)", col:"#6d7a8a", peak:"≈4% at Japan's crest", yr:"2003", how:"Logic merged into Renesas alongside Hitachi's; DRAM had already gone to Elpida.", by:"Renesas (consolidation)", kind:"submitted"},
+ {c:"Fujitsu (semis)", col:"#6d7a8a", peak:"≈5% at Japan's crest", yr:"2008–13", how:"Flash JV with AMD (Spansion) went bankrupt in 2013 — remains to Cypress, then Infineon; logic foundry ambitions quietly abandoned.", by:"Market attrition; Cypress/Infineon (remains)", kind:"destroyed"},
+ {c:"Elpida", col:"#8e5a6b", peak:"Japan's consolidated DRAM champion", yr:"2012", how:"The vessel holding NEC's and Hitachi's memory legacy went bankrupt in 2012 — the largest manufacturing failure in Japanese history — and was bought by Micron. Japan's 30-year memory war ends here.", by:"Micron (acquisition from bankruptcy)", kind:"destroyed"},
+ {c:"Qimonda", col:"#a08050", peak:"Europe's DRAM champion (Infineon spinoff)", yr:"2009", how:"Bankrupt in the financial crisis; Europe exits commodity memory permanently.", by:"The 2008–09 memory crash", kind:"destroyed"},
+ {c:"Toshiba → Kioxia", col:"#8a5a33", peak:"≈8.5% · inventor of NAND flash", yr:"2018", how:"Forced to auction its flash crown jewels to pay for Westinghouse's nuclear losses — a $18B carve-out to a Bain-led consortium. Kioxia still flies the flag, reduced.", by:"Bain consortium (forced carve-out)", kind:"submitted"},
+ {c:"LG Semicon", col:"#c26a3f", peak:"Korea's #2 memory house", yr:"1999", how:"Forced into Hyundai Electronics by Seoul's post-IMF-crisis 'Big Deal' — the shotgun merger that created Hynix.", by:"Hyundai (state-directed merger)", kind:"submitted"},
+ {c:"ATI", col:"#c1442e", peak:"Nvidia's only real GPU rival", yr:"2006", how:"Bought by AMD for $5.4B — a deal that nearly bankrupted the buyer and, fifteen years later, saved it: the graphics and semi-custom business carried AMD through its darkest years.", by:"AMD", kind:"submitted"},
+ {c:"Altera", col:"#35548f", peak:"FPGA duopolist", yr:"2015", how:"Bought by Intel for $16.7B, integrated poorly, and spun back out in 2025 — a round trip that bracketed Intel's decade of drift.", by:"Intel (acquisition, later reversed)", kind:"submitted"},
+ {c:"Xilinx", col:"#7a5a6e", peak:"FPGA duopolist — the other half", yr:"2022", how:"Bought by AMD for $49B in stock — AMD's Piedmont: the biggest bite of its resurgence.", by:"AMD", kind:"submitted"},
+ {c:"IBM Microelectronics", col:"#4a5f7a", peak:"Arguably the most advanced fabs on Earth, 1970s–80s (captive)", yr:"2015", how:"The great captive producer never had a merchant business to retreat to; it ultimately PAID GlobalFoundries $1.5B to take its fabs and their obligations away.", by:"GlobalFoundries (paid disposal)", kind:"destroyed"},
+ {c:"Broadcom Corp.", col:"#a05a4a", peak:"Networking-chip king of the broadband era", yr:"2016", how:"Bought for $37B by the smaller Avago, which kept the better name — the industry's great reverse takeover.", by:"Avago (reverse takeover — Avago's team in command)", kind:"submitted"},
+ {c:"GlobalFoundries", col:"#5e8a5a", peak:"AMD's former fabs + IBM's + Chartered's", yr:"2018 (quit the edge)", how:"Abandoned 7nm development in 2018 — rational surrender: profitable ever since as a trailing-edge specialist, but out of the race for the throne.", by:"— (strategic retreat; independence intact)", kind:"survived"},
+ {c:"UMC", col:"#5e8a5a", peak:"Foundry #2 of the early era", yr:"2017 (quit the edge)", how:"Stopped advancing at 14nm; like GloFo, found peace and profit as a trailing-edge landlord in TSMC's shadow.", by:"—", kind:"survived"},
+ {c:"SMIC", col:"#8a7d6e", peak:"China's champion foundry", yr:"— (frozen)", how:"Reached 7nm-class production without EUV — then was frozen there by U.S. export controls. The one claimant whose fate is set by shogunates, not markets.", by:"— (sanction-capped)", kind:"survived"},
+ {c:"Renesas", col:"#8a7d6e", peak:"≈4% · Japan's merged logic remnants", yr:"—", how:"The merger vessel (Hitachi + Mitsubishi + NEC) nearly sank in 2012, was bailed out by the state and its customers, and rebuilt itself as an auto/embedded power.", by:"—", kind:"survived"},
+ {c:"NXP · Infineon · ST", col:"#a08050", peak:"≈8% combined at the European crest", yr:"—", how:"All three still standing in auto and industrial silicon. Europe's real thrones ended up adjacent: ASML's EUV monopoly and, via Philips' 1987 seed money, a founding stake in TSMC itself.", by:"—", kind:"survived"},
+ {c:"Texas Instruments", col:"#9d8a3f", peak:"#1 merchant chipmaker for ~25 years", yr:"—", how:"The great survivor-by-retreat: exited DRAM in 1998, leading-edge logic in 2007, and compounds quietly in analog — the only house on this table that led the industry in both 1960 and never went bankrupt after.", by:"—", kind:"survived"},
+ {c:"Micron", col:"#5f7d9c", peak:"≈6.5% · last American memory maker", yr:"—", how:"Survived 1985 by lawsuit and stubbornness, then ate the dead for three decades — TI's memory, Elpida, Inotera. Standing on a battlefield where every American peer died.", by:"—", kind:"survived"},
+ {c:"AMD", col:"#c1442e", peak:"≈4.5% and the x86 server crown", yr:"—", how:"Twice near death (1990s, 2015), saved by shedding its fabs and betting on Zen + TSMC. The eternal second source now sets the pace in the market Intel owned for 40 years.", by:"—", kind:"survived"},
+ {c:"Qualcomm", col:"#6e5a7a", peak:"≈5.5% · king of the mobile decade", yr:"—", how:"The modem tollbooth survived Broadcom's hostile bid (blocked by Washington) and China's veto of its NXP deal — boxed in, but unbeaten in its keep.", by:"—", kind:"survived"},
+ {c:"Intel", col:"#35548f", peak:"#1 for 25 straight years; >60% of industry profits at peak", yr:"—", how:"The former shogun, besieged in its own castle: lost the process crown to TSMC, the revenue crown to Samsung and Nvidia, and the server initiative to AMD. Betting the house on 18A, with the U.S. government now a shareholder. The Siege of Osaka is underway; the outcome is not decided.", by:"—", kind:"survived"},
+ {c:"Broadcom (Avago)", col:"#a05a4a", peak:"≈6.5% and rising on custom AI silicon", yr:"—", how:"The serial acquirer became the AI era's quiet second winner: the hyperscalers' custom-ASIC armorer and the hedge against Nvidia.", by:"—", kind:"victor"},
+ {c:"Samsung", col:"#3d8f80", peak:"First to dethrone Intel (2017)", yr:"—", how:"The counter-cyclical fortress: forty years of investing hardest at the bottom of every memory crash. #1 in memory since 1993 — though its foundry remains the #2 that cannot close the gap.", by:"—", kind:"victor"},
+ {c:"SK Hynix", col:"#c26a3f", peak:"The HBM crown (2024–25)", yr:"—", how:"Forged in a shotgun merger, nearly dead twice — then bet early on high-bandwidth memory and won the most valuable socket of the AI age, beside every Nvidia GPU.", by:"—", kind:"victor"},
+ {c:"TSMC", col:"#1f5c45", peak:"~90% of the leading edge", yr:"—", how:"The Tokugawa of silicon: never made a product, never fought a customer, armed every side of every war — and ended up holding the entire leading edge. The shogunate rules from Hsinchu.", by:"—", kind:"victor"},
+ {c:"Nvidia", col:"#7fa33c", peak:"Largest semiconductor company in history (2024–25)", yr:"—", how:"Gekokujō complete: 30 days from bankruptcy in 1996; spent 15 unfashionable years building CUDA; and when the AI wave broke, owned the only shovel. The low overthrew the high, absolutely.", by:"—", kind:"victor"},
+];
+
+/* Sankey: share points (or founding talent, marked) flowing from absorbed to absorber */
+const SK_NODES = ["Shockley","Fairchild","RCA · GE","Signetics","Mostek","Mitsubishi","NEC","Hitachi","Elpida","Toshiba","LG Semicon","ATI","Xilinx","Altera","Mellanox","IBM Micro","Broadcom Corp.","Motorola · Freescale","National","AMD","Intel","Texas Instruments","SK Hynix","Micron","Kioxia","Renesas","Europe (NXP·Infineon·ST)","GlobalFoundries","TSMC","Nvidia","Broadcom (Avago)"];
+const SK_COLORS = {"Shockley":"#8a8a6e","Fairchild":"#8d7ba8","RCA · GE":"#7a6a4a","Signetics":"#9e9450","Mostek":"#96566b","Mitsubishi":"#6d7a8a","NEC":"#b0486b","Hitachi":"#7d5ba6","Elpida":"#8e5a6b","Toshiba":"#8a5a33","LG Semicon":"#c26a3f","ATI":"#c1442e","Xilinx":"#7a5a6e","Altera":"#4a6fa8","Mellanox":"#5a8a7d","IBM Micro":"#4a5f7a","Broadcom Corp.":"#a05a4a","Motorola · Freescale":"#5b8ea6","National":"#86a83e","AMD":"#c1442e","Intel":"#35548f","Texas Instruments":"#9d8a3f","SK Hynix":"#c26a3f","Micron":"#5f7d9c","Kioxia":"#8a5a33","Renesas":"#8a7d6e","Europe (NXP·Infineon·ST)":"#a08050","GlobalFoundries":"#5e8a5a","TSMC":"#1f5c45","Nvidia":"#7fa33c","Broadcom (Avago)":"#a05a4a"};
+const SK_LINKS = [
+ {s:"Shockley",t:"Fairchild",v:2, kind:"fall", e:"1957 — the Traitorous Eight defect; the founding talent of the entire Valley walks out of one door"},
+ {s:"Fairchild",t:"National",v:2, kind:"fall", e:"1967 Sporck raids the operations staff → 1987 National buys the Fairchild shell outright: the deputy inherits the temple"},
+ {s:"Fairchild",t:"Intel",v:3, kind:"fall", e:"1968 — Noyce and Moore leave with Grove in tow; the mother house's two most famous names found its successor"},
+ {s:"Fairchild",t:"AMD",v:1.5, kind:"fall", e:"1969 — Jerry Sanders and seven colleagues found AMD after Fairchild passes him over"},
+ {s:"RCA · GE",t:"Renesas",v:0.8, kind:"fall", e:"1988 Harris buys GE Solid State → Intersil (1999) → Renesas (2017): the tube lords' remains end their journey in Japan"},
+ {s:"Signetics",t:"Europe (NXP·Infineon·ST)",v:1.2, kind:"sub", e:"1975 — Philips buys the first pure-IC house; the earliest great American name under a foreign flag"},
+ {s:"Mostek",t:"Europe (NXP·Infineon·ST)",v:0.8, kind:"fall", e:"1985 — worth $345M in 1979, sold to Thomson for $71M in the DRAM crash; lives on inside STMicro"},
+ {s:"Motorola · Freescale",t:"Europe (NXP·Infineon·ST)",v:2.5, kind:"sub", e:"2015 — NXP buys Freescale for $11.8B; Intel's great rival of the 8-bit wars becomes a Dutch subsidiary"},
+ {s:"National",t:"Texas Instruments",v:0.8, kind:"sub", e:"2011 — TI absorbs National for $6.5B; the animals of the Valley retire to the analog pasture"},
+ {s:"NEC",t:"Renesas",v:2, kind:"fall", e:"2010 — the ex-#1's logic business merges into Renesas; the house that dethroned America is dismantled"},
+ {s:"NEC",t:"Elpida",v:1.2, kind:"fall", e:"1999 — NEC's DRAM poured into the consolidated national champion"},
+ {s:"Hitachi",t:"Elpida",v:1, kind:"sub", e:"1999 — Hitachi's DRAM joins NEC's in Elpida"},
+ {s:"Hitachi",t:"Renesas",v:2, kind:"sub", e:"2003 — logic merged with Mitsubishi's to form Renesas"},
+ {s:"Mitsubishi",t:"Renesas",v:1.2, kind:"sub", e:"2003 — the third house in the Renesas vessel"},
+ {s:"Elpida",t:"Micron",v:2, kind:"fall", e:"2012–13 — Japan's consolidated DRAM champion goes bankrupt; Micron buys it for ~$2.5B. The 30-year memory war ends in total defeat"},
+ {s:"Toshiba",t:"Kioxia",v:3, kind:"sub", e:"2018 — the NAND crown jewels carved out for $18B to pay for Westinghouse's nuclear collapse"},
+ {s:"LG Semicon",t:"SK Hynix",v:1.2, kind:"sub", e:"1999 — Seoul's post-IMF 'Big Deal' forces LG's chips into Hyundai Electronics, forging Hynix"},
+ {s:"ATI",t:"AMD",v:1, kind:"sub", e:"2006 — the $5.4B GPU bet that nearly killed AMD, and fifteen years later saved it"},
+ {s:"Xilinx",t:"AMD",v:1, kind:"sub", e:"2022 — $49B in stock; AMD's largest bite, at the peak of its resurgence"},
+ {s:"Altera",t:"Intel",v:0.8, kind:"sub", e:"2015 — $16.7B; integrated poorly and spun back out in 2025, bracketing Intel's decade of drift"},
+ {s:"AMD",t:"GlobalFoundries",v:1, kind:"sub", e:"2009 — dying AMD gives up its ancestral fabs to survive as a design house; 'real men have fabs' no more"},
+ {s:"IBM Micro",t:"GlobalFoundries",v:0.8, kind:"fall", e:"2015 — IBM pays GloFo $1.5B to take its fabs and their obligations; the great captive producer exits"},
+ {s:"Broadcom Corp.",t:"Broadcom (Avago)",v:2.5, kind:"sub", e:"2016 — the reverse takeover: smaller Avago pays $37B and wears the better name"},
+ {s:"Mellanox",t:"Nvidia",v:0.6, kind:"sub", e:"2019 — $6.9B for the networking that turns GPUs into AI factories; the most prescient acquisition of the era"},
+ {s:"Europe (NXP·Infineon·ST)",t:"TSMC",v:0.8, kind:"sub", e:"1987 — Philips seeds TSMC with capital and process licenses at its founding; Europe's greatest semiconductor return came from arming Taiwan"},
+];
+
+/* ================= STACKED AREA CHART ================= */
+const Y0=1955, Y1=2025;
+const years = d3.range(Y0, Y1+1);
+const byId = Object.fromEntries(CLANS.map(c=>[c.id,c]));
+
+function powerAt(clan, y){
+  const p = clan.pts;
+  if(!p || y < p[0][0] || y > p[p.length-1][0]) return 0;
+  for(let i=0;i<p.length-1;i++){
+    const [x0,v0]=p[i],[x1,v1]=p[i+1];
+    if(y>=x0 && y<=x1) return x1===x0 ? v1 : v0 + (v1-v0)*(y-x0)/(x1-x0);
+  }
+  return 0;
+}
+function mktAt(y){ return powerAt({pts:MKT}, y); }
+
+const rows = years.map(y=>{
+  const r = {year:y}; let named=0;
+  ORDER.forEach(id=>{ if(id!=="other"){ r[id]=powerAt(byId[id],y); named+=r[id]; }});
+  r.other = Math.max(TOTAL - named, 0);   /* total is ALWAYS 100% — sockets never disappear */
+  return r;
+});
+
+const W=1500, H=580, M={t:64,r:24,b:36,l:60};
+const svg = d3.select("#chart").attr("viewBox",`0 0 ${W} ${H}`);
+const x = d3.scaleLinear([Y0,Y1],[M.l,W-M.r]);
+const yS = d3.scaleLinear([0,100],[H-M.b,M.t]);
+
+const series = d3.stack().keys(ORDER)(rows);
+const area = d3.area().x(d=>x(d.data.year)).y0(d=>yS(d[0])).y1(d=>yS(d[1])).curve(d3.curveBasis);
+
+/* era bands */
+const eraG = svg.append("g");
+ERAS.forEach((e,i)=>{
+  if(i>0) eraG.append("line").attr("x1",x(e.a)).attr("x2",x(e.a)).attr("y1",M.t-6).attr("y2",H-M.b)
+    .attr("stroke","rgba(224,229,218,.28)").attr("stroke-dasharray","2 5");
+  const cx=(x(e.a)+x(e.b))/2;
+  eraG.append("text").attr("x",cx).attr("y",22).attr("text-anchor","middle")
+    .attr("fill","#e0e5da").attr("font-size",13.5).attr("letter-spacing","2").text(e.l1.toUpperCase());
+  eraG.append("text").attr("x",cx).attr("y",40).attr("text-anchor","middle")
+    .attr("fill","#8a7340").attr("font-size",11.5).attr("letter-spacing","1.5").text(e.l2);
+});
+
+/* grid + axes (% share) */
+d3.range(0,101,10).forEach(v=>{
+  svg.append("line").attr("x1",M.l).attr("x2",W-M.r).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke","rgba(224,229,218,.07)");
+  svg.append("text").attr("x",M.l-8).attr("y",yS(v)+4).attr("text-anchor","end")
+    .attr("fill","#66705f").attr("font-size",11).attr("font-family","var(--sans)").text(v+"%");
+});
+svg.append("text").attr("transform",`translate(16,${(M.t+H-M.b)/2}) rotate(-90)`).attr("text-anchor","middle")
+  .attr("fill","#98a394").attr("font-size",11.5).attr("letter-spacing","1.5").text("SHARE OF SEMICONDUCTOR INDUSTRY REVENUE");
+d3.range(1955,2026,5).forEach(t=>{
+  svg.append("text").attr("x",x(t)).attr("y",H-12).attr("text-anchor","middle")
+    .attr("fill","#98a394").attr("font-size",12.5).attr("font-family","var(--sans)").text(t);
+});
+
+/* bands */
+const paths = svg.append("g").selectAll("path").data(series).join("path")
+  .attr("d",area).attr("fill",d=>byId[d.key].color).attr("fill-opacity",.92)
+  .attr("stroke","#111310").attr("stroke-width",.7).style("cursor","crosshair");
+
+/* in-band labels at widest point */
+series.forEach(s=>{
+  let best={w:0,i:0};
+  s.forEach((d,i)=>{const w=d[1]-d[0]; if(w>best.w) best={w,i};});
+  const d=s[best.i];
+  if(best.w>3){
+    const yr=d.data.year;
+    const lx=Math.max(M.l+95, Math.min(W-M.r-95, x(yr)));
+    svg.append("text").attr("x",lx).attr("y",yS((d[0]+d[1])/2)+4.5)
+      .attr("text-anchor","middle").attr("fill","#0c0e0c").attr("font-size",best.w>11?16:(best.w>5?12.5:10))
+      .attr("font-weight",700).attr("letter-spacing","1.5").attr("pointer-events","none")
+      .text(byId[s.key].name.toUpperCase())
+      .clone(true).attr("fill","rgba(224,229,218,.94)").attr("dy",-1);
+  }
+});
+
+/* hegemony annotations, placed on the actual bands */
+function annotate(id, yr, text, anchor){
+  const s = series.find(s=>s.key===id); if(!s) return;
+  const d = s[yr-Y0];
+  svg.append("text").attr("x",x(yr)).attr("y",yS((d[0]+d[1])/2)-14)
+    .attr("text-anchor",anchor||"middle").attr("fill","#c9a24b").attr("font-size",10.5)
+    .attr("letter-spacing","1").attr("pointer-events","none").text(text);
+}
+annotate("intel",2003,"※ WINTEL — MAJORITY OF ALL CHIP PROFITS");
+annotate("tsmc",2023,"※ ~90% OF THE LEADING EDGE","end");
+
+/* fall / merger seals — hoverable */
+const tt1 = document.getElementById("tt1");
+const wrap1 = document.getElementById("chart-wrap");
+function showTip(tt, wrap, ev, html){
+  tt.style.display="block"; tt.innerHTML=html;
+  const r=wrap.getBoundingClientRect();
+  let tx=ev.clientX-r.left+16, ty=ev.clientY-r.top-10;
+  if(tx>r.width-310) tx-=330;
+  tt.style.left=tx+"px"; tt.style.top=ty+"px";
+}
+let sealIdx=0;
+CLANS.filter(c=>c.fate.yr).forEach(c=>{
+  const s = series.find(s=>s.key===c.id);
+  if(!s) return;
+  const yr = Math.min(c.fate.yr, Y1);
+  let j = yr - Y0;
+  while(j>0 && (s[j][1]-s[j][0])<0.4) j--;
+  const mid=(s[j][0]+s[j][1])/2;
+  const isSub = c.fate.kind==="sub";
+  const stagger = yr>=1990 ? -(10 + (sealIdx++ % 3)*12) : -10;
+  const g=svg.append("g").style("cursor","help");
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",12).attr("fill","transparent");
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",5.5)
+    .attr("fill",isSub?"transparent":"#b3372a").attr("stroke",isSub?"#c9a24b":"#111310").attr("stroke-width",isSub?2:1.5);
+  g.append("text").attr("x",x(yr)).attr("y",yS(mid)+stagger)
+    .attr("text-anchor", yr>2012?"end":"middle")
+    .attr("fill",isSub?"#d9c27f":"#e8b0a6").attr("font-size",10.5).attr("letter-spacing","1")
+    .text(c.name.toUpperCase()+" · "+c.fate.yr);
+  g.on("mousemove",ev=>{
+     showTip(tt1,wrap1,ev,
+      `<div class="yr">${c.fate.yr} · ${isSub?"MERGED / CARVED OUT":"HOUSE FALLS"}</div>
+       <div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="fate-t" style="color:${isSub?'#d9c27f':'#d98a7f'}">${c.fate.txt}</div>
+       ${c.fate.by?`<div class="pw" style="margin-top:4px"><b style="color:#e0e5da">Taken by:</b> ${c.fate.by}</div>`:""}`);
+   }).on("mouseleave",()=>{tt1.style.display="none";});
+});
+
+/* event marker */
+const marker = svg.append("g").style("display","none").attr("pointer-events","none");
+marker.append("line").attr("y1",M.t-4).attr("y2",H-M.b).attr("stroke","#c9a24b").attr("stroke-width",1).attr("stroke-dasharray","3 4");
+const markerLabel = marker.append("text").attr("y",M.t+8).attr("fill","#c9a24b").attr("font-size",11).attr("letter-spacing","1.5");
+
+/* hover crosshair + band tooltip */
+const cross = svg.append("line").attr("y1",M.t).attr("y2",H-M.b)
+  .attr("stroke","rgba(224,229,218,.35)").attr("stroke-width",1).style("display","none").attr("pointer-events","none");
+
+paths.on("mousemove",function(ev,d){
+    paths.attr("fill-opacity",s=>s.key===d.key?1:.35);
+    const [mx]=d3.pointer(ev,svg.node());
+    const yr=Math.max(Y0,Math.min(Y1,Math.round(x.invert(mx))));
+    cross.style("display",null).attr("x1",x(yr)).attr("x2",x(yr));
+    const row=rows[yr-Y0], c=byId[d.key], v=row[d.key];
+    const rev=(v/100*mktAt(yr));
+    const revTxt = rev>=1 ? `$${rev.toFixed(rev>20?0:1)}B` : `$${(rev*1000).toFixed(0)}M`;
+    const suz = c.suzerain && yr>=c.suzerain.a && yr<=c.suzerain.b
+      ? `<div class="pw" style="margin-top:5px;color:#d9c27f">※ ${c.suzerain.note}</div>` : "";
+    showTip(tt1,wrap1,ev,
+      `<div class="yr">${yr}</div><div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="pw">≈ <b style="color:#e0e5da">${v.toFixed(1)}%</b> of industry revenue</div>
+       <div class="pw">≈ ${revTxt} in revenue that year</div>
+       <div class="pw" style="margin-top:4px">${c.region}</div>${suz}`);
+  })
+  .on("mouseleave",()=>{paths.attr("fill-opacity",.92); cross.style("display","none"); tt1.style.display="none";});
+
+/* ================= SANKEY ================= */
+(function(){
+  const SW=1500, SH=660, SM={t:16,r:230,b:16,l:150};
+  const s = d3.select("#sankey").attr("viewBox",`0 0 ${SW} ${SH}`);
+  const nodes = SK_NODES.map(n=>({name:n}));
+  const idx = Object.fromEntries(SK_NODES.map((n,i)=>[n,i]));
+  const links = SK_LINKS.map(l=>({source:idx[l.s],target:idx[l.t],value:l.v,kind:l.kind,e:l.e,s:l.s,t:l.t}));
+  const sk = d3.sankey().nodeWidth(16).nodePadding(18)
+    .extent([[SM.l,SM.t],[SW-SM.r,SH-SM.b]]);
+  const graph = sk({nodes:nodes.map(d=>({...d})), links:links.map(d=>({...d}))});
+
+  const tt2=document.getElementById("tt2"), wrap2=document.getElementById("sankey-wrap");
+
+  s.append("g").selectAll("path").data(graph.links).join("path")
+    .attr("d",d3.sankeyLinkHorizontal())
+    .attr("fill","none")
+    .attr("stroke",d=>d.kind==="fall"?"#b3372a":"#c9a24b")
+    .attr("stroke-opacity",.38)
+    .attr("stroke-width",d=>Math.max(1.5,d.width))
+    .style("cursor","help")
+    .on("mousemove",function(ev,d){
+      d3.select(this).attr("stroke-opacity",.75);
+      showTip(tt2,wrap2,ev,
+        `<div class="yr">${d.kind==="fall"?"DESTROYED / DEFECTED / TAKEN":"MERGER / CARVE-OUT"}</div>
+         <div class="nm"><span style="color:${SK_COLORS[d.s]}">${d.s}</span> → <span style="color:${SK_COLORS[d.t]}">${d.t}</span></div>
+         <div class="pw">≈ ${d.value} share points (genesis ribbons: talent &amp; technology)</div>
+         <div class="pw" style="margin-top:4px">${d.e}</div>`);
+    })
+    .on("mouseleave",function(){d3.select(this).attr("stroke-opacity",.38); tt2.style.display="none";});
+
+  const ng = s.append("g").selectAll("g").data(graph.nodes).join("g");
+  ng.append("rect")
+    .attr("x",d=>d.x0).attr("y",d=>d.y0)
+    .attr("width",d=>d.x1-d.x0).attr("height",d=>Math.max(2,d.y1-d.y0))
+    .attr("fill",d=>SK_COLORS[d.name]).attr("stroke","#111310");
+  ng.append("text")
+    .attr("x",d=>d.x0 < SW/2 ? d.x0-8 : d.x1+8)
+    .attr("y",d=>(d.y0+d.y1)/2+4)
+    .attr("text-anchor",d=>d.x0 < SW/2 ? "end":"start")
+    .attr("fill","#e0e5da").attr("font-size",13).attr("letter-spacing",".5")
+    .text(d=>d.name);
+})();
+
+/* ================= THE LEADING-EDGE REGENCY ================= */
+(function(){
+  /* bar value = halvings of the node from 90nm: log2(90/node) */
+  const R=[
+   {n:"TSMC", v:5.5, node:"2 nm (2025)", col:"#1f5c45", side:"IN THE RACE — the throne",
+    fate:"The last claimant standing without qualification: ~90% of all leading-edge output, every major customer, and the only 2nm line ramping on schedule. The regency ended; this is the shogunate.", cls:"#c9a24b"},
+   {n:"Intel", v:5.5, node:"18A ≈ 2 nm (2025)", col:"#35548f", side:"IN THE RACE — betting the company",
+    fate:"Fumbled 10nm for half a decade and lost the crown it had held since the 1980s. 18A is the all-in bet to retake it — backed by CHIPS money and, since 2025, direct U.S. government equity. Win, and the siege lifts; lose, and the last American leading-edge logic fab goes with it.", cls:"#d9c27f"},
+   {n:"Samsung", v:5.5, node:"2 nm (2025)", col:"#3d8f80", side:"IN THE RACE — yields willing",
+    fate:"The perennial #2: matches TSMC node-for-node on paper, but yield troubles at 3nm and 2nm keep the biggest customers walking to Hsinchu. Memory pays the bills while the foundry chases.", cls:"#d9c27f"},
+   {n:"SMIC", v:3.7, node:"7 nm-class (2022)", col:"#8a7d6e", side:"FROZEN — by decree, not physics",
+    fate:"Reached 7nm-class production without EUV — a feat — then was capped there by U.S. export controls on the machines. The one claimant whose ceiling is set by shogunates rather than markets.", cls:"#d98a7f"},
+   {n:"GlobalFoundries", v:2.7, node:"quit at 14 nm (2018)", col:"#5e8a5a", side:"WITHDREW — and prospered",
+    fate:"Inherited AMD's fabs, bought IBM's and Chartered's — then abandoned 7nm in 2018 as unaffordable. Rational surrender: profitable ever since as a trailing-edge specialist, but permanently out of the race for the throne.", cls:"#d98a7f"},
+   {n:"UMC", v:2.7, node:"stopped at 14 nm (2017)", col:"#5e8a5a", side:"WITHDREW — the quiet landlord",
+    fate:"TSMC's original Taiwanese rival stopped advancing at 14nm and found peace as a trailing-edge landlord — proof that in this war, retreat can pay better than battle.", cls:"#d98a7f"},
+   {n:"IBM", v:2.0, node:"22 nm (2014)", col:"#4a5f7a", side:"PAID TO LEAVE",
+    fate:"Once the most advanced fabs on Earth. In 2015 IBM paid GlobalFoundries $1.5B to take its manufacturing away — the only lord in the table who paid tribute to surrender his own land. Its research arm still invents nodes; others build them.", cls:"#d98a7f"},
+   {n:"Texas Instruments", v:1.0, node:"45 nm (2007)", col:"#9d8a3f", side:"RETREATED FIRST — on purpose",
+    fate:"Left leading-edge logic earliest and most deliberately, redeploying every dollar into analog — where nodes are old, competition is scarce, and margins never die. The first to quit the race, and among the best-rewarded for it.", cls:"#9dbf9a"},
+  ];
+  const RW=1500, RH=390, RM={t:20,r:330,b:30,l:230};
+  const s=d3.select("#regents").attr("viewBox",`0 0 ${RW} ${RH}`);
+  const rx=d3.scaleLinear([0,6],[RM.l,RW-RM.r]);
+  const ry=d3.scaleBand(R.map(d=>d.n),[RM.t,RH-RM.b]).padding(0.32);
+  const tt3=document.getElementById("tt3"), wrap3=document.getElementById("regents-wrap");
+
+  [["90 nm",0],["45 nm",1],["22 nm",2],["10 nm",3.17],["5 nm",4.17],["2 nm",5.49]].forEach(([lbl,v])=>{
+    s.append("line").attr("x1",rx(v)).attr("x2",rx(v)).attr("y1",RM.t).attr("y2",RH-RM.b).attr("stroke","rgba(224,229,218,.07)");
+    s.append("text").attr("x",rx(v)).attr("y",RH-10).attr("text-anchor","middle")
+      .attr("fill","#66705f").attr("font-size",11).attr("font-family","var(--sans)").text(lbl);
+  });
+
+  R.forEach(d=>{
+    const g=s.append("g").style("cursor","help");
+    g.append("rect").attr("x",rx(0)).attr("y",ry(d.n)).attr("width",rx(d.v)-rx(0)).attr("height",ry.bandwidth())
+      .attr("fill",d.col).attr("fill-opacity",.92).attr("stroke","#111310");
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+4).attr("text-anchor","end")
+      .attr("fill","#e0e5da").attr("font-size",13.5).text(d.n);
+    g.append("text").attr("x",rx(d.v)+10).attr("y",ry(d.n)+ry.bandwidth()/2+4)
+      .attr("fill",d.cls).attr("font-size",12).attr("font-family","var(--sans)")
+      .text(d.node+" · "+d.side);
+    g.on("mousemove",ev=>showTip(tt3,wrap3,ev,
+       `<div class="yr">LAST NODE: ${d.node.toUpperCase()}</div>
+        <div class="nm" style="color:${d.col}">${d.n}</div>
+        <div class="pw">${d.fate}</div>`))
+     .on("mouseleave",()=>{tt3.style.display="none";});
+  });
+})();
+
+/* ================= EVENTS ================= */
+const evWrap=document.getElementById("events");
+EVENTS.forEach(e=>{
+  const div=document.createElement("button");
+  div.type="button";
+  div.dataset.year=e.yr;
+  div.className="ev"+(e.fall?" fall":"");
+  div.innerHTML=`<div class="yr">${e.label}</div><div class="nm">${e.name}</div>${e.txt}`;
+  div.onclick=()=>{
+    document.querySelectorAll(".ev").forEach(n=>n.classList.remove("active"));
+    div.classList.add("active");
+    marker.style("display",null);
+    marker.select("line").attr("x1",x(e.yr)).attr("x2",x(e.yr));
+    markerLabel.attr("text-anchor",e.yr>2010?"end":"start")
+      .attr("x",e.yr>2010?x(e.yr)-6:x(e.yr)+6).text(e.name.toUpperCase()+" · "+e.label);
+    document.getElementById("chart-wrap").scrollIntoView({behavior:"smooth",block:"center"});
+  };
+  evWrap.appendChild(div);
+});
+
+/* ================= FATES TABLE ================= */
+const KIND_LBL={destroyed:"Destroyed",submitted:"Absorbed",survived:"Still standing",victor:"Victor"};
+const tbl=document.getElementById("fates");
+tbl.innerHTML=`<tr><th>House</th><th>Peak</th><th>Folded</th><th>How it ended</th><th>Taken / absorbed by</th><th>Outcome</th></tr>`+
+ FATES.map(f=>`<tr>
+   <td><span class="sw" style="background:${f.col}"></span>${f.c}</td>
+   <td>${f.peak}</td>
+   <td class="num">${f.yr}</td>
+   <td>${f.how}</td>
+   <td>${f.by}</td>
+   <td class="k-${f.kind}">${KIND_LBL[f.kind]}</td></tr>`).join("");
+
+/* ================= HOUSE CARDS ================= */
+const clWrap=document.getElementById("clans");
+CLANS.filter(c=>c.id!=="other").forEach(c=>{
+  const div=document.createElement("div");
+  div.className="clan"; div.style.setProperty("--c",c.color);
+  const fk=c.fate.kind==="fall"?"fall":(c.fate.kind==="sub"?"sub":"live");
+  div.innerHTML=`<div class="nm"><i>▚</i> ${c.name}</div>
+    <div class="meta"><b>Core:</b> ${c.region}<br><b>Peak:</b> ${c.peak}</div>
+    <div class="fate ${fk}">${c.fate.txt}</div>`;
+  clWrap.appendChild(div);
+});
+</script>
+</body>
+</html>

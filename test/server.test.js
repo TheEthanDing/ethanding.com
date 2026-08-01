@@ -34,6 +34,15 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /href="\/data-agent-stack"/);
   assert.match(homepage, /href="\/analytics-token-tam"/);
   assert.match(homepage, /href="\/sengoku-clans"/);
+  assert.match(homepage, /href="\/semiconductor-wars"/);
+});
+
+test('serves the semiconductor wars visualization', async () => {
+  const response = await fetch(`${base}/semiconductor-wars`);
+  assert.equal(response.status, 200);
+  const page = await response.text();
+  assert.match(page, /WARS OF THE SEMIS/);
+  assert.match(page, /Chain of Succession/);
 });
 
 test('serves the Sengoku clan power visualization', async () => {

@@ -298,6 +298,7 @@ async function handle(req, res) {
   if (pathname === '/data-agent-stack' || pathname === '/data-agent-stack/') return serveStatic(res, '/data-agent-stack.html');
   if (pathname === '/analytics-token-tam' || pathname === '/analytics-token-tam/') return serveStatic(res, '/analytics-token-tam.html');
   if (pathname === '/sengoku-clans' || pathname === '/sengoku-clans/') return serveStatic(res, '/sengoku-clans.html');
+  if (pathname === '/semiconductor-wars' || pathname === '/semiconductor-wars/') return serveStatic(res, '/semiconductor-wars.html');
   if (/^\/(assets|images|data)\//.test(pathname) || ['/admin.js', '/healthcare-map.js', '/bi-pricing.js', '/data-agent-stack.js', '/analytics-token-tam.js'].includes(pathname)) return serveStatic(res, pathname);
   if (/^\/[a-z0-9-]+\/?$/.test(pathname)) return renderArticlePreview(res, req, pathname.replace(/^\/|\/$/g, ''));
   return send(res, 404, 'Not found');
