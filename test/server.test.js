@@ -32,6 +32,7 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /href="\/healthcare-map"/);
   assert.match(homepage, /href="\/bi-pricing"/);
   assert.match(homepage, /href="\/data-agent-stack"/);
+  assert.match(homepage, /href="\/analytics-token-tam"/);
 });
 
 test('serves the BI pricing comparison and its script', async () => {
@@ -50,6 +51,15 @@ test('serves the autonomous data agent stack and its script', async () => {
   const script = await fetch(`${base}/data-agent-stack.js`);
   assert.equal(script.status, 200);
   assert.match(await script.text(), /Snowflake/);
+});
+
+test('serves the updated analytics token TAM model and its script', async () => {
+  const response = await fetch(`${base}/analytics-token-tam`);
+  assert.equal(response.status, 200);
+  assert.match(await response.text(), /How many tokens will analytics consume/);
+  const script = await fetch(`${base}/analytics-token-tam.js`);
+  assert.equal(script.status, 200);
+  assert.match(await script.text(), /analyticsQ/);
 });
 
 test('serves the healthcare ecosystem map and its script', async () => {

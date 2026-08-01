@@ -296,7 +296,8 @@ async function handle(req, res) {
   if (pathname === '/healthcare-map' || pathname === '/healthcare-map/') return serveStatic(res, '/healthcare-map.html');
   if (pathname === '/bi-pricing' || pathname === '/bi-pricing/') return serveStatic(res, '/bi-pricing.html');
   if (pathname === '/data-agent-stack' || pathname === '/data-agent-stack/') return serveStatic(res, '/data-agent-stack.html');
-  if (/^\/(assets|images|data)\//.test(pathname) || ['/admin.js', '/healthcare-map.js', '/bi-pricing.js', '/data-agent-stack.js'].includes(pathname)) return serveStatic(res, pathname);
+  if (pathname === '/analytics-token-tam' || pathname === '/analytics-token-tam/') return serveStatic(res, '/analytics-token-tam.html');
+  if (/^\/(assets|images|data)\//.test(pathname) || ['/admin.js', '/healthcare-map.js', '/bi-pricing.js', '/data-agent-stack.js', '/analytics-token-tam.js'].includes(pathname)) return serveStatic(res, pathname);
   if (/^\/[a-z0-9-]+\/?$/.test(pathname)) return renderArticlePreview(res, req, pathname.replace(/^\/|\/$/g, ''));
   return send(res, 404, 'Not found');
 }
