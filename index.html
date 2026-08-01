@@ -426,6 +426,12 @@
         color: #000;
         border-color: #000;
       }
+      .interactive-links {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        min-width: min(100%, 300px);
+      }
       .social-links {
         display: flex;
         gap: 1rem;
@@ -548,10 +554,16 @@
       </section>
       
       <footer>
-        <a class="interactive-link" href="/healthcare-map">
-          <span>Interactive</span>
-          Healthcare ecosystem map →
-        </a>
+        <div class="interactive-links" aria-label="Interactive notes">
+          <a class="interactive-link" href="/healthcare-map">
+            <span>Interactive</span>
+            Healthcare ecosystem map →
+          </a>
+          <a class="interactive-link" href="/bi-pricing">
+            <span>Interactive</span>
+            BI tool per-seat pricing →
+          </a>
+        </div>
         <div class="social-links">
           <a id="site-twitter" href="https://twitter.com/theethanding" target="_blank" rel="noopener noreferrer" aria-label="Twitter" class="social-link">
             <svg width="16" height="16" viewBox="0 0 24 24">

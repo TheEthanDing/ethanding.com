@@ -30,6 +30,16 @@ test('serves the homepage and health check', async () => {
   const homepage = await fetch(base).then((response) => response.text());
   assert.match(homepage, /Ethan Ding/);
   assert.match(homepage, /href="\/healthcare-map"/);
+  assert.match(homepage, /href="\/bi-pricing"/);
+});
+
+test('serves the BI pricing comparison and its script', async () => {
+  const response = await fetch(`${base}/bi-pricing`);
+  assert.equal(response.status, 200);
+  assert.match(await response.text(), /The price of one more seat/);
+  const script = await fetch(`${base}/bi-pricing.js`);
+  assert.equal(script.status, 200);
+  assert.match(await script.text(), /Power BI/);
 });
 
 test('serves the healthcare ecosystem map and its script', async () => {

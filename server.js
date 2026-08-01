@@ -294,7 +294,8 @@ async function handle(req, res) {
   if (pathname === '/') return serveStatic(res, '/index.html');
   if (pathname === '/admin' || pathname === '/admin/') return serveStatic(res, '/admin.html');
   if (pathname === '/healthcare-map' || pathname === '/healthcare-map/') return serveStatic(res, '/healthcare-map.html');
-  if (/^\/(assets|images|data)\//.test(pathname) || pathname === '/admin.js' || pathname === '/healthcare-map.js') return serveStatic(res, pathname);
+  if (pathname === '/bi-pricing' || pathname === '/bi-pricing/') return serveStatic(res, '/bi-pricing.html');
+  if (/^\/(assets|images|data)\//.test(pathname) || ['/admin.js', '/healthcare-map.js', '/bi-pricing.js'].includes(pathname)) return serveStatic(res, pathname);
   if (/^\/[a-z0-9-]+\/?$/.test(pathname)) return renderArticlePreview(res, req, pathname.replace(/^\/|\/$/g, ''));
   return send(res, 404, 'Not found');
 }
