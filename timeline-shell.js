@@ -38,7 +38,13 @@
 
     title.remove();
     if (nodes.some((item) => item === events || (item.nodeType === 1 && item.contains?.(events)))) return;
-    sections.push({ title: title.textContent.trim(), label: compactLabel(title.textContent.trim()), nodes });
+    sections.push({
+      title: title.textContent.trim(),
+      label: compactLabel(title.textContent.trim()),
+      actionLabel: title.dataset.actionLabel || '',
+      featured: title.classList.contains('timeline-featured-section'),
+      nodes,
+    });
   });
 
   if (introNodes.length) sections.unshift({ title: 'How to read this timeline', label: 'Guide', nodes: introNodes });
@@ -66,6 +72,15 @@
   explore.className = 'timeline-action';
   explore.textContent = 'Explore the story';
   actions.appendChild(explore);
+  const featuredIndex = sections.findIndex((section) => section.featured);
+  let featuredAction = null;
+  if (featuredIndex >= 0) {
+    featuredAction = document.createElement('button');
+    featuredAction.type = 'button';
+    featuredAction.className = 'timeline-action timeline-action-primary';
+    featuredAction.textContent = sections[featuredIndex].actionLabel || sections[featuredIndex].label;
+    actions.prepend(featuredAction);
+  }
   header.appendChild(actions);
   topbar.appendChild(header);
 
@@ -100,6 +115,7 @@
   popover.querySelector('.timeline-popover-close').addEventListener('click', () => { popover.hidden = true; });
 
   events.classList.add('timeline-event-rail');
+  const featuredYear = document.body.dataset.featuredEventYear;
   Array.from(events.querySelectorAll('.ev')).forEach((eventButton) => {
     const year = eventButton.querySelector('.yr')?.textContent.trim() || '';
     const name = eventButton.querySelector('.nm')?.textContent.trim() || '';
@@ -107,6 +123,9 @@
     const copy = copyNodes.map((node) => node.textContent.trim()).join(' ');
     copyNodes.forEach((node) => node.remove());
     eventButton.setAttribute('aria-label', `${year}. ${name}. ${copy}`);
+    if (featuredYear && (eventButton.dataset.year === featuredYear || year.includes(featuredYear))) {
+      eventButton.classList.add('timeline-featured-event');
+    }
     eventButton.setAttribute('aria-pressed', eventButton.classList.contains('active') ? 'true' : 'false');
     eventButton.addEventListener('click', () => {
       events.querySelectorAll('.ev').forEach((button) => button.setAttribute('aria-pressed', button === eventButton ? 'true' : 'false'));
@@ -153,6 +172,7 @@
   });
 
   explore.addEventListener('click', () => showSection(0));
+  featuredAction?.addEventListener('click', () => showSection(featuredIndex));
   drawer.querySelector('.timeline-drawer-close').addEventListener('click', () => drawer.close());
   drawer.addEventListener('click', (event) => { if (event.target === drawer) drawer.close(); });
 

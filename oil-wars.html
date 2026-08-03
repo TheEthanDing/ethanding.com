@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Oil Wars · Ethan Ding</title>
+<meta name="description" content="An interactive history of oil power, from Standard Oil and its 34 Baby Standards to OPEC, Aramco, and the modern supermajors.">
+<link rel="icon" href="/images/favicon.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-sankey/0.12.3/d3-sankey.min.js"></script>
+<style>
+  :root{
+    --ink:#151210; --ink-2:#1c1814; --ink-3:#241e18;
+    --gold:#c9a24b; --gold-dim:#8a7340;
+    --paper:#e6ddc8; --paper-dim:#a69c85;
+    --seal:#b3372a;
+    --hair:rgba(201,162,75,.22);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans:"Avenir Next","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--paper);font-family:var(--serif);padding:28px clamp(14px,3vw,44px) 40px;}
+  .site-nav{display:flex;gap:14px;margin-bottom:18px;font:600 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase}
+  .site-nav a{color:var(--paper-dim);text-decoration:none}.site-nav a:hover{color:var(--gold)}
+  header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;
+         border-bottom:1px solid var(--hair);padding-bottom:18px;margin-bottom:6px;}
+  h1{font-size:clamp(20px,2.8vw,32px);font-weight:600;letter-spacing:.04em;}
+  h1 .era{color:var(--gold);font-weight:400;}
+  .sub{color:var(--paper-dim);font-size:13.5px;margin-top:6px;max-width:780px;line-height:1.55;}
+  .sub b{color:var(--paper);font-weight:600;}
+  .legend-box{border:1px solid var(--hair);padding:10px 14px;background:var(--ink-2);min-width:250px;}
+  .legend-box .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+  .legend-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--paper-dim);margin-top:5px;}
+  .seal-dot{width:12px;height:12px;border-radius:50%;background:var(--seal);box-shadow:0 0 0 2px rgba(179,55,42,.3);flex:none;}
+  .sub-dot{width:11px;height:11px;border-radius:50%;background:transparent;border:2px solid var(--gold);flex:none;}
+  .gold-tick{width:12px;height:0;border-top:1px dashed var(--gold);flex:none;}
+  #chart-wrap,#sankey-wrap{position:relative;background:var(--ink-2);border:1px solid var(--hair);margin-top:16px;padding:6px 6px 0;}
+  #chart,#sankey{display:block;width:100%;height:auto;}
+  .tooltip{position:absolute;pointer-events:none;background:#0e0c09;border:1px solid var(--gold-dim);
+           padding:9px 12px;font-size:12.5px;line-height:1.5;color:var(--paper);display:none;z-index:5;max-width:300px;
+           box-shadow:0 6px 18px rgba(0,0,0,.55);}
+  .tooltip .yr{color:var(--gold);letter-spacing:.12em;font-size:11px;}
+  .tooltip .nm{font-size:14.5px;margin:2px 0 3px;}
+  .tooltip .pw{color:var(--paper-dim);}
+  .tooltip .fate-t{color:#d98a7f;margin-top:4px;}
+  .section-title{margin:32px 0 12px;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);
+                 display:flex;align-items:center;gap:14px;}
+  .section-title::after{content:"";flex:1;border-top:1px solid var(--hair);}
+  .section-sub{color:var(--paper-dim);font-size:13px;line-height:1.55;margin:-4px 0 12px;max-width:900px;}
+  #events{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px;}
+  .ev{background:var(--ink-3);border:1px solid rgba(201,162,75,.14);border-top:2px solid var(--gold-dim);
+      padding:12px 13px;font-size:12.5px;line-height:1.5;color:var(--paper-dim);cursor:pointer;transition:border-color .15s, transform .15s;}
+  .ev:hover,.ev.active{border-color:var(--gold);transform:translateY(-2px);}
+  .ev .yr{font-family:var(--sans);font-size:15px;color:var(--paper);letter-spacing:.02em;}
+  .ev .nm{color:var(--gold);font-size:13px;margin:3px 0 6px;font-weight:600;}
+  .ev.fall .yr::after{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--seal);margin-left:8px;}
+  #fates{width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.5;}
+  #fates th{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);text-align:left;
+            padding:8px 10px;border-bottom:1px solid var(--hair);}
+  #fates td{padding:8px 10px;border-bottom:1px solid rgba(230,221,200,.07);color:var(--paper-dim);vertical-align:top;}
+  #fates td:first-child{color:var(--paper);white-space:nowrap;font-weight:600;}
+  #fates .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:1px;}
+  #fates .k-destroyed{color:#d98a7f;} #fates .k-submitted{color:#d9c27f;} #fates .k-survived{color:#9dbf9a;} #fates .k-victor{color:#c9a24b;font-weight:600;}
+  #fates td.num{white-space:nowrap;font-family:var(--sans);}
+  #clans{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+  .clan{padding:12px 13px;border:1px solid rgba(230,221,200,.08);background:var(--ink-3);
+        border-left:5px solid var(--c);font-size:12.5px;line-height:1.55;color:var(--paper-dim);}
+  .clan .nm{color:var(--paper);font-size:14.5px;font-weight:600;letter-spacing:.03em;}
+  .clan .nm i{font-style:normal;color:var(--c);}
+  .clan .meta{margin-top:5px;}
+  .clan .meta b{color:var(--paper);font-weight:600;}
+  .clan .fate{margin-top:5px;padding-top:5px;border-top:1px dashed rgba(230,221,200,.12);}
+  .clan .fate.fall{color:#d98a7f;} .clan .fate.sub{color:#d9c27f;} .clan .fate.live{color:#9dbf9a;}
+  .fermi{margin-top:14px;border:1px dashed var(--gold-dim);padding:14px 16px;font-size:12.5px;line-height:1.7;color:var(--paper-dim);}
+  .fermi b{color:var(--gold);font-weight:600;}
+  .breakup-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--hair);border:1px solid var(--hair)}
+  .breakup-line{background:var(--ink-3);padding:13px 14px;line-height:1.45}
+  .breakup-line b{display:block;color:var(--paper);font-size:13px}.breakup-line span{color:var(--gold);font:600 11px/1.4 var(--sans)}
+  .breakup-line small{display:block;margin-top:5px;color:var(--paper-dim);font:12px/1.45 var(--serif)}
+  .breakup-count{color:var(--seal);font-size:clamp(42px,8vw,86px);line-height:.9;font-weight:600;float:left;margin:3px 18px 8px 0}
+  .table-scroll{overflow-x:auto} .sources a{color:var(--gold)}
+  footer{margin-top:18px;color:#726852;font-size:11.5px;line-height:1.55;}
+  @media (prefers-reduced-motion:reduce){.ev{transition:none}.ev:hover{transform:none}}
+</style>
+<link rel="stylesheet" href="/timeline-shell.css?v=3">
+</head>
+<body data-featured-event-year="1911">
+
+<nav class="site-nav" aria-label="Site"><a href="/">← Ethan Ding</a><a href="/#writing">Writing</a></nav>
+
+<header>
+  <div>
+    <h1>THE OIL WARS <span class="era">(1870–2025)</span> — POWER OVER THE WORLD'S CRUDE, IN PRODUCTION SHARE</h1>
+    <p class="sub">Power is measured in <b>share of world crude oil production</b> under each house's — or each state's — control.
+      A rule of thumb at today's output: <b>1 share point ≈ 1 million barrels a day</b>.
+      The stack always totals 100%: when a house falls, its fields keep pumping for someone else.
+      Note the shape no other industry has: this chronicle <b>begins</b> with a completed shogunate — and watches the state shatter it,
+      the children remarry, and the land itself pass to a new species of lord. Hover any band <i>or any fall seal</i>; click a timeline event to mark its year.</p>
+  </div>
+  <div class="legend-box">
+    <div class="t">Reading the chart</div>
+    <div class="legend-row"><span class="seal-dot"></span>House destroyed — by court, coup, or revolution</div>
+    <div class="legend-row"><span class="sub-dot"></span>Merged / bought out — the fields change heralds</div>
+    <div class="legend-row"><span class="gold-tick"></span>Key event marker (click cards below)</div>
+    <div class="legend-row" style="margin-top:8px">Band height = % of world crude production</div>
+  </div>
+</header>
+
+<div id="chart-wrap"><svg id="chart" role="img" aria-label="Stacked timeline showing control of world crude oil production from 1870 to 2025, with Standard Oil breaking into successor companies in 1911"></svg><div class="tooltip" id="tt1"></div></div>
+
+<div class="section-title timeline-featured-section" data-action-label="See the 34-way breakup">The 34-way Breakup — Meet the Baby Standards</div>
+<div class="fermi breakup-intro">
+  <span class="breakup-count">34</span>
+  <b>Standard Oil did not become one new company in 1911. It became 34 independent companies.</b>
+  The chart’s central rupture is a court-ordered family tree: regional refiners, pipeline companies, and specialist businesses were separated from the New Jersey holding company. The nine major lineages below are the recognizable descendants—not a claim that all 34 became modern supermajors. Several later reunited through mergers.
+</div>
+<div class="breakup-grid" aria-label="Major Baby Standard lineages">
+  <div class="breakup-line"><b>Standard Oil of New Jersey</b><span>Esso → Exxon → ExxonMobil</span><small>The largest child; reunited with Mobil in 1999.</small></div>
+  <div class="breakup-line"><b>Standard Oil of New York + Vacuum</b><span>Socony-Vacuum → Mobil → ExxonMobil</span><small>Two 1911 companies combined in 1931, then rejoined Jersey Standard.</small></div>
+  <div class="breakup-line"><b>Standard Oil of California</b><span>Socal → Chevron</span><small>The western child that won the Saudi concession and later absorbed Gulf and Texaco.</small></div>
+  <div class="breakup-line"><b>Standard Oil of Indiana</b><span>Amoco → BP</span><small>The Midwestern refiner became Amoco and merged with BP in 1998.</small></div>
+  <div class="breakup-line"><b>Standard Oil of Ohio</b><span>Sohio → BP</span><small>The original Ohio operating company passed fully into BP in 1987.</small></div>
+  <div class="breakup-line"><b>Atlantic Refining</b><span>ARCO → BP</span><small>Atlantic later combined with Richfield; BP acquired ARCO in 2000.</small></div>
+  <div class="breakup-line"><b>Continental Oil</b><span>Conoco → ConocoPhillips</span><small>The Rocky Mountain business later combined with Phillips.</small></div>
+  <div class="breakup-line"><b>Ohio Oil Company</b><span>Marathon</span><small>A producer separated in 1911 and renamed Marathon Oil in 1962.</small></div>
+  <div class="breakup-line"><b>South Penn Oil</b><span>Pennzoil lineage</span><small>One of the Appalachian production companies; its later corporate path is more complex than a straight rename.</small></div>
+  <div class="breakup-line"><b>The other fragments</b><span>Pipelines · terminals · specialists</span><small>The decree also separated transport, storage, paraffin, and regional businesses. Sun Oil was independent—not a Baby Standard.</small></div>
+</div>
+
+<div class="section-title">Chain of Succession — Who Took Whose Fields</div>
+<p class="section-sub">Each ribbon is production (in share points of world output) passing from the dispossessed to the possessor.
+  <span style="color:#d98a7f">Red ribbons</span> = taken by force — a court's decree, a revolution, or a nationalization. <span style="color:#d9c27f">Gold ribbons</span> = merger, acquisition, or a bought-out concession. The chart opens with the only red ribbon of its kind in this whole series: <b>a state shattering a monopoly into 34 pieces</b> — and closes with two of those pieces (Exxon and Mobil) remarrying 88 years later. Hover any ribbon for the deal, coup or decree behind it.</p>
+<div id="sankey-wrap"><svg id="sankey" role="img" aria-label="Flow diagram tracing the major Baby Standards and other oil empires into their modern successors"></svg><div class="tooltip" id="tt2"></div></div>
+
+<div class="section-title">Key Events Timeline</div>
+<div id="events"></div>
+
+<div class="section-title">The Aramco Anomaly — The Richest Land on Earth, Taken Without a Shot</div>
+<div class="fermi">
+  <b>Why it became the greatest prize in economic history.</b> Three structural advantages, compounding for ninety years.
+  <b>(1) The Kantō plain of oil:</b> Ghawar — one field — has produced ~5 million barrels a day for decades, more than most <i>countries</i>; Saudi lifting costs run around $3 a barrel against $30–60 for deepwater and shale. The Hōjō farmed the best eight provinces in Japan; Aramco farms the best sedimentary basin on the planet, and the gap to its rivals is the same order of magnitude.
+  <b>(2) Won for pocket change:</b> in 1933 Standard of California bought the concession for roughly <b>£35,000 in gold</b> — because Anglo-Persian's geologists had surveyed the peninsula and passed. The greatest single asset acquisition in the history of commerce was the deal the incumbents didn't want.
+  <b>(3) The only nationalization that didn't destroy the thing nationalized:</b> where Mexico expelled the companies (1938), Iran seized and cratered (1951), and Venezuela's PDVSA eventually purged its own engineers into ruin, Riyadh <i>bought</i> Aramco in stages — 25% (1972), 60% (1974), 100% (1980) — kept the American management systems and staff, and inherited a functioning world-class company. Five decades without a succession war, in an industry where every rival's NOC has had several.
+  <br><br>
+  <b>Why it rules without being the biggest band.</b> The throne isn't Aramco's production — it's the <b>spare capacity</b>: the only power on the chart that can add or subtract millions of barrels a day at will. In 1980–85 it cut its own output by two-thirds to defend the price alone (watch the band collapse on the chart), and when the free-riders kept cheating, it opened the taps in 1986 and broke them — crashing crude to $10 and, plausibly, helping bankrupt the Soviet Union. No corporation ever held that kind of power; the Sisters at their peak could only fix prices, not make them.
+  <br><br>
+  <b>Why the peak is also the exposure.</b> One commodity, one field system, one strait (Hormuz), and a world debating the end of oil demand itself. The 2019 IPO — the largest in history — priced the kingdom's paradox: the most profitable company ever listed, whose entire value depends on the one thing it cannot control, which is whether the future still burns what it sells.
+</div>
+
+<div class="section-title">Research Anchors</div>
+<div class="fermi sources">
+  <b>The breakup and its descendants.</b> The 1911 decision and the 34-company count are grounded in the <a href="https://www.supremecourt.gov/pdfs/USReports/USREPORTS-221_PDFA.pdf" target="_blank" rel="noopener noreferrer">U.S. Supreme Court’s published decision</a> and the <a href="https://corporate.exxonmobil.com/who-we-are/our-global-organization/our-history" target="_blank" rel="noopener noreferrer">ExxonMobil corporate history</a>. The latter documents Jersey Standard, Socony, Vacuum, and the 1999 Exxon–Mobil reunion. <a href="https://www.chevron.com/-/media/chevron/about/documents/chevron-history-brochure.pdf" target="_blank" rel="noopener noreferrer">Chevron’s historical archive</a> traces Standard Oil of California from the decree to Chevron. <a href="https://www.bp.com/en/global/corporate/who-we-are/our-history/first-oil.html" target="_blank" rel="noopener noreferrer">BP’s heritage history</a> covers Amoco, Sohio, and ARCO, while <a href="https://www.conocophillips.com/about-us/our-history/" target="_blank" rel="noopener noreferrer">ConocoPhillips</a> documents its Continental Oil and Standard Oil lineage.
+  <br><br>
+  <b>How to read the estimates.</b> Production shares are broad historical estimates intended to compare control of crude production across eras. They should not be read as audited company volumes, and Standard Oil’s much larger refining and transport power is deliberately not converted into fictional barrels.
+</div>
+
+<div class="section-title">1973–1980 — The Great Confiscation, and What the Exile Became</div>
+<div class="fermi">
+  What happened to the Seven Sisters in the 1970s is the largest transfer of property in economic history, and it was a <b>forced swap, not a negotiation among equals</b>. The concession system — under which the Sisters owned the oil in the ground from Venezuela to the Gulf, set the "posted price" themselves, and paid the host states a royalty — died in seven years. Qaddafi broke the first company in 1970 (squeezing Occidental, which had nowhere else to pump); the Tehran and Tripoli agreements followed; "participation" became majority ownership became everything. The 1973 embargo quadrupled prices and revealed who actually held the land. <b>By 1980 the Sisters had lost roughly 85% of their reserves</b>: Aramco bought out, Iran gone (twice), Kuwait, Iraq, Venezuela, Libya — nationalized. The companies kept what Hideyoshi left Ieyasu: their technology, their markets, their refineries, and a mandate to start over somewhere else.
+  <br><br>
+  From OPEC's chair, the logic was sovereignty: <b>(1)</b> the concessions had been signed with empires and puppets, at terms set when the states were weak; <b>(2)</b> the Sisters' cartel (constituted at Achnacarry castle in 1928) had held prices <i>down</i> for producer states for four decades; <b>(3)</b> the land was theirs; and <b>(4)</b> destroying the companies entirely wasn't on the menu — the states still needed someone to drill, lift, refine and sell, so most nationalizations kept the Sisters on as contractors and buyers. Land was the currency; the states took the land and rented back the expertise.
+  <br><br>
+  <b>The exile became the throne — twice.</b> Stripped of their easy Middle Eastern barrels, the majors were forced into the hardest geology on Earth: the North Sea, Alaska's North Slope, and eventually deepwater — inventing, out of dispossession, the technology that found oil <i>outside</i> OPEC. Non-OPEC supply surged; by 1986 OPEC's share had collapsed from over half of world output to under a third, and the price war that followed broke the cartel's first reign. Then the pattern repeated a generation later: the same forced ingenuity produced fracking, and the shale rebellion of 2008–2019 made the confiscators' old victim — the United States — the largest producer on Earth again. The lesson runs through every chart in this series, but nowhere more literally: what you surrender matters less than what the surrender forces you to become. OPEC took the land; the exiles learned to make new land.
+</div>
+
+<div class="section-title">The Seven Sisters — The Cartel of 1950</div>
+<p class="section-sub">The seven houses that met (in various combinations) at Achnacarry castle in 1928 and divided the world "as is": by 1950 they controlled <b style="color:#e6ddc8">roughly 85% of the reserves outside the communist bloc</b>, fixed the posted price among themselves, and shared the great concessions through interlocking joint ventures — Aramco, the Iraq Petroleum Company, the Iranian consortium. Enrico Mattei of Italy's Eni, locked out of the club, coined the name "le sette sorelle" — and died in a 1962 plane crash Italians still argue about. The bars show each sister's share of world production at the cartel's height. Hover a bar for each house's fate.</p>
+<div id="regents-wrap" style="position:relative;background:var(--ink-2);border:1px solid var(--hair);padding:6px;">
+  <svg id="regents" role="img" aria-label="Bar chart comparing the Seven Sisters' estimated shares of world oil production in 1950" style="display:block;width:100%;height:auto;"></svg>
+  <div class="tooltip" id="tt3"></div>
+</div>
+
+<div class="section-title">How Every Great House Ended</div>
+<p class="section-sub">The era's major powers, in order of when they folded. "Folded" takes three forms: <span style="color:#d98a7f">destroyed</span> (broken by court, coup, revolution, or its own hand), <span style="color:#d9c27f">absorbed</span> (merged or bought out), or <span style="color:#9dbf9a">still pumping in 2025</span>. Note what kills oil houses: in every other chart of this series the killers are markets and balance sheets. Here, <b>every great fall but one was inflicted by a state</b> — a court in 1911, revolutions in 1917 and 1979, decrees in 1938, 1951 and 1972–80. The market only ever rearranged the survivors.</p>
+<div class="table-scroll"><table id="fates"></table></div>
+
+<div class="section-title">The Great Houses — Peak Domain &amp; Fate</div>
+<div id="clans"></div>
+
+<div class="fermi">
+  <b>How the production estimates were made (Fermi method):</b>
+  Anchors are historical production statistics (API, BP Statistical Review lineage, EIA) and company reports. Documented checkpoints keep the bands honest:
+  <b>Russia briefly out-produced the entire rest of the world around 1901</b> (Baku); Standard Oil controlled ~90% of U.S. <i>refining</i> at its height while producing a smaller share of crude;
+  the Seven Sisters controlled <b>≈85% of non-communist reserves circa 1950</b>; Saudi output was cut from ~10 Mb/d to ~3.5 Mb/d in 1980–85 (the swing-producer sacrifice, visible as the great notch in the Aramco band) before the 1986 counterattack;
+  the USSR peaked near <b>12.5 Mb/d in the 1980s</b>; and today's order is <b>U.S. ≈13 Mb/d (mostly shale), Saudi Aramco ≈9–11, Russia ≈10.5</b>, with the five Western supermajors together under 15% of world output.
+  Company bands include production from their controlled concessions and joint-venture equity; error bars are ±2 points and wider before 1930.
+  <br><br>
+  <b>Two things that look wrong but aren't.</b>
+  <b>(1) Standard Oil's band understates the monopoly — deliberately.</b> Rockefeller's empire was a <i>refining and transport</i> shogunate: ~90% of American refining, the pipelines, the rail rebates, and therefore the price — while producing a smaller share of crude. Like the Ashikaga and Pan Am before it, its true power sat outside the land system the chart measures; the ※ note on the band says so. This is also why breaking it required a court rather than a competitor.
+  <b>(2) The protagonists change species mid-story — that's the plot, not an error.</b> Before 1938 every band is a company; after 1980 the largest bands are sovereigns — Aramco, the NOCs, the Russian state's champions. Oil is the one industry in this series where the daimyō were conquered by the shogunates themselves: the states stopped taxing the game and took the board. Every later fight — OPEC quotas, sanctions, the shale war — is lords-versus-crowns, not lords-versus-lords.
+</div>
+
+<footer>Bands show share of world crude production controlled by each house or state system ("The National Oil Companies" = NIOC, KPC, INOC, ADNOC, PDVSA, Pemex, Libya NOC, Sonatrach, NNPC and peers; "Russia" spans Nobel/Rothschild Baku → the Soviet ministry → Rosneft, Lukoil and Gazprom Neft; "U.S. shale independents" = EOG, Pioneer, Continental, Devon, Occidental and peers; Petrobras, Equinor, Canadian oil sands and other non-OPEC producers sit in gray). The stack always totals 100%. ※ marks Standard's refining suzerainty and Aramco's swing-producer throne. Values are Fermi estimates for comparison, not audited barrels.</footer>
+
+<script>
+/* ================= DATA (% of world crude production) ================= */
+const CLANS = [
+ {id:"standard", name:"Standard Oil", color:"#8d7ba8", region:"Cleveland → 26 Broadway · the first shogunate — the still, the pipe, and the price",
+  peak:"1880s–1900s · ≈30–35% of world crude, ~90% of American refining",
+  suzerain:{a:1882,b:1911,note:"The refining shogunate: Standard produced perhaps a third of the world's crude but controlled ~90% of American refining, the pipelines, and the rail rebates — and therefore the price itself. Like the Ashikaga, its true power sat outside the land system this chart measures, which is why only a court, not a competitor, could break it."},
+  fate:{txt:"Shattered by the Supreme Court in 1911 into 34 companies after Ida Tarbell's exposé and Roosevelt's suit — the only house in this entire series destroyed at its peak, by decree. Rockefeller, holding shares in every fragment, became richer than ever", kind:"fall", yr:1911, by:"The United States (Sherman Act, Standard Oil v. United States)"},
+  pts:[[1870,3],[1880,25],[1890,34],[1900,30],[1905,32],[1911,29],[1912,0]]},
+
+ {id:"exxon", name:"ExxonMobil (Jersey Standard)", color:"#c1442e", region:"Irving · the eldest child — Esso, Exxon, and the reunion",
+  peak:"2020s · ≈5.5% and the largest Western oil company",
+  fate:{txt:"Victor — the biggest fragment of the breakup became the biggest company in the world for much of a century; lost its Venezuelan and Saudi crowns to the Confiscation, remarried its sibling Mobil in 1999, and bought the shale rebellion's champion (Pioneer, $60B) in 2023", kind:"live", yr:null, by:null},
+  pts:[[1912,12],[1920,10],[1930,12],[1940,12],[1950,12],[1960,11],[1970,10],[1976,7],[1980,5],[1990,4],[1999,4],[2000,6],[2010,5],[2023,4.5],[2024,5.5],[2025,5.5]]},
+
+ {id:"mobil", name:"Mobil (Socony)", color:"#b0486b", region:"New York · the second child — the flying red Pegasus",
+  peak:"Midcentury · ≈5% — Standard of New York, plus Vacuum Oil",
+  fate:{txt:"The reunion: 88 years after the Supreme Court separated them, Mobil remarried Jersey Standard in the $81B Exxon merger of 1999 — the largest in history at the time, and the breakup's most explicit undoing", kind:"sub", yr:1999, by:"Exxon (merger — ExxonMobil)"},
+  pts:[[1912,5],[1930,5],[1950,5],[1970,4],[1980,3],[1990,2.5],[1999,2.5],[2000,0]]},
+
+ {id:"chevron", name:"Chevron (Socal)", color:"#35548f", region:"San Ramon · the western child — the house that found Arabia",
+  peak:"2020s · ≈5% — the serial consolidator of the children",
+  fate:{txt:"Victor — Standard of California made the greatest bet in commercial history (the 1933 Saudi concession, ~£35,000 in gold), lost Aramco to the buyout, then ate its way back: Gulf (1984), Texaco (2001), Hess (2024)", kind:"live", yr:null, by:null},
+  pts:[[1912,3],[1930,4],[1950,4],[1970,4],[1980,3],[1984,4.5],[1990,4],[2000,4],[2001,5.3],[2010,4.5],[2024,4.8],[2025,5]]},
+
+ {id:"texaco", name:"Texaco", color:"#3d8f80", region:"Houston · born at Spindletop, outside Standard's grip — the green T star",
+  peak:"Midcentury · ≈5.5% — the only company selling in all 50 states",
+  fate:{txt:"The Getty acquisition (1984) triggered Pennzoil v. Texaco — a $10.5B verdict, the largest in history — and bankrupted it in 1987; it limped another decade and merged into Chevron in 2001", kind:"sub", yr:2001, by:"Chevron (merger — after the Pennzoil wound)"},
+  pts:[[1902,1],[1912,3],[1930,5],[1950,5.5],[1970,5],[1980,3.5],[1990,3],[2000,3],[2001,0]]},
+
+ {id:"gulf", name:"Gulf Oil", color:"#de8a3c", region:"Pittsburgh · the Mellons' house — Spindletop to Kuwait, the orange disc",
+  peak:"1950s–60s · ≈6% — half of Kuwait's ocean of oil",
+  fate:{txt:"Lost Kuwait to nationalization (1975), drifted, and was raided by Boone Pickens' Mesa Petroleum — forcing the 1984 sale to Chevron, the largest merger in history at the time. The first Sister to die, and the first child remarriage", kind:"sub", yr:1984, by:"Chevron (forced by Pickens' raid)"},
+  pts:[[1901,1],[1912,3],[1930,5],[1950,6],[1970,5],[1975,3],[1983,2.5],[1984,0]]},
+
+ {id:"amoco", name:"Amoco (Standard of Indiana)", color:"#6f7d8a", region:"Chicago · the refining child — the torch and oval",
+  peak:"Midcentury · ≈4.5% — the great midcontinent refiner",
+  fate:{txt:"Merged into BP in 1998 ($48B) as $10 crude forced the supermajor wave — a child of Standard passing under the British flag", kind:"sub", yr:1998, by:"BP (merger)"},
+  pts:[[1912,4],[1930,4.5],[1950,4],[1970,3.5],[1990,3],[1998,2.8],[1999,0]]},
+
+ {id:"sohio", name:"Sohio (Standard of Ohio)", color:"#96566b", region:"Cleveland · the original — Rockefeller's first vessel, 1870",
+  peak:"1980s · ≈2% — reborn on Prudhoe Bay's North Slope",
+  fate:{txt:"The original Standard Oil — the actual 1870 company — traded its Alaska bonanza for BP shares in stages and was wholly absorbed in 1987: the mother's first vessel ended as a British subsidiary", kind:"sub", yr:1987, by:"BP (staged acquisition)"},
+  pts:[[1912,1.5],[1950,1],[1968,1],[1977,2],[1986,2],[1987,0]]},
+
+ {id:"arco", name:"ARCO (Atlantic Richfield)", color:"#7d5ba6", region:"Los Angeles · the child that found Prudhoe Bay (1968)",
+  peak:"1970s–80s · ≈3% — Alaska's discoverer",
+  fate:{txt:"Atlantic (a Standard child) merged with Richfield, struck the largest oil field in North America, and sold to BP in 2000 — completing BP's collection of Standard's fragments", kind:"sub", yr:2000, by:"BP (acquisition)"},
+  pts:[[1912,1.5],[1950,1.5],[1966,2],[1969,3],[1980,3],[1990,2.5],[1999,2],[2000,0]]},
+
+ {id:"conocophillips", name:"ConocoPhillips", color:"#a05a4a", region:"Houston · Continental (a Standard child) + Phillips 66",
+  peak:"2000s · ≈3.5% — the largest pure E&P after the 2012 refining spinoff",
+  fate:{txt:"Still standing — Conoco survived a decade inside DuPont (1981–98), merged with Phillips in 2002, spun off its refining (Phillips 66, 2012), and remains the biggest independent producer in the world", kind:"live", yr:null, by:null},
+  pts:[[1912,1.5],[1950,2.5],[1970,2.5],[1981,2],[1998,2],[2002,3.3],[2012,2.5],[2025,2.3]]},
+
+ {id:"shell", name:"Royal Dutch Shell", color:"#b8963c", region:"The Hague & London · Samuel's tankers + Deterding's wells — the scallop",
+  peak:"1920s–50s · ≈11–12% — Standard's first true global rival",
+  fate:{txt:"Still standing — built by Marcus Samuel's tanker fleet and Henri Deterding's Royal Dutch (merged 1907) explicitly to fight Standard; bought the Rothschilds' Baku empire in 1912, weeks too early; lost the Confiscation like everyone, pivoted to LNG, and endures reduced", kind:"live", yr:null, by:null},
+  pts:[[1892,2],[1900,4],[1907,6],[1920,11],[1930,11],[1950,12],[1960,10],[1970,9],[1980,6],[1990,5],[2000,4.5],[2010,4],[2025,3.7]]},
+
+ {id:"bp", name:"BP (Anglo-Persian)", color:"#5e8a5a", region:"London · Churchill's company — Persia, then Alaska, then the North Sea",
+  peak:"1950 & 2000 · ≈7% — twice built, twice broken",
+  fate:{txt:"Still standing, twice wounded — lost Iran to Mossadegh (1951) and again to Khomeini (1979), rebuilt on Alaska and the North Sea, collected three Standard children (Sohio, Amoco, ARCO), then paid $65B+ for Macondo (2010) and has been shrinking since", kind:"live", yr:null, by:null},
+  pts:[[1908,0.3],[1914,1],[1930,4],[1950,7],[1952,3],[1955,5],[1970,7],[1975,5],[1979,3.5],[1987,4],[1998,4],[1999,5.5],[2000,6.5],[2010,5],[2012,4.3],[2025,3.3]]},
+
+ {id:"total", name:"TotalEnergies", color:"#7a6a4a", region:"Paris · the French champion — CFP + Fina + Elf",
+  peak:"2000s · ≈3.5% after the great French rollup",
+  fate:{txt:"Still standing — born of France's post-WWI share of Iraq (the Red Line inheritance); swallowed Petrofina (1999) and the scandal-soaked Elf (2000) — gekokujō à la française, the smaller house absorbing the state's champion", kind:"live", yr:null, by:null},
+  pts:[[1924,0.3],[1950,1],[1970,2],[1990,2],[1999,2.8],[2000,3.5],[2010,3.2],[2025,3]]},
+
+ {id:"aramco", name:"Saudi Aramco", color:"#1f5c45", region:"Dhahran · Ghawar and the Eastern Province — the richest land on Earth",
+  peak:"1974–80 & today · ≈11–17% — and all the world's spare capacity",
+  suzerain:{a:1980,b:2025,note:"The swing producer: the only power on the chart that can add or subtract millions of barrels a day at will. Its spare capacity, not its production, is the true throne — it cut its own output by two-thirds in 1980–85 to defend the price alone, then opened the taps in 1986 and broke the free-riders. No corporation ever held that power."},
+  fate:{txt:"Victor — the Sisters' joint venture, bought (not seized) by Riyadh in stages 1972–80, keeping the engineers and the systems: the only nationalization that improved the thing nationalized. The 2019 IPO, largest in history, listed the most profitable company that has ever existed", kind:"live", yr:null, by:null},
+  pts:[[1938,0.2],[1945,1],[1950,5],[1960,6],[1970,8],[1974,15],[1980,17],[1985,6],[1990,13],[2000,12],[2010,12],[2020,12.5],[2025,11.5]]},
+
+ {id:"nocs", name:"The National Oil Companies", color:"#8a5a33", region:"NIOC · KPC · INOC · ADNOC · PDVSA · Pemex · Libya NOC · Sonatrach · NNPC — the sovereigns' champions",
+  peak:"1980s– · ≈25–26% — the Confiscation's inheritors",
+  fate:{txt:"Victors of the Confiscation, with wildly divergent fates since: ADNOC and KPC world-class, NIOC sanctioned for decades, INOC wrecked by wars, Pemex drowning in debt — and PDVSA, which purged its own engineers in 2003 and committed the only self-inflicted collapse on this chart", kind:"live", yr:null, by:null},
+  pts:[[1938,1],[1950,2],[1960,3],[1970,6],[1973,12],[1976,22],[1980,25],[1990,26],[2000,26],[2010,26],[2025,25]]},
+
+ {id:"russia", name:"Russia (Baku → Soviet → Rosneft·Lukoil)", color:"#9e4444", region:"Baku → Bashkiria → West Siberia · Nobels & Rothschilds, then the ministry, then the champions",
+  peak:"1901 · >50% of world output — Baku alone briefly out-pumped the planet",
+  fate:{txt:"Still standing, sanctioned — the Nobels' and Rothschilds' Baku empire out-produced the world in 1901, burned in the 1905 revolution, was nationalized by the Bolsheviks in 1920, peaked as the USSR at ~12.5 Mb/d, collapsed with the union, was re-consolidated under Rosneft — and since 2022 sells east at a discount", kind:"live", yr:null, by:null},
+  pts:[[1870,25],[1885,32],[1898,45],[1901,50],[1905,32],[1913,17],[1920,3],[1930,10],[1940,12],[1950,8],[1960,15],[1970,15],[1980,20.5],[1985,21],[1991,17],[1996,12],[2005,12],[2015,12],[2022,12.5],[2025,11]]},
+
+ {id:"china", name:"China (CNPC · Sinopec · CNOOC)", color:"#a34a5c", region:"Daqing (1959) → offshore · the eastern ministry",
+  peak:"2010s · ≈5% of production — and the buyer of everyone else's",
+  fate:{txt:"Still standing — Daqing made Mao's China self-sufficient by 1965; production plateaued long ago, and China's real power in the oil war is now demand: the largest importer on Earth, the customer every producer must court", kind:"live", yr:null, by:null},
+  pts:[[1959,0.3],[1965,1],[1978,3.5],[1990,4.5],[2000,4.3],[2010,5],[2025,4.3]]},
+
+ {id:"shale", name:"U.S. shale independents", color:"#6b8f4a", region:"Midland & the Bakken · EOG, Pioneer, Continental, Devon, Occidental — the rebellion",
+  peak:"2019 · ≈8% — the wildcatters' revenge that made America #1 again",
+  fate:{txt:"The gekokujō of the final act: frackers the majors dismissed made the U.S. the largest producer on Earth and broke OPEC's 2014 price war. Now the majors are buying the rebellion — Pioneer to Exxon ($60B, 2023), Hess to Chevron — and the Permian consolidates like every frontier before it", kind:"live", yr:null, by:null},
+  pts:[[2005,1],[2010,2],[2015,5],[2019,8],[2023,8],[2024,7],[2025,7]]},
+
+ {id:"other", name:"Other producers", color:"#6b6b66", region:"The first era's independents (Pure, Sun, Sinclair, Union, Getty…), Romania and the Indies, and today's non-OPEC rest: Canada's oil sands, Brazil's Petrobras, Norway's Equinor, Kazakhstan, Qatar",
+  peak:"—", fate:{txt:"The churn layer: wildcatters and middle powers in every era — squeezed by Standard, licensed by the Sisters, courted by everyone now", kind:"live", yr:null, by:null},
+  pts:null /* remainder to 100% */},
+];
+
+const ORDER = ["other","shale","china","russia","nocs","aramco","total","bp","shell","conocophillips","arco","sohio","amoco","gulf","texaco","chevron","mobil","exxon","standard"];
+const TOTAL = 100;
+/* world crude production, million barrels/day, for the tooltip conversion */
+const MKT = [[1870,0.02],[1880,0.08],[1890,0.2],[1900,0.4],[1910,0.9],[1920,1.9],[1930,3.9],[1940,5.9],[1950,10.4],[1960,21],[1970,45.7],[1973,58.5],[1980,59.6],[1985,57.5],[1990,60.5],[2000,74.9],[2010,82.5],[2020,88.4],[2024,96],[2025,97]];
+
+const ERAS = [
+ {a:1870,b:1911,l1:"The Standard Monopoly",l2:"1870–1911"},
+ {a:1911,b:1928,l1:"The Shattering",l2:"1911–1928"},
+ {a:1928,b:1951,l1:"The Seven Sisters",l2:"1928–1951"},
+ {a:1951,b:1980,l1:"The Great Nationalization",l2:"1951–1980"},
+ {a:1980,b:2000,l1:"Countershock & Merger Wave",l2:"1980–2000"},
+ {a:2000,b:2025,l1:"NOCs & the Shale Rebellion",l2:"2000–2025"},
+];
+
+const EVENTS = [
+ {yr:1870, label:"1870", name:"Standard Oil founded", fall:false,
+  txt:"Rockefeller incorporates in Cleveland with a simple insight: the money isn't in finding oil, it's in refining and moving it. Within a decade he controls ~90% of American refining through rebates, buyouts, and quiet strangulation."},
+ {yr:1882, label:"1882", name:"The Trust", fall:false,
+  txt:"Standard's lawyers invent the trust — the corporate form itself — to hold the empire across state lines. Every antitrust law that follows is named after this moment."},
+ {yr:1901, label:"1901", name:"Spindletop · Baku's peak", fall:false,
+  txt:"The Lucas gusher in Texas blows 100,000 barrels a day and births Gulf and Texaco beyond Standard's grip — the same year the Nobels' and Rothschilds' Baku briefly out-produces the entire rest of the world."},
+ {yr:1911, label:"1911", name:"Standard Oil broken into 34 Baby Standards", fall:true,
+  txt:"The Supreme Court orders the trust dissolved into 34 independent companies. Jersey Standard, Socony, Vacuum, Socal, Indiana, Ohio, Atlantic, Continental, Ohio Oil, South Penn and two dozen other operating, pipeline, and specialty companies leave the same parent—and several later reunite."},
+ {yr:1914, label:"1908–14", name:"Persia · Churchill's purchase", fall:false,
+  txt:"Oil is struck at Masjid-i-Suleiman (1908); on the eve of war, Churchill converts the Royal Navy to oil and buys 51% of Anglo-Persian for the Crown. The state is now a shareholder in the game it referees."},
+ {yr:1917, label:"1917–20", name:"Baku falls to revolution", fall:true,
+  txt:"The Bolsheviks nationalize the world's second oil empire; the Nobels flee. The Rothschilds had sold their Baku holdings to Shell in 1912 — the best-timed exit in the industry's history."},
+ {yr:1928, label:"1928", name:"Achnacarry — the cartel's constitution", fall:false,
+  txt:"At a Scottish castle, the heads of Jersey, Shell and Anglo-Persian agree to hold the world 'as is' — market shares frozen, competition suspended. With the Red Line Agreement the same year, the Sisters divide the Middle East like provinces."},
+ {yr:1938, label:"1933–38", name:"Arabia for £35,000 · Pemex", fall:true,
+  txt:"Socal buys the Saudi concession for a pittance in gold because Anglo-Persian's geologists passed — the greatest asset purchase in commercial history. Five years later Mexico expropriates everything: the first nationalization, and the writing on every wall."},
+ {yr:1951, label:"1951–54", name:"Mossadegh nationalizes Anglo-Iranian", fall:true,
+  txt:"Iran seizes the largest refinery on Earth at Abadan; Britain blockades; the CIA and MI6 answer with the 1953 coup. A consortium restores partial control — and teaches every producer state both halves of the lesson."},
+ {yr:1960, label:"1960", name:"OPEC founded in Baghdad", fall:false,
+  txt:"After the Sisters cut the posted price without asking, five producer states — Venezuela's Pérez Alfonzo and Saudi Arabia's Tariki leading — organize. The club of lords now faces a club of crowns."},
+ {yr:1971, label:"1969–72", name:"The squeeze", fall:false,
+  txt:"Qaddafi breaks Occidental — the one company with nowhere else to pump — and every producer copies the play. Tehran, Tripoli, then 'participation': the concession system is dying in plain sight."},
+ {yr:1973, label:"1973", name:"The embargo", fall:true,
+  txt:"Yom Kippur, the Arab embargo, and a fourfold price rise in months. The Confiscation accelerates: within seven years the Sisters lose ~85% of their reserves — the largest transfer of property in economic history."},
+ {yr:1979, label:"1979–80", name:"Iran again · Aramco bought out", fall:false,
+  txt:"The revolution takes Iran's oil a second time and doubles prices again; Riyadh completes its purchase of Aramco. The land now belongs entirely to the crowns; the companies keep the technology and the tankers."},
+ {yr:1985, label:"1984–87", name:"The children start remarrying", fall:false,
+  txt:"Boone Pickens' raid forces Gulf into Chevron (1984) — the largest merger in history at the time. BP swallows Sohio (1987), the original Standard Oil. Getty's sale to Texaco spawns the $10.5B Pennzoil verdict that bankrupts the buyer."},
+ {yr:1986, label:"1986", name:"The Countershock", fall:true,
+  txt:"After cutting its own output by two-thirds to defend the price alone, Saudi Arabia opens the taps. Crude falls toward $10; the cheaters are broken; and the USSR — whose treasury ran on oil — begins its terminal decade."},
+ {yr:1999, label:"1998–2002", name:"The supermajor wave", fall:false,
+  txt:"$10 oil forces the great remarriages: Exxon+Mobil (two children of Standard, reunited after 88 years), BP+Amoco+ARCO, Chevron+Texaco, Conoco+Phillips, Total+Fina+Elf. Seven Sisters become four supermajors and a French champion."},
+ {yr:2012, label:"2008–14", name:"The Shale Rebellion", fall:false,
+  txt:"Fracking — invented by wildcatters the majors ignored — unlocks the Permian and the Bakken. The U.S. passes Russia and Saudi Arabia to become the largest producer on Earth; OPEC's 2014 price war fails to kill the rebels."},
+ {yr:2023, label:"2019–24", name:"The largest IPO · buying the rebellion", fall:false,
+  txt:"Aramco lists at the largest IPO in history — the most profitable company that has ever existed. Then the majors buy the frontier: Exxon takes Pioneer ($60B), Chevron takes Hess. The Permian consolidates, as every frontier before it did."},
+];
+
+const FATES = [
+ {c:"Standard Oil", col:"#8d7ba8", peak:"~90% of U.S. refining; the price itself", yr:"1911", how:"The only great house in this series destroyed at its peak, by decree: Tarbell's pen, Roosevelt's suit, the Supreme Court's order — 34 fragments. The fragments' combined value doubled within a year.", by:"The United States (Sherman Act)", kind:"destroyed"},
+ {c:"Nobel Brothers (Branobel)", col:"#9e4444", peak:"Baku's masters; half the world's oil in their era", yr:"1920", how:"The dynamite family's other empire — pioneers of the tanker and the pipeline — nationalized by the Bolsheviks; the family fled with almost nothing.", by:"The Russian Revolution", kind:"destroyed"},
+ {c:"Rothschilds' Bnito (Baku)", col:"#b8963c", peak:"Baku's #2", yr:"1912", how:"Sold everything to Royal Dutch Shell for shares in 1912 — five years before the revolution took it all. The best-timed exit in the industry's history.", by:"Shell (sale — presciently)", kind:"submitted"},
+ {c:"Pure · Sun · Sinclair · Union (the U.S. independents)", col:"#6b6b66", peak:"The post-breakup American field", yr:"1960s–80s", how:"The wildcatters' generation consolidated away across half a century — Sinclair into ARCO, Pure into Union into Chevron's orbit, Getty's fortune into Texaco's ruin.", by:"The majors (serial absorption)", kind:"submitted"},
+ {c:"Getty Oil", col:"#7a6a4a", peak:"J. Paul Getty — 'the richest American' — and his billions of barrels", yr:"1984", how:"The estate's sale to Texaco, snatched from a handshake with Pennzoil, produced the largest civil verdict in history ($10.5B) and bankrupted the buyer. The most expensive acquisition ever measured per regret.", by:"Texaco (fatally)", kind:"submitted"},
+ {c:"Gulf Oil", col:"#de8a3c", peak:"≈6% · half of Kuwait", yr:"1984", how:"Lost Kuwait to nationalization, drifted, and was raided by Boone Pickens — forced into Chevron in the largest merger in history at the time. First Sister to fall.", by:"Chevron (forced by Mesa's raid)", kind:"submitted"},
+ {c:"Sohio (Standard of Ohio)", col:"#96566b", peak:"The original 1870 company · Prudhoe Bay's operator", yr:"1987", how:"Rockefeller's first vessel traded Alaska for BP shares and was wholly absorbed — the mother's original body, buried under a British flag.", by:"BP", kind:"submitted"},
+ {c:"The Seven Sisters' concessions", col:"#8a5a33", peak:"≈85% of non-communist reserves (1950)", yr:"1972–80", how:"The Great Confiscation: participation → majority → everything, from Tripoli to Riyadh to Caracas. The largest transfer of property in economic history, completed in seven years without a single battle.", by:"OPEC's sovereigns", kind:"destroyed"},
+ {c:"Amoco (Standard of Indiana)", col:"#6f7d8a", peak:"≈4.5% · the midcontinent refiner", yr:"1998", how:"$10 crude forced the supermajor wave; Amoco went first, into BP for $48B.", by:"BP", kind:"submitted"},
+ {c:"Mobil (Socony)", col:"#b0486b", peak:"≈5% · the Pegasus", yr:"1999", how:"The reunion: remarried Jersey Standard 88 years after the Court separated them — $81B, the largest merger in history at the time.", by:"Exxon (ExxonMobil)", kind:"submitted"},
+ {c:"ARCO (Atlantic Richfield)", col:"#7d5ba6", peak:"≈3% · discoverer of Prudhoe Bay", yr:"2000", how:"Sold to BP, completing BP's collection of three Standard children.", by:"BP", kind:"submitted"},
+ {c:"Texaco", col:"#3d8f80", peak:"≈5.5% · the green star in all 50 states", yr:"2001", how:"Mortally wounded by the Pennzoil verdict (bankrupt 1987 — the largest company ever to file, at the time); merged into Chevron a wounded shadow.", by:"Chevron", kind:"submitted"},
+ {c:"Elf Aquitaine", col:"#7a6a4a", peak:"France's state champion — and its slush fund", yr:"2000", how:"The Elf affair — Africa, bribes, and the largest corruption trial in French history — ended with the smaller Total absorbing the state's champion. Gekokujō à la française.", by:"Total (after a hostile duel)", kind:"submitted"},
+ {c:"Pioneer Natural Resources", col:"#6b8f4a", peak:"The Permian's champion", yr:"2023", how:"Scott Sheffield's shale powerhouse sold to Exxon for $60B — the rebellion's flagship, bought by the empire.", by:"ExxonMobil", kind:"submitted"},
+ {c:"Hess", col:"#6b8f4a", peak:"Guyana's golden stake", yr:"2024", how:"Sold to Chevron for the Stabroek block — the last great conventional discovery — after an arbitration duel with Exxon over first refusal.", by:"Chevron", kind:"submitted"},
+ {c:"PDVSA", col:"#8a5a33", peak:"≈3.3 Mb/d · Latin America's finest NOC (1990s)", yr:"2003–", how:"The only self-inflicted collapse on this chart: the 2003 strike purge expelled 18,000 of its own engineers, and Chavismo bled the survivor — from 3.3 Mb/d to under 1. The NOC that committed seppuku.", by:"Its own state", kind:"destroyed"},
+ {c:"NIOC (Iran)", col:"#8a5a33", peak:"The prize seized twice (1951, 1979)", yr:"—", how:"Holder of some of the greatest fields on Earth, sanctioned for most of half a century — proof that owning the land is not the same as being allowed to sell its fruit.", by:"—", kind:"survived"},
+ {c:"Pemex", col:"#8a5a33", peak:"The first nationalizer (1938)", yr:"—", how:"The original NOC, a national symbol and the most indebted oil company on Earth — Cantarell's decline never answered.", by:"—", kind:"survived"},
+ {c:"Russia (Rosneft · Lukoil · Gazprom Neft)", col:"#9e4444", peak:">50% of world output (1901); ~12.5 Mb/d (USSR, 1980s)", yr:"—", how:"Empire, ministry, oligarchs, re-nationalization, sanctions: five regimes, one resource. Still ~11% of world output, now sold east at a discount.", by:"—", kind:"survived"},
+ {c:"Shell", col:"#b8963c", peak:"≈12% · Standard's first true rival", yr:"—", how:"Built explicitly to fight Rockefeller; survived every era by pivoting first — tankers, then Baku, then LNG. Endures, reduced, still arguing with its own shareholders about what an oil company should become.", by:"—", kind:"survived"},
+ {c:"BP", col:"#5e8a5a", peak:"≈7% twice — Persia, then Alaska & the North Sea", yr:"—", how:"Twice broken by Iran, twice rebuilt on new frontiers, then wounded a third time by its own rig at Macondo ($65B+). The house that keeps surviving its catastrophes without ever quite recovering from them.", by:"—", kind:"survived"},
+ {c:"TotalEnergies", col:"#7a6a4a", peak:"≈3.5% · the French rollup", yr:"—", how:"The Red Line inheritance compounded: absorbed Fina and Elf, and now hedges the transition harder than any peer.", by:"—", kind:"survived"},
+ {c:"ConocoPhillips", col:"#a05a4a", peak:"The largest independent producer", yr:"—", how:"A Standard child that survived DuPont, merged with Phillips, shed its refining, and outlived every mid-sized peer.", by:"—", kind:"survived"},
+ {c:"U.S. shale independents", col:"#6b8f4a", peak:"≈8% · made America #1 again", yr:"—", how:"The wildcatters' revenge broke OPEC's price war and rewrote the map — and is now being bought, champion by champion, by the majors it humiliated.", by:"—", kind:"survived"},
+ {c:"ExxonMobil", col:"#c1442e", peak:"The largest fragment, reassembled", yr:"—", how:"Jersey Standard plus Socony plus Pioneer: the eldest child spent a century quietly reversing 1911 and remains the most disciplined operator the industry has produced.", by:"—", kind:"victor"},
+ {c:"Chevron", col:"#35548f", peak:"The house that found Arabia", yr:"—", how:"Made the £35,000 bet that created Aramco, lost it to the buyout, and consolidated the children instead: Gulf, Texaco, Hess. The western Standard, still compounding.", by:"—", kind:"victor"},
+ {c:"Saudi Aramco", col:"#1f5c45", peak:"The richest land on Earth + all the spare capacity", yr:"—", how:"The Tokugawa of oil: took the best land without a battle, kept the defeated's engineers, and rules through spare capacity — the power to make the price, which even Rockefeller only ever approximated.", by:"—", kind:"victor"},
+ {c:"The National Oil Companies", col:"#8a5a33", peak:"≈75% of world reserves, with Aramco", yr:"—", how:"The Confiscation's inheritors, collectively the victors of the century — though their individual fates, from ADNOC's excellence to PDVSA's suicide, span this table's every category.", by:"—", kind:"victor"},
+];
+
+/* Sankey: share points of world production flowing from dispossessed to possessor */
+const SK_NODES = ["Standard Oil","Nobel & Rothschild Baku","Jersey Standard","Socony + Vacuum","Socal","Standard of Indiana","Standard of Ohio","Atlantic Refining","Continental Oil","Ohio Oil / Marathon","South Penn / Pennzoil","Other Standard fragments","Getty","Gulf Oil","Sohio","Texaco","Mobil","Amoco","ARCO","Conoco","Phillips","Fina","Elf","Pioneer","Hess","ExxonMobil","Chevron","BP","Shell","TotalEnergies","ConocoPhillips","Soviet / Russian state","Saudi Aramco","The National Oil Companies"];
+const SK_COLORS = {"Standard Oil":"#8d7ba8","Nobel & Rothschild Baku":"#9e4444","Jersey Standard":"#c1442e","Socony + Vacuum":"#b0486b","Socal":"#35548f","Standard of Indiana":"#6f7d8a","Standard of Ohio":"#96566b","Atlantic Refining":"#7d5ba6","Continental Oil":"#a05a4a","Ohio Oil / Marathon":"#b8963c","South Penn / Pennzoil":"#8a7340","Other Standard fragments":"#6b6b66","Getty":"#7a6a4a","Gulf Oil":"#de8a3c","Sohio":"#96566b","Texaco":"#3d8f80","Mobil":"#b0486b","Amoco":"#6f7d8a","ARCO":"#7d5ba6","Conoco":"#a05a4a","Phillips":"#c9903f","Fina":"#8a8a6e","Elf":"#7a6a4a","Pioneer":"#6b8f4a","Hess":"#6b8f4a","ExxonMobil":"#c1442e","Chevron":"#35548f","BP":"#5e8a5a","Shell":"#b8963c","TotalEnergies":"#7a6a4a","ConocoPhillips":"#a05a4a","Soviet / Russian state":"#9e4444","Saudi Aramco":"#1f5c45","The National Oil Companies":"#8a5a33"};
+const SK_LINKS = [
+ {s:"Standard Oil",t:"Jersey Standard",v:10, kind:"fall", e:"1911 — the New Jersey holding company becomes independent; it later adopts the Exxon name"},
+ {s:"Standard Oil",t:"Socony + Vacuum",v:5, kind:"fall", e:"1911 — Standard Oil of New York and Vacuum Oil leave as separate companies; they combine in 1931"},
+ {s:"Standard Oil",t:"Socal",v:3, kind:"fall", e:"1911 — Standard Oil of California becomes autonomous and later adopts the Chevron name"},
+ {s:"Standard Oil",t:"Standard of Indiana",v:3, kind:"fall", e:"1911 — the Midwestern refining and marketing company becomes independent; later Amoco"},
+ {s:"Standard Oil",t:"Standard of Ohio",v:1.5, kind:"fall", e:"1911 — the original Ohio operating company becomes independent; later Sohio"},
+ {s:"Standard Oil",t:"Atlantic Refining",v:1.5, kind:"fall", e:"1911 — Atlantic Refining leaves the trust; later Atlantic Richfield (ARCO)"},
+ {s:"Standard Oil",t:"Continental Oil",v:1.5, kind:"fall", e:"1911 — Continental Oil becomes an independent Rocky Mountain company; later Conoco"},
+ {s:"Standard Oil",t:"Ohio Oil / Marathon",v:1, kind:"fall", e:"1911 — Ohio Oil is separated and later takes the Marathon name"},
+ {s:"Standard Oil",t:"South Penn / Pennzoil",v:0.8, kind:"fall", e:"1911 — South Penn Oil leaves the trust; its later lineage feeds into Pennzoil"},
+ {s:"Standard Oil",t:"Other Standard fragments",v:1.7, kind:"fall", e:"1911 — the remaining pipeline, terminal, regional, paraffin, and specialty companies complete the 34-way dissolution. Sun Oil was independent"},
+ {s:"Jersey Standard",t:"ExxonMobil",v:10, kind:"sub", e:"1972–99 — Jersey Standard becomes Exxon, then combines with Mobil"},
+ {s:"Socony + Vacuum",t:"Mobil",v:5, kind:"sub", e:"1931 onward — Socony and Vacuum combine as Socony-Vacuum and ultimately become Mobil"},
+ {s:"Socal",t:"Chevron",v:3, kind:"sub", e:"1984 — Standard Oil of California adopts the Chevron corporate name"},
+ {s:"Standard of Indiana",t:"Amoco",v:3, kind:"sub", e:"1985 — Standard of Indiana adopts the Amoco name used by its operating company"},
+ {s:"Standard of Ohio",t:"Sohio",v:1.5, kind:"sub", e:"The Ohio Baby Standard becomes commonly known as Sohio"},
+ {s:"Atlantic Refining",t:"ARCO",v:1.5, kind:"sub", e:"1966 — Atlantic Refining combines with Richfield to become ARCO"},
+ {s:"Continental Oil",t:"Conoco",v:1.5, kind:"sub", e:"Continental Oil adopts the Conoco name"},
+ {s:"Nobel & Rothschild Baku",t:"Shell",v:5, kind:"sub", e:"1912 — the Rothschilds sell their Baku empire to Shell for shares: five years before the revolution, the best-timed exit in oil history"},
+ {s:"Nobel & Rothschild Baku",t:"Soviet / Russian state",v:8, kind:"fall", e:"1920 — the Bolsheviks nationalize Baku; the Nobels flee with almost nothing"},
+ {s:"BP",t:"The National Oil Companies",v:3.5, kind:"fall", e:"1951 & 1979 — Iran, twice: Mossadegh seizes Abadan, the consortium claws back half, Khomeini takes the rest"},
+ {s:"Gulf Oil",t:"The National Oil Companies",v:2.5, kind:"fall", e:"1975 — Kuwait nationalizes; Gulf loses half its oil in a stroke"},
+ {s:"ExxonMobil",t:"The National Oil Companies",v:2, kind:"fall", e:"1976 — Venezuela nationalizes Creole, Jersey's crown jewel, into PDVSA"},
+ {s:"Shell",t:"The National Oil Companies",v:1.5, kind:"fall", e:"1972–79 — Venezuela, Nigeria, the Gulf: participation becomes ownership everywhere at once"},
+ {s:"ExxonMobil",t:"Saudi Aramco",v:1.5, kind:"sub", e:"1972–80 — its 30% of Aramco bought out in stages: Riyadh purchases rather than seizes"},
+ {s:"Chevron",t:"Saudi Aramco",v:2, kind:"sub", e:"1972–80 — the concession Socal won for £35,000 in 1933, bought back for billions; the engineers stay"},
+ {s:"Texaco",t:"Saudi Aramco",v:2, kind:"sub", e:"1972–80 — the second founding partner's 30%, bought out"},
+ {s:"Mobil",t:"Saudi Aramco",v:1, kind:"sub", e:"1972–80 — the junior partner's 10%, bought out"},
+ {s:"Getty",t:"Texaco",v:1, kind:"sub", e:"1984 — the $10B estate sale, snatched from Pennzoil's handshake: the verdict that follows ($10.5B) bankrupts the buyer"},
+ {s:"Gulf Oil",t:"Chevron",v:2.5, kind:"sub", e:"1984 — Pickens' raid forces the first mega-merger, largest in history at the time; the first Sister falls to a sibling"},
+ {s:"Sohio",t:"BP",v:2, kind:"sub", e:"1987 — the original Standard Oil, traded for its Alaska bonanza, ends as a British subsidiary"},
+ {s:"Amoco",t:"BP",v:2.8, kind:"sub", e:"1998 — $48B at $10 crude: the supermajor wave begins"},
+ {s:"Mobil",t:"ExxonMobil",v:2.5, kind:"sub", e:"1999 — the reunion: two children of Standard remarry, 88 years after the Court separated them ($81B)"},
+ {s:"ARCO",t:"BP",v:2, kind:"sub", e:"2000 — BP completes its collection of Standard's children"},
+ {s:"Fina",t:"TotalEnergies",v:0.8, kind:"sub", e:"1999 — the Belgian house joins the French rollup"},
+ {s:"Elf",t:"TotalEnergies",v:1.5, kind:"sub", e:"2000 — the scandal-soaked state champion absorbed by its smaller rival: gekokujō à la française"},
+ {s:"Texaco",t:"Chevron",v:3, kind:"sub", e:"2001 — the Pennzoil-wounded star merges into the western Standard"},
+ {s:"Conoco",t:"ConocoPhillips",v:2, kind:"sub", e:"2002 — after 17 years inside DuPont, Conoco merges with Phillips"},
+ {s:"Phillips",t:"ConocoPhillips",v:1.5, kind:"sub", e:"2002 — Phillips 66's half of the last mid-major merger"},
+ {s:"Pioneer",t:"ExxonMobil",v:0.8, kind:"sub", e:"2023 — $60B for the Permian's champion: the empire buys the rebellion"},
+ {s:"Hess",t:"Chevron",v:0.4, kind:"sub", e:"2024 — the Guyana stake, won after an arbitration duel with Exxon"},
+];
+
+/* ================= STACKED AREA CHART ================= */
+const Y0=1870, Y1=2025;
+const years = d3.range(Y0, Y1+1);
+const byId = Object.fromEntries(CLANS.map(c=>[c.id,c]));
+
+function powerAt(clan, y){
+  const p = clan.pts;
+  if(!p || y < p[0][0] || y > p[p.length-1][0]) return 0;
+  for(let i=0;i<p.length-1;i++){
+    const [x0,v0]=p[i],[x1,v1]=p[i+1];
+    if(y>=x0 && y<=x1) return x1===x0 ? v1 : v0 + (v1-v0)*(y-x0)/(x1-x0);
+  }
+  return 0;
+}
+function mktAt(y){ return powerAt({pts:MKT}, y); }
+
+const rows = years.map(y=>{
+  const r = {year:y}; let named=0;
+  ORDER.forEach(id=>{ if(id!=="other"){ r[id]=powerAt(byId[id],y); named+=r[id]; }});
+  r.other = Math.max(TOTAL - named, 0);   /* total is ALWAYS 100% — the fields keep pumping for someone */
+  return r;
+});
+
+const W=1500, H=580, M={t:64,r:24,b:36,l:60};
+const svg = d3.select("#chart").attr("viewBox",`0 0 ${W} ${H}`);
+const x = d3.scaleLinear([Y0,Y1],[M.l,W-M.r]);
+const yS = d3.scaleLinear([0,100],[H-M.b,M.t]);
+
+const series = d3.stack().keys(ORDER)(rows);
+const area = d3.area().x(d=>x(d.data.year)).y0(d=>yS(d[0])).y1(d=>yS(d[1])).curve(d3.curveBasis);
+
+/* era bands */
+const eraG = svg.append("g");
+ERAS.forEach((e,i)=>{
+  if(i>0) eraG.append("line").attr("x1",x(e.a)).attr("x2",x(e.a)).attr("y1",M.t-6).attr("y2",H-M.b)
+    .attr("stroke","rgba(230,221,200,.28)").attr("stroke-dasharray","2 5");
+  const cx=(x(e.a)+x(e.b))/2;
+  eraG.append("text").attr("x",cx).attr("y",22).attr("text-anchor","middle")
+    .attr("fill","#e6ddc8").attr("font-size",12.5).attr("letter-spacing","1.5").text(e.l1.toUpperCase());
+  eraG.append("text").attr("x",cx).attr("y",40).attr("text-anchor","middle")
+    .attr("fill","#8a7340").attr("font-size",11).attr("letter-spacing","1.5").text(e.l2);
+});
+
+/* grid + axes */
+d3.range(0,101,10).forEach(v=>{
+  svg.append("line").attr("x1",M.l).attr("x2",W-M.r).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke","rgba(230,221,200,.07)");
+  svg.append("text").attr("x",M.l-8).attr("y",yS(v)+4).attr("text-anchor","end")
+    .attr("fill","#726852").attr("font-size",11).attr("font-family","var(--sans)").text(v+"%");
+});
+svg.append("text").attr("transform",`translate(16,${(M.t+H-M.b)/2}) rotate(-90)`).attr("text-anchor","middle")
+  .attr("fill","#a69c85").attr("font-size",11.5).attr("letter-spacing","1.5").text("SHARE OF WORLD CRUDE PRODUCTION");
+d3.range(1875,2026,25).forEach(t=>{
+  svg.append("text").attr("x",x(t)).attr("y",H-12).attr("text-anchor","middle")
+    .attr("fill","#a69c85").attr("font-size",12.5).attr("font-family","var(--sans)").text(t);
+});
+
+/* The dissolution is the hinge of the story, not a routine event marker. */
+svg.append("rect")
+  .attr("x",x(1910.4)).attr("y",M.t)
+  .attr("width",Math.max(7,x(1912.2)-x(1910.4))).attr("height",H-M.t-M.b)
+  .attr("fill","#b3372a").attr("fill-opacity",.14).attr("pointer-events","none");
+
+/* bands */
+const paths = svg.append("g").selectAll("path").data(series).join("path")
+  .attr("d",area).attr("fill",d=>byId[d.key].color).attr("fill-opacity",.92)
+  .attr("stroke","#151210").attr("stroke-width",.7).style("cursor","crosshair");
+
+/* in-band labels at widest point */
+series.forEach(s=>{
+  let best={w:0,i:0};
+  s.forEach((d,i)=>{const w=d[1]-d[0]; if(w>best.w) best={w,i};});
+  const d=s[best.i];
+  if(best.w>3){
+    const yr=d.data.year;
+    const lx=Math.max(M.l+95, Math.min(W-M.r-95, x(yr)));
+    svg.append("text").attr("x",lx).attr("y",yS((d[0]+d[1])/2)+4.5)
+      .attr("text-anchor","middle").attr("fill","#0e0c09").attr("font-size",best.w>13?16:(best.w>5?12.5:10))
+      .attr("font-weight",700).attr("letter-spacing","1.5").attr("pointer-events","none")
+      .text(byId[s.key].name.toUpperCase().replace(/ \(.*\)/,""))
+      .clone(true).attr("fill","rgba(230,221,200,.94)").attr("dy",-1);
+  }
+});
+
+/* hegemony annotations */
+function annotate(id, yr, text, anchor){
+  const s = series.find(s=>s.key===id); if(!s) return;
+  const d = s[yr-Y0];
+  svg.append("text").attr("x",x(yr)).attr("y",yS((d[0]+d[1])/2)-14)
+    .attr("text-anchor",anchor||"middle").attr("fill","#c9a24b").attr("font-size",10.5)
+    .attr("letter-spacing","1").attr("pointer-events","none").text(text);
+}
+annotate("standard",1895,"※ 90% OF REFINING — THE PRICE ITSELF");
+annotate("aramco",2008,"※ THE SWING PRODUCER","middle");
+
+const breakupMark = svg.append("g").attr("pointer-events","none");
+breakupMark.append("line")
+  .attr("x1",x(1911)).attr("x2",x(1911)).attr("y1",M.t-4).attr("y2",H-M.b)
+  .attr("stroke","#e15a4a").attr("stroke-width",3);
+breakupMark.append("text")
+  .attr("x",x(1911)+9).attr("y",M.t+13)
+  .attr("fill","#f2c0b8").attr("font-size",12).attr("font-weight",700).attr("letter-spacing","1.2")
+  .text("1911 · STANDARD OIL BROKEN INTO 34 BABY STANDARDS");
+
+/* fall / merger seals */
+const tt1 = document.getElementById("tt1");
+const wrap1 = document.getElementById("chart-wrap");
+function showTip(tt, wrap, ev, html){
+  tt.style.display="block"; tt.innerHTML=html;
+  const r=wrap.getBoundingClientRect();
+  let tx=ev.clientX-r.left+16, ty=ev.clientY-r.top-10;
+  if(tx>r.width-310) tx-=330;
+  tt.style.left=tx+"px"; tt.style.top=ty+"px";
+}
+let sealIdx=0;
+CLANS.filter(c=>c.fate.yr).forEach(c=>{
+  const s = series.find(s=>s.key===c.id);
+  if(!s) return;
+  const yr = Math.min(c.fate.yr, Y1);
+  let j = yr - Y0;
+  while(j>0 && (s[j][1]-s[j][0])<0.4) j--;
+  const mid=(s[j][0]+s[j][1])/2;
+  const isSub = c.fate.kind==="sub";
+  const stagger = yr>=1980 ? -(10 + (sealIdx++ % 3)*12) : -10;
+  const g=svg.append("g").style("cursor","help");
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",12).attr("fill","transparent");
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",5.5)
+    .attr("fill",isSub?"transparent":"#b3372a").attr("stroke",isSub?"#c9a24b":"#151210").attr("stroke-width",isSub?2:1.5);
+  g.append("text").attr("x",x(yr)).attr("y",yS(mid)+stagger)
+    .attr("text-anchor", yr>2010?"end":"middle")
+    .attr("fill",isSub?"#d9c27f":"#e8b0a6").attr("font-size",10.5).attr("letter-spacing","1")
+    .text(c.name.toUpperCase().replace(/ \(.*\)/,"")+" · "+c.fate.yr);
+  g.on("mousemove",ev=>{
+     showTip(tt1,wrap1,ev,
+      `<div class="yr">${c.fate.yr} · ${isSub?"MERGED / BOUGHT OUT":"HOUSE FALLS"}</div>
+       <div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="fate-t" style="color:${isSub?'#d9c27f':'#d98a7f'}">${c.fate.txt}</div>
+       ${c.fate.by?`<div class="pw" style="margin-top:4px"><b style="color:#e6ddc8">Taken by:</b> ${c.fate.by}</div>`:""}`);
+   }).on("mouseleave",()=>{tt1.style.display="none";});
+});
+
+/* event marker */
+const marker = svg.append("g").style("display","none").attr("pointer-events","none");
+marker.append("line").attr("y1",M.t-4).attr("y2",H-M.b).attr("stroke","#c9a24b").attr("stroke-width",1).attr("stroke-dasharray","3 4");
+const markerLabel = marker.append("text").attr("y",M.t+8).attr("fill","#c9a24b").attr("font-size",11).attr("letter-spacing","1.5");
+
+/* hover crosshair + band tooltip */
+const cross = svg.append("line").attr("y1",M.t).attr("y2",H-M.b)
+  .attr("stroke","rgba(230,221,200,.35)").attr("stroke-width",1).style("display","none").attr("pointer-events","none");
+
+paths.on("mousemove",function(ev,d){
+    paths.attr("fill-opacity",s=>s.key===d.key?1:.35);
+    const [mx]=d3.pointer(ev,svg.node());
+    const yr=Math.max(Y0,Math.min(Y1,Math.round(x.invert(mx))));
+    cross.style("display",null).attr("x1",x(yr)).attr("x2",x(yr));
+    const row=rows[yr-Y0], c=byId[d.key], v=row[d.key];
+    const mbd=(v/100*mktAt(yr));
+    const mbdTxt = mbd>=1 ? mbd.toFixed(1)+" million barrels/day" : (mbd*1000).toFixed(0)+" thousand barrels/day";
+    const suz = c.suzerain && yr>=c.suzerain.a && yr<=c.suzerain.b
+      ? `<div class="pw" style="margin-top:5px;color:#d9c27f">※ ${c.suzerain.note}</div>` : "";
+    showTip(tt1,wrap1,ev,
+      `<div class="yr">${yr}</div><div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="pw">≈ <b style="color:#e6ddc8">${v.toFixed(1)}%</b> of world production</div>
+       <div class="pw">≈ ${mbdTxt} that year</div>
+       <div class="pw" style="margin-top:4px">${c.region}</div>${suz}`);
+  })
+  .on("mouseleave",()=>{paths.attr("fill-opacity",.92); cross.style("display","none"); tt1.style.display="none";});
+
+/* ================= SANKEY ================= */
+(function(){
+  const SW=1500, SH=680, SM={t:16,r:280,b:16,l:210};
+  const s = d3.select("#sankey").attr("viewBox",`0 0 ${SW} ${SH}`);
+  const nodes = SK_NODES.map(n=>({name:n}));
+  const idx = Object.fromEntries(SK_NODES.map((n,i)=>[n,i]));
+  const links = SK_LINKS.map(l=>({source:idx[l.s],target:idx[l.t],value:l.v,kind:l.kind,e:l.e,s:l.s,t:l.t}));
+  const sk = d3.sankey().nodeWidth(16).nodePadding(16)
+    .extent([[SM.l,SM.t],[SW-SM.r,SH-SM.b]]);
+  const graph = sk({nodes:nodes.map(d=>({...d})), links:links.map(d=>({...d}))});
+
+  const tt2=document.getElementById("tt2"), wrap2=document.getElementById("sankey-wrap");
+
+  s.append("g").selectAll("path").data(graph.links).join("path")
+    .attr("d",d3.sankeyLinkHorizontal())
+    .attr("fill","none")
+    .attr("stroke",d=>d.kind==="fall"?"#b3372a":"#c9a24b")
+    .attr("stroke-opacity",.38)
+    .attr("stroke-width",d=>Math.max(1.5,d.width))
+    .style("cursor","help")
+    .on("mousemove",function(ev,d){
+      d3.select(this).attr("stroke-opacity",.75);
+      showTip(tt2,wrap2,ev,
+        `<div class="yr">${d.kind==="fall"?"TAKEN — COURT, COUP OR REVOLUTION":"MERGER / BUYOUT"}</div>
+         <div class="nm"><span style="color:${SK_COLORS[d.s]}">${d.s}</span> → <span style="color:${SK_COLORS[d.t]}">${d.t}</span></div>
+         <div class="pw">≈ ${d.value} share points of world production</div>
+         <div class="pw" style="margin-top:4px">${d.e}</div>`);
+    })
+    .on("mouseleave",function(){d3.select(this).attr("stroke-opacity",.38); tt2.style.display="none";});
+
+  const ng = s.append("g").selectAll("g").data(graph.nodes).join("g");
+  ng.append("rect")
+    .attr("x",d=>d.x0).attr("y",d=>d.y0)
+    .attr("width",d=>d.x1-d.x0).attr("height",d=>Math.max(2,d.y1-d.y0))
+    .attr("fill",d=>SK_COLORS[d.name]).attr("stroke","#151210");
+  ng.append("text")
+    .attr("x",d=>d.x0 < SW/2 ? d.x0-8 : d.x1+8)
+    .attr("y",d=>(d.y0+d.y1)/2+4)
+    .attr("text-anchor",d=>d.x0 < SW/2 ? "end":"start")
+    .attr("fill","#e6ddc8").attr("font-size",12.5).attr("letter-spacing",".5")
+    .text(d=>d.name);
+})();
+
+/* ================= THE SEVEN SISTERS, 1950 ================= */
+(function(){
+  const R=[
+   {n:"Jersey Standard (Exxon)", v:12, col:"#c1442e", role:"The eldest sister", side:"→ lost the land, kept the crown",
+    fate:"The largest fragment of 1911 and the largest company in the world for much of the century. Lost Venezuela and its Aramco stake to the Confiscation, remarried Mobil in 1999, and remains the last house standing at full strength.", cls:"#c9a24b"},
+   {n:"Royal Dutch Shell", v:12, col:"#b8963c", role:"The rival built to fight Standard", side:"→ survived every era, reduced",
+    fate:"Samuel's tankers plus Deterding's wells, merged in 1907 explicitly to fight Rockefeller. Co-authored the Achnacarry cartel, lost the Confiscation like everyone, and pivoted to gas — still arguing with its own shareholders about what it should become.", cls:"#d9c27f"},
+   {n:"Anglo-Iranian (BP)", v:7, col:"#5e8a5a", role:"The Crown's company", side:"→ broken by Iran, twice",
+    fate:"Churchill's 51% made it an instrument of state — which is exactly why Mossadegh seized it in 1951 and Khomeini finished the job in 1979. Rebuilt twice on new frontiers; wounded a third time by its own rig at Macondo.", cls:"#d98a7f"},
+   {n:"Gulf Oil", v:6, col:"#de8a3c", role:"The Mellons' sister", side:"† 1984 — first sister to fall",
+    fate:"Half of Kuwait's ocean of oil until the 1975 nationalization took it in a stroke. Drifted for a decade, then Boone Pickens' raid forced the sale to Chevron — the first mega-merger, and the first sister's funeral.", cls:"#d98a7f"},
+   {n:"Texaco", v:5.5, col:"#3d8f80", role:"The Spindletop sister", side:"→ bankrupted by a handshake",
+    fate:"The only company selling in all 50 states. Snatched Getty from Pennzoil's handshake in 1984; the $10.5B verdict bankrupted it in 1987 — the largest bankruptcy in history at the time — and it merged into Chevron a shadow.", cls:"#d98a7f"},
+   {n:"Socony (Mobil)", v:5, col:"#b0486b", role:"The marketing sister", side:"→ the reunion, 1999",
+    fate:"Standard of New York, the Pegasus, junior partner in Aramco. Remarried Jersey Standard in 1999 — 88 years after the Supreme Court separated them, the breakup's most explicit undoing.", cls:"#d9c27f"},
+   {n:"Socal (Chevron)", v:4, col:"#35548f", role:"The sister that found Arabia", side:"→ the consolidator",
+    fate:"The smallest sister made the greatest bet in commercial history: the 1933 Saudi concession for ~£35,000 in gold. Lost Aramco to the buyout, then spent forty years eating its siblings — Gulf, Texaco, and finally Hess.", cls:"#c9a24b"},
+  ];
+  const RW=1500, RH=360, RM={t:20,r:330,b:30,l:230};
+  const s=d3.select("#regents").attr("viewBox",`0 0 ${RW} ${RH}`);
+  const rx=d3.scaleLinear([0,13],[RM.l,RW-RM.r]);
+  const ry=d3.scaleBand(R.map(d=>d.n),[RM.t,RH-RM.b]).padding(0.32);
+  const tt3=document.getElementById("tt3"), wrap3=document.getElementById("regents-wrap");
+
+  [3,6,9,12].forEach(v=>{
+    s.append("line").attr("x1",rx(v)).attr("x2",rx(v)).attr("y1",RM.t).attr("y2",RH-RM.b).attr("stroke","rgba(230,221,200,.07)");
+    s.append("text").attr("x",rx(v)).attr("y",RH-10).attr("text-anchor","middle")
+      .attr("fill","#726852").attr("font-size",11).attr("font-family","var(--sans)").text(v+"% of world output");
+  });
+
+  R.forEach(d=>{
+    const g=s.append("g").style("cursor","help");
+    g.append("rect").attr("x",rx(0)).attr("y",ry(d.n)).attr("width",rx(d.v)-rx(0)).attr("height",ry.bandwidth())
+      .attr("fill",d.col).attr("fill-opacity",.92).attr("stroke","#151210");
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+4).attr("text-anchor","end")
+      .attr("fill","#e6ddc8").attr("font-size",13).text(d.n);
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+17).attr("text-anchor","end")
+      .attr("fill","#8a7340").attr("font-size",10).attr("letter-spacing","1").text(d.role.toUpperCase());
+    g.append("text").attr("x",rx(d.v)+10).attr("y",ry(d.n)+ry.bandwidth()/2+4)
+      .attr("fill",d.cls).attr("font-size",12).attr("font-family","var(--sans)")
+      .text(d.v.toFixed(1)+"% · "+d.side);
+    g.on("mousemove",ev=>showTip(tt3,wrap3,ev,
+       `<div class="yr">${d.role.toUpperCase()} · ≈${d.v}% OF WORLD OUTPUT (1950)</div>
+        <div class="nm" style="color:${d.col}">${d.n}</div>
+        <div class="pw">${d.fate}</div>`))
+     .on("mouseleave",()=>{tt3.style.display="none";});
+  });
+})();
+
+/* ================= EVENTS ================= */
+const evWrap=document.getElementById("events");
+EVENTS.forEach(e=>{
+  const div=document.createElement("button");
+  div.type="button";
+  div.dataset.year=String(e.yr);
+  div.className="ev"+(e.fall?" fall":"");
+  div.innerHTML=`<div class="yr">${e.label}</div><div class="nm">${e.name}</div>${e.txt}`;
+  div.onclick=()=>{
+    document.querySelectorAll(".ev").forEach(n=>n.classList.remove("active"));
+    div.classList.add("active");
+    marker.style("display",null);
+    marker.select("line").attr("x1",x(e.yr)).attr("x2",x(e.yr));
+    markerLabel.attr("text-anchor",e.yr>2000?"end":"start")
+      .attr("x",e.yr>2000?x(e.yr)-6:x(e.yr)+6).text(e.name.toUpperCase()+" · "+e.label);
+  };
+  evWrap.appendChild(div);
+});
+
+/* ================= FATES TABLE ================= */
+const KIND_LBL={destroyed:"Destroyed",submitted:"Absorbed",survived:"Still pumping",victor:"Victor"};
+const tbl=document.getElementById("fates");
+tbl.innerHTML=`<tr><th>House</th><th>Peak</th><th>Folded</th><th>How it ended</th><th>Taken / absorbed by</th><th>Outcome</th></tr>`+
+ FATES.map(f=>`<tr>
+   <td><span class="sw" style="background:${f.col}"></span>${f.c}</td>
+   <td>${f.peak}</td>
+   <td class="num">${f.yr}</td>
+   <td>${f.how}</td>
+   <td>${f.by}</td>
+   <td class="k-${f.kind}">${KIND_LBL[f.kind]}</td></tr>`).join("");
+
+/* ================= HOUSE CARDS ================= */
+const clWrap=document.getElementById("clans");
+CLANS.filter(c=>c.id!=="other").forEach(c=>{
+  const div=document.createElement("div");
+  div.className="clan"; div.style.setProperty("--c",c.color);
+  const fk=c.fate.kind==="fall"?"fall":(c.fate.kind==="sub"?"sub":"live");
+  div.innerHTML=`<div class="nm"><i>▲</i> ${c.name}</div>
+    <div class="meta"><b>Core:</b> ${c.region}<br><b>Peak:</b> ${c.peak}</div>
+    <div class="fate ${fk}">${c.fate.txt}</div>`;
+  clWrap.appendChild(div);
+});
+</script>
+<script src="/timeline-shell.js?v=3"></script>
+</body>
+</html>

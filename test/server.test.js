@@ -38,6 +38,7 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /href="\/airline-wars"/);
   assert.match(homepage, /href="\/wall-street-houses"/);
   assert.match(homepage, /href="\/railroad-empires"/);
+  assert.match(homepage, /href="\/oil-wars"/);
 });
 
 test('serves the researched railroad empires visualization', async () => {
@@ -47,6 +48,17 @@ test('serves the researched railroad empires visualization', async () => {
   assert.match(page, /THE IRON DAIMYŌ/);
   assert.match(page, /Research Anchors/);
   assert.match(page, /UP proposes to acquire NS/);
+  assert.match(page, /timeline-shell\.js/);
+});
+
+test('serves the oil wars and makes the Baby Standards explicit', async () => {
+  const response = await fetch(`${base}/oil-wars`);
+  assert.equal(response.status, 200);
+  const page = await response.text();
+  assert.match(page, /THE OIL WARS/);
+  assert.match(page, /34-way Breakup/);
+  assert.match(page, /Standard Oil of New Jersey/);
+  assert.match(page, /Sun Oil was independent/);
   assert.match(page, /timeline-shell\.js/);
 });
 

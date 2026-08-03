@@ -79,6 +79,12 @@ body.timeline-shell-mode {
   color: var(--gold);
 }
 
+.timeline-action-primary {
+  border-color: var(--seal);
+  background: color-mix(in srgb, var(--seal) 24%, var(--ink-2));
+  color: var(--paper);
+}
+
 .timeline-action:hover,
 .timeline-drawer-tab:hover,
 .timeline-drawer-tab[aria-selected="true"] {
@@ -200,6 +206,18 @@ body.timeline-shell-mode {
 .timeline-event-rail .ev.active {
   border-color: var(--gold);
   background: color-mix(in srgb, var(--gold) 9%, var(--ink-3));
+}
+
+.timeline-event-rail .timeline-featured-event {
+  min-width: 190px;
+  border-color: var(--seal);
+  border-top-width: 3px;
+  background: color-mix(in srgb, var(--seal) 20%, var(--ink-3));
+}
+
+.timeline-event-rail .timeline-featured-event .nm::before {
+  content: "The breakup · ";
+  color: var(--paper);
 }
 
 .timeline-event-popover {
