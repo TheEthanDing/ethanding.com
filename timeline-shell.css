@@ -1,0 +1,429 @@
+body.timeline-shell-mode {
+  height: 100dvh;
+  min-height: 540px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.timeline-app {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: 100%;
+  max-width: 100vw;
+  min-width: 0;
+  height: 100dvh;
+  min-height: 540px;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.timeline-topbar {
+  position: relative;
+  z-index: 3;
+  padding: 12px clamp(14px, 2vw, 30px) 10px;
+  border-bottom: 1px solid var(--hair);
+  background: var(--ink);
+  min-width: 0;
+  width: 100%;
+}
+
+.timeline-topbar .site-nav {
+  margin: 0 0 9px;
+}
+
+.timeline-topbar header {
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.timeline-topbar header > div:first-child {
+  min-width: 0;
+  flex: 1;
+}
+
+.timeline-topbar h1 {
+  max-width: none;
+  font-size: clamp(16px, 1.7vw, 25px);
+  line-height: 1.16;
+}
+
+.timeline-actions {
+  display: flex;
+  flex: none;
+  gap: 8px;
+  align-items: center;
+}
+
+.timeline-action,
+.timeline-drawer-tab,
+.timeline-popover-close,
+.timeline-drawer-close {
+  appearance: none;
+  border: 1px solid var(--hair);
+  border-radius: 0;
+  background: var(--ink-2);
+  color: var(--paper);
+  font: 600 11px/1 var(--sans);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.timeline-action {
+  padding: 10px 13px;
+  color: var(--gold);
+}
+
+.timeline-action:hover,
+.timeline-drawer-tab:hover,
+.timeline-drawer-tab[aria-selected="true"] {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.timeline-action:focus-visible,
+.timeline-drawer-tab:focus-visible,
+.timeline-popover-close:focus-visible,
+.timeline-drawer-close:focus-visible,
+.timeline-event-rail .ev:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.timeline-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: 10px clamp(8px, 1.5vw, 22px);
+  overflow: hidden;
+}
+
+.timeline-stage #chart-wrap {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.timeline-stage #chart {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+}
+
+.timeline-stage .chart-fate-marker text {
+  opacity: 0;
+  transition: opacity .14s ease;
+}
+
+.timeline-stage .chart-fate-marker:hover text {
+  opacity: 1;
+}
+
+.timeline-bottom {
+  position: relative;
+  z-index: 4;
+  border-top: 1px solid var(--hair);
+  background: var(--ink-2);
+  box-shadow: 0 -12px 30px rgba(0, 0, 0, .2);
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.timeline-rail-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+  padding: 8px clamp(14px, 2vw, 30px) 5px;
+  color: var(--gold);
+  font: 600 10px/1 var(--sans);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.timeline-rail-head span:last-child {
+  color: var(--paper-dim);
+  font-weight: 400;
+  letter-spacing: .08em;
+}
+
+.timeline-event-rail {
+  display: flex !important;
+  grid-template-columns: none !important;
+  gap: 7px !important;
+  width: 100%;
+  min-width: 0;
+  padding: 0 clamp(14px, 2vw, 30px) 10px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+
+.timeline-event-rail .ev {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 142px;
+  max-width: 240px;
+  min-height: 52px;
+  margin: 0;
+  padding: 7px 10px;
+  border-top-width: 1px;
+  text-align: left;
+  scroll-snap-align: start;
+  transform: none !important;
+}
+
+.timeline-event-rail .ev .yr {
+  font-size: 11px;
+  line-height: 1.1;
+}
+
+.timeline-event-rail .ev .nm {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.18;
+}
+
+.timeline-event-rail .ev.active {
+  border-color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 9%, var(--ink-3));
+}
+
+.timeline-event-popover {
+  position: absolute;
+  right: clamp(14px, 2vw, 30px);
+  bottom: calc(100% + 10px);
+  width: min(560px, calc(100vw - 28px));
+  padding: 16px 44px 16px 18px;
+  border: 1px solid var(--gold-dim);
+  background: var(--ink-2);
+  color: var(--paper-dim);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .55);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.timeline-event-popover[hidden] {
+  display: none;
+}
+
+.timeline-event-popover .timeline-event-date {
+  color: var(--gold);
+  font: 500 10px/1 var(--sans);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.timeline-event-popover h2 {
+  margin: 5px 0 7px;
+  color: var(--paper);
+  font-size: 19px;
+  line-height: 1.15;
+}
+
+.timeline-popover-close,
+.timeline-drawer-close {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--paper-dim);
+  font-size: 18px;
+}
+
+.timeline-popover-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.timeline-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(620px, 100vw);
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--gold-dim);
+  border-radius: 0;
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: -24px 0 70px rgba(0, 0, 0, .55);
+}
+
+.timeline-drawer::backdrop {
+  background: rgba(0, 0, 0, .66);
+  backdrop-filter: blur(2px);
+}
+
+.timeline-drawer-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+  padding: 18px;
+  border-bottom: 1px solid var(--hair);
+  background: var(--ink);
+}
+
+.timeline-drawer-kicker {
+  color: var(--gold);
+  font: 500 10px/1 var(--sans);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.timeline-drawer-title {
+  margin: 6px 0 0;
+  color: var(--paper);
+  font-size: 22px;
+  line-height: 1.18;
+}
+
+.timeline-drawer-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 10px 18px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--hair);
+  background: var(--ink-2);
+}
+
+.timeline-drawer-tab {
+  flex: none;
+  padding: 8px 10px;
+  color: var(--paper-dim);
+  white-space: nowrap;
+}
+
+.timeline-drawer-content {
+  height: calc(100dvh - 126px);
+  padding: 20px 20px 48px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.timeline-drawer-content > .legend-box,
+.timeline-drawer-content > .sub {
+  max-width: none;
+  margin-bottom: 16px;
+}
+
+.timeline-drawer-content #sankey-wrap,
+.timeline-drawer-content #regents-wrap,
+.timeline-drawer-content .table-scroll {
+  overflow-x: auto;
+}
+
+.timeline-drawer-content #sankey,
+.timeline-drawer-content #regents {
+  min-width: 860px;
+}
+
+.timeline-drawer-content footer {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hair);
+}
+
+@media (max-width: 760px) {
+  body.timeline-shell-mode,
+  .timeline-app {
+    min-height: 500px;
+  }
+
+  .timeline-topbar {
+    padding: 9px 10px 8px;
+  }
+
+  .timeline-topbar .site-nav {
+    margin-bottom: 6px;
+  }
+
+  .timeline-topbar h1 {
+    font-size: 14px;
+    letter-spacing: .02em;
+  }
+
+  .timeline-action {
+    padding: 8px 9px;
+    font-size: 9px;
+  }
+
+  .timeline-stage {
+    padding: 6px;
+    overflow-x: auto;
+  }
+
+  .timeline-stage #chart-wrap {
+    width: 900px;
+    overflow: visible;
+  }
+
+  .timeline-stage #chart {
+    width: 900px !important;
+    max-width: none;
+  }
+
+  .timeline-rail-head {
+    padding: 7px 10px 4px;
+  }
+
+  .timeline-rail-head span:last-child {
+    display: none;
+  }
+
+  .timeline-event-rail {
+    padding: 0 10px 8px;
+  }
+
+  .timeline-event-rail .ev {
+    min-width: 130px;
+    max-width: 190px;
+    min-height: 48px;
+  }
+
+  .timeline-event-popover {
+    right: 10px;
+    bottom: calc(100% + 7px);
+    width: calc(100vw - 20px);
+    max-height: 38vh;
+    overflow: auto;
+  }
+
+  .timeline-drawer-head {
+    padding: 14px;
+  }
+
+  .timeline-drawer-tabs {
+    padding: 8px 14px;
+  }
+
+  .timeline-drawer-content {
+    padding: 16px 14px 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-stage .chart-fate-marker text {
+    transition: none;
+  }
+}

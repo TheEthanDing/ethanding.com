@@ -47,6 +47,16 @@ test('serves the researched railroad empires visualization', async () => {
   assert.match(page, /THE IRON DAIMYŌ/);
   assert.match(page, /Research Anchors/);
   assert.match(page, /UP proposes to acquire NS/);
+  assert.match(page, /timeline-shell\.js/);
+});
+
+test('serves the shared one-page timeline interface', async () => {
+  const script = await fetch(`${base}/timeline-shell.js`);
+  assert.equal(script.status, 200);
+  assert.match(await script.text(), /Explore the story/);
+  const styles = await fetch(`${base}/timeline-shell.css`);
+  assert.equal(styles.status, 200);
+  assert.match(await styles.text(), /timeline-event-rail/);
 });
 
 test('serves the researched Wall Street houses visualization', async () => {

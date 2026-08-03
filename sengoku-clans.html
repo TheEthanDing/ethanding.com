@@ -95,6 +95,7 @@
   }
   @media (prefers-reduced-motion:reduce){.ev{transition:none}.ev:hover{transform:none}}
 </style>
+<link rel="stylesheet" href="/timeline-shell.css?v=2">
 </head>
 <body>
 
@@ -665,7 +666,6 @@ EVENTS.forEach(e=>{
     marker.select("line").attr("x1",x(e.yr)).attr("x2",x(e.yr));
     markerLabel.attr("text-anchor",e.yr>1585?"end":"start")
       .attr("x",e.yr>1585?x(e.yr)-6:x(e.yr)+6).text(e.name.toUpperCase()+" · "+e.label);
-    document.getElementById("chart-wrap").scrollIntoView({behavior:"smooth",block:"center"});
   };
   evWrap.appendChild(div);
 });
@@ -694,5 +694,6 @@ CLANS.filter(c=>c.id!=="other" && !c.id.startsWith("vassals")).forEach(c=>{
   clWrap.appendChild(div);
 });
 </script>
+<script src="/timeline-shell.js?v=2"></script>
 </body>
 </html>

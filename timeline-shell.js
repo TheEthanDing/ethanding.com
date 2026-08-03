@@ -1,0 +1,160 @@
+(() => {
+  const chartWrap = document.getElementById('chart-wrap');
+  const chart = document.getElementById('chart');
+  const events = document.getElementById('events');
+  const header = document.querySelector('body > header');
+  const nav = document.querySelector('body > .site-nav');
+
+  if (!chartWrap || !chart || !events || !header || document.body.classList.contains('timeline-shell-mode')) return;
+  document.body.classList.add('timeline-shell-mode');
+
+  const compactLabel = (title) => {
+    if (/^Chain of/.test(title)) return title.split('—')[0].trim();
+    if (/^How Every/.test(title)) return 'Fates';
+    if (/^The Great/.test(title)) return 'Profiles';
+    if (/Research Anchors/i.test(title)) return 'Sources';
+    if (/Unclosed Gate/i.test(title)) return "What's next";
+    const short = title.split('—')[0].trim();
+    return short.length > 34 ? `${short.slice(0, 31).trim()}…` : short;
+  };
+
+  const introNodes = [];
+  const intro = header.querySelector('.sub');
+  const legend = header.querySelector('.legend-box');
+  if (intro) introNodes.push(intro);
+  if (legend) introNodes.push(legend);
+
+  const sections = [];
+  const titles = Array.from(document.querySelectorAll('body > .section-title'));
+
+  titles.forEach((title) => {
+    const nodes = [];
+    let node = title.nextSibling;
+    while (node && !(node.nodeType === 1 && node.classList.contains('section-title')) && !(node.nodeType === 1 && node.tagName === 'SCRIPT') && !(node.nodeType === 1 && node.tagName === 'FOOTER')) {
+      const next = node.nextSibling;
+      nodes.push(node);
+      node = next;
+    }
+
+    title.remove();
+    if (nodes.some((item) => item === events || (item.nodeType === 1 && item.contains?.(events)))) return;
+    sections.push({ title: title.textContent.trim(), label: compactLabel(title.textContent.trim()), nodes });
+  });
+
+  if (introNodes.length) sections.unshift({ title: 'How to read this timeline', label: 'Guide', nodes: introNodes });
+
+  const footer = document.querySelector('body > footer');
+  if (footer) {
+    const sources = sections.find((section) => section.label === 'Sources');
+    if (sources) sources.nodes.push(footer);
+    else sections.push({ title: 'Notes and definitions', label: 'Notes', nodes: [footer] });
+  }
+
+  sections.forEach((section) => section.nodes.forEach((node) => node.remove()));
+
+  const app = document.createElement('main');
+  app.className = 'timeline-app';
+
+  const topbar = document.createElement('div');
+  topbar.className = 'timeline-topbar';
+  if (nav) topbar.appendChild(nav);
+
+  const actions = document.createElement('div');
+  actions.className = 'timeline-actions';
+  const explore = document.createElement('button');
+  explore.type = 'button';
+  explore.className = 'timeline-action';
+  explore.textContent = 'Explore the story';
+  actions.appendChild(explore);
+  header.appendChild(actions);
+  topbar.appendChild(header);
+
+  const stage = document.createElement('section');
+  stage.className = 'timeline-stage';
+  stage.setAttribute('aria-label', 'Timeline chart');
+  stage.appendChild(chartWrap);
+
+  Array.from(chart.querySelectorAll('g')).forEach((group) => {
+    const children = Array.from(group.children);
+    const circles = children.filter((child) => child.tagName?.toLowerCase() === 'circle');
+    const label = children.find((child) => child.tagName?.toLowerCase() === 'text');
+    if (circles.length >= 2 && label) {
+      group.classList.add('chart-fate-marker');
+      group.setAttribute('aria-label', label.textContent.trim());
+    }
+  });
+
+  const bottom = document.createElement('section');
+  bottom.className = 'timeline-bottom';
+  bottom.setAttribute('aria-label', 'Timeline events');
+
+  const railHead = document.createElement('div');
+  railHead.className = 'timeline-rail-head';
+  railHead.innerHTML = '<span>Events</span><span>Choose a moment to pin it on the chart</span>';
+
+  const popover = document.createElement('aside');
+  popover.className = 'timeline-event-popover';
+  popover.hidden = true;
+  popover.setAttribute('aria-live', 'polite');
+  popover.innerHTML = '<button type="button" class="timeline-popover-close" aria-label="Close event details">×</button><div class="timeline-event-date"></div><h2></h2><p></p>';
+  popover.querySelector('.timeline-popover-close').addEventListener('click', () => { popover.hidden = true; });
+
+  events.classList.add('timeline-event-rail');
+  Array.from(events.querySelectorAll('.ev')).forEach((eventButton) => {
+    const year = eventButton.querySelector('.yr')?.textContent.trim() || '';
+    const name = eventButton.querySelector('.nm')?.textContent.trim() || '';
+    const copyNodes = Array.from(eventButton.childNodes).filter((node) => node.nodeType === 3 && node.textContent.trim());
+    const copy = copyNodes.map((node) => node.textContent.trim()).join(' ');
+    copyNodes.forEach((node) => node.remove());
+    eventButton.setAttribute('aria-label', `${year}. ${name}. ${copy}`);
+    eventButton.setAttribute('aria-pressed', eventButton.classList.contains('active') ? 'true' : 'false');
+    eventButton.addEventListener('click', () => {
+      events.querySelectorAll('.ev').forEach((button) => button.setAttribute('aria-pressed', button === eventButton ? 'true' : 'false'));
+      popover.querySelector('.timeline-event-date').textContent = year;
+      popover.querySelector('h2').textContent = name;
+      popover.querySelector('p').textContent = copy;
+      popover.hidden = false;
+    });
+  });
+
+  bottom.append(railHead, popover, events);
+  app.append(topbar, stage, bottom);
+
+  const drawer = document.createElement('dialog');
+  drawer.className = 'timeline-drawer';
+  drawer.setAttribute('aria-label', 'Timeline story explorer');
+  drawer.innerHTML = '<div class="timeline-drawer-head"><div><div class="timeline-drawer-kicker">Story explorer</div><h2 class="timeline-drawer-title"></h2></div><button type="button" class="timeline-drawer-close" aria-label="Close story explorer">×</button></div><div class="timeline-drawer-tabs" role="tablist" aria-label="Story sections"></div><div class="timeline-drawer-content" role="tabpanel"></div>';
+
+  const drawerTitle = drawer.querySelector('.timeline-drawer-title');
+  const drawerTabs = drawer.querySelector('.timeline-drawer-tabs');
+  const drawerContent = drawer.querySelector('.timeline-drawer-content');
+  const tabButtons = [];
+
+  const showSection = (index) => {
+    const section = sections[index];
+    if (!section) return;
+    drawerTitle.textContent = section.title;
+    drawerContent.replaceChildren(...section.nodes);
+    tabButtons.forEach((button, buttonIndex) => button.setAttribute('aria-selected', buttonIndex === index ? 'true' : 'false'));
+    drawerContent.scrollTop = 0;
+    if (!drawer.open) drawer.showModal();
+  };
+
+  sections.forEach((section, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'timeline-drawer-tab';
+    button.setAttribute('role', 'tab');
+    button.setAttribute('aria-selected', 'false');
+    button.textContent = section.label;
+    button.addEventListener('click', () => showSection(index));
+    tabButtons.push(button);
+    drawerTabs.appendChild(button);
+  });
+
+  explore.addEventListener('click', () => showSection(0));
+  drawer.querySelector('.timeline-drawer-close').addEventListener('click', () => drawer.close());
+  drawer.addEventListener('click', (event) => { if (event.target === drawer) drawer.close(); });
+
+  document.body.replaceChildren(app, drawer);
+})();
