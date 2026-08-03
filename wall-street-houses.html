@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Houses of Wall Street · Ethan Ding</title>
+<meta name="description" content="An interactive history of Wall Street's great investment banks, their mergers, failures, and shifting share of the global banking and markets wallet.">
+<link rel="icon" href="/images/profile.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-sankey/0.12.3/d3-sankey.min.js"></script>
+<style>
+  :root{
+    --ink:#101216; --ink-2:#15181f; --ink-3:#1a1e27;
+    --gold:#c9a24b; --gold-dim:#8a7340;
+    --paper:#e2e4e0; --paper-dim:#99a09c;
+    --seal:#b3372a;
+    --hair:rgba(201,162,75,.22);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans:"Avenir Next","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--paper);font-family:var(--serif);padding:20px clamp(14px,3vw,44px) 40px;}
+  .site-nav{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:22px;
+            font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-dim);}
+  .site-nav a{color:var(--gold);text-decoration:none;border-bottom:1px solid transparent;padding:4px 0;}
+  .site-nav a:hover{border-color:var(--gold);}
+  header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;
+         border-bottom:1px solid var(--hair);padding-bottom:18px;margin-bottom:6px;}
+  h1{font-size:clamp(20px,2.8vw,32px);font-weight:600;letter-spacing:.04em;}
+  h1 .era{color:var(--gold);font-weight:400;}
+  .sub{color:var(--paper-dim);font-size:13.5px;margin-top:6px;max-width:780px;line-height:1.55;}
+  .sub b{color:var(--paper);font-weight:600;}
+  .legend-box{border:1px solid var(--hair);padding:10px 14px;background:var(--ink-2);min-width:250px;}
+  .legend-box .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+  .legend-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--paper-dim);margin-top:5px;}
+  .seal-dot{width:12px;height:12px;border-radius:50%;background:var(--seal);box-shadow:0 0 0 2px rgba(179,55,42,.3);flex:none;}
+  .sub-dot{width:11px;height:11px;border-radius:50%;background:transparent;border:2px solid var(--gold);flex:none;}
+  .gold-tick{width:12px;height:0;border-top:1px dashed var(--gold);flex:none;}
+  #chart-wrap,#sankey-wrap{position:relative;background:var(--ink-2);border:1px solid var(--hair);margin-top:16px;padding:6px 6px 0;}
+  #chart,#sankey{display:block;width:100%;height:auto;}
+  .tooltip{position:absolute;pointer-events:none;background:#0b0d11;border:1px solid var(--gold-dim);
+           padding:9px 12px;font-size:12.5px;line-height:1.5;color:var(--paper);display:none;z-index:5;max-width:300px;
+           box-shadow:0 6px 18px rgba(0,0,0,.55);}
+  .tooltip .yr{color:var(--gold);letter-spacing:.12em;font-size:11px;}
+  .tooltip .nm{font-size:14.5px;margin:2px 0 3px;}
+  .tooltip .pw{color:var(--paper-dim);}
+  .tooltip .fate-t{color:#d98a7f;margin-top:4px;}
+  .section-title{margin:32px 0 12px;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);
+                 display:flex;align-items:center;gap:14px;}
+  .section-title::after{content:"";flex:1;border-top:1px solid var(--hair);}
+  .section-sub{color:var(--paper-dim);font-size:13px;line-height:1.55;margin:-4px 0 12px;max-width:900px;}
+  #events{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px;}
+  .ev{background:var(--ink-3);border:1px solid rgba(201,162,75,.14);border-top:2px solid var(--gold-dim);
+      padding:12px 13px;font:inherit;font-size:12.5px;line-height:1.5;color:var(--paper-dim);cursor:pointer;
+      text-align:left;transition:border-color .15s, transform .15s;}
+  .ev:hover,.ev.active{border-color:var(--gold);transform:translateY(-2px);}
+  .ev:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .ev .yr{font-family:var(--sans);font-size:15px;color:var(--paper);letter-spacing:.02em;}
+  .ev .nm{color:var(--gold);font-size:13px;margin:3px 0 6px;font-weight:600;}
+  .ev.fall .yr::after{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--seal);margin-left:8px;}
+  #fates{width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.5;}
+  #fates th{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);text-align:left;
+            padding:8px 10px;border-bottom:1px solid var(--hair);}
+  #fates td{padding:8px 10px;border-bottom:1px solid rgba(226,228,224,.07);color:var(--paper-dim);vertical-align:top;}
+  #fates td:first-child{color:var(--paper);white-space:nowrap;font-weight:600;}
+  #fates .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:1px;}
+  #fates .k-destroyed{color:#d98a7f;} #fates .k-submitted{color:#d9c27f;} #fates .k-survived{color:#9dbf9a;} #fates .k-victor{color:#c9a24b;font-weight:600;}
+  #fates td.num{white-space:nowrap;font-family:var(--sans);}
+  #clans{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+  .clan{padding:12px 13px;border:1px solid rgba(226,228,224,.08);background:var(--ink-3);
+        border-left:5px solid var(--c);font-size:12.5px;line-height:1.55;color:var(--paper-dim);}
+  .clan .nm{color:var(--paper);font-size:14.5px;font-weight:600;letter-spacing:.03em;}
+  .clan .nm i{font-style:normal;color:var(--c);}
+  .clan .meta{margin-top:5px;}
+  .clan .meta b{color:var(--paper);font-weight:600;}
+  .clan .fate{margin-top:5px;padding-top:5px;border-top:1px dashed rgba(226,228,224,.12);}
+  .clan .fate.fall{color:#d98a7f;} .clan .fate.sub{color:#d9c27f;} .clan .fate.live{color:#9dbf9a;}
+  .fermi{margin-top:14px;border:1px dashed var(--gold-dim);padding:14px 16px;font-size:12.5px;line-height:1.7;color:var(--paper-dim);}
+  .fermi b{color:var(--gold);font-weight:600;}
+  .sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px 18px;
+           margin-top:14px;padding:14px 16px;border:1px solid var(--hair);font-family:var(--sans);font-size:11.5px;line-height:1.5;}
+  .sources a{color:var(--paper-dim);text-decoration:none;border-bottom:1px solid rgba(201,162,75,.25);}
+  .sources a:hover{color:var(--paper);border-color:var(--gold);}
+  footer{margin-top:18px;color:#636b66;font-size:11.5px;line-height:1.55;}
+  .table-scroll{overflow-x:auto;}
+  @media (max-width:760px){
+    .site-nav span{display:none}
+    #chart-wrap,#sankey-wrap,#regents-wrap,.table-scroll{overflow-x:auto}
+    #chart,#sankey,#regents{width:900px!important;max-width:none}
+    #fates{min-width:880px}
+  }
+  @media (prefers-reduced-motion:reduce){.ev{transition:none}.ev:hover{transform:none}}
+</style>
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="/">← Ethan Ding</a>
+  <span>Interactive financial history · 1960–2025</span>
+</nav>
+
+<header>
+  <div>
+    <h1>THE HOUSES OF THE STREET <span class="era">(1960–2025)</span> — POWER OF THE GREAT INVESTMENT BANKS, IN MARKET SHARE</h1>
+    <p class="sub">Power is measured as an <b>illustrative share of the combined global investment-banking &amp; markets wallet</b> — underwriting, advisory, and trading,
+      reconstructed from league tables and reported segment revenue. A rough 2025 conversion is <b>1 share point ≈ $3–4 billion a year</b>.
+      The stack always totals 100%: when a house dies, its clients and its trades don't vanish — they're re-banked by someone else,
+      usually within the week. Hover any band <i>or any fall seal</i> for details; click a timeline event to mark its year.</p>
+  </div>
+  <div class="legend-box">
+    <div class="t">Reading the chart</div>
+    <div class="legend-row"><span class="seal-dot"></span>House dies — bankruptcy, scandal, or a weekend shotgun sale</div>
+    <div class="legend-row"><span class="sub-dot"></span>Merged / acquired — the franchise lives on under a new name</div>
+    <div class="legend-row"><span class="gold-tick"></span>Key event marker (click cards below)</div>
+    <div class="legend-row" style="margin-top:8px">Band height = % of the industry wallet</div>
+  </div>
+</header>
+
+<div id="chart-wrap"><svg id="chart" role="img" aria-label="Stacked area chart showing the estimated share of global investment banking and markets revenue held by major Wall Street firms from 1960 to 2025"></svg><div class="tooltip" id="tt1"></div></div>
+
+<div class="section-title">Chain of Succession — Who Absorbed Whom</div>
+<p class="section-sub">Each ribbon is franchise (in share points of the industry wallet) passing from the absorbed to the absorber.
+  <span style="color:#d98a7f">Red ribbons</span> = house destroyed — scandal, bankruptcy, or a corpse carved up over a weekend. <span style="color:#d9c27f">Gold ribbons</span> = merger or acquisition. Hover any ribbon for the deal or collapse behind it. Note the two houses with no inbound ribbons of consequence: <b>Goldman took one small commodities shop in 65 years and built the rest</b>; and note how many streams end at buyers who wished they hadn't.</p>
+<div id="sankey-wrap"><svg id="sankey" role="img" aria-label="Flow chart showing investment banks merging, failing, and passing franchises to successor firms"></svg><div class="tooltip" id="tt2"></div></div>
+
+<div class="section-title">Key Events Timeline</div>
+<div id="events"></div>
+
+<div class="section-title">The Goldman Anomaly — Last Partnership Standing</div>
+<div class="fermi">
+  <b>Why they got so powerful.</b> Three structural advantages, compounding for four decades.
+  <b>(1) They stayed private the longest:</b> through the 1980s every rival sold itself to a deep-pocketed parent — Salomon to Phibro, Lehman to American Express, Dean Witter to Sears, Kidder to GE — and every parent's capital dissolved the partners' discipline, because it was no longer <i>their</i> money at risk. Goldman's partners kept their entire net worth in the firm until the 1999 IPO, the last major house to convert. When your own fortune is the trading book, you read the risk reports differently.
+  <b>(2) The culture machine:</b> Gus Levy's "long-term greedy" — take the loss today, keep the client forever — plus the most selective recruiting on the Street and a partnership tournament that made the firm, not any product, the object of loyalty. Rivals were serially captured by their hot desk: Salomon <i>became</i> its bond floor, Drexel <i>became</i> Milken's junk machine, Bear and Lehman <i>became</i> their mortgage books. Goldman never let one desk become the firm.
+  <b>(3) They side-stepped the fatal trade:</b> in December 2006, when the mortgage desk started losing money ten days straight, Goldman's leadership ordered the whole book "closer to home" — and the firm entered 2008 hedged short the very securities that killed Bear, Lehman and Merrill. Ruthless, controversial, litigated — and the reason there's a band left to argue about.
+  <br><br>
+  <b>Why they stayed on top while the Street burned.</b> Strategy: they never bet the house on a single product war. Advisory when advisory paid, trading when trading paid, principal when principal paid — the revenue mix rotated while the franchise compounded. Every rival's obituary names its one fatal concentration; Goldman's near-death moments (Penn Central's paper in 1970, 1994's rate shock, 2008 itself) were survived precisely because no single position was the firm.
+  <br><br>
+  <b>Why the aura cracked anyway.</b> Victory brought the scrutiny the partnership had always avoided: the "vampire squid," the Abacus settlement (2010), 1MDB (a $2.9B penalty and a guilty-pleading subsidiary), and a billion-dollar wander into consumer lending (Marcus) that proved even Goldman can be tourists somewhere. The house that survived every war on the Street was nearly wounded worst in peacetime, by itself.
+</div>
+
+<div class="section-title">September 2008 — The Weekend the Fed Redrew the Map</div>
+<div class="fermi">
+  What happened over six months in 2008 looks like chaos until you see it as a single forced land reform. It was a <b>set of forced swaps, not rescues freely chosen</b> — and, like Hideyoshi at the Kantō, the sovereign decided who got what. In March, Bear Stearns — 85 years old, never a losing quarter until its final one — was handed to JPMorgan for <b>$2 a share</b> (raised to $10 to quell the shareholders' mob), with the Fed financing $29B of the corpse's worst assets. The precedent set, the Street assumed everyone would be caught.
+  <br><br>
+  Then came the weekend of September 13–14, when the sovereign chose differently: <b>(1)</b> Lehman — which had survived the Civil War, the Depression, and its own 1984 civil war — was allowed to fail outright, the largest bankruptcy in world history (~$613B), because Washington needed one head on a spike; <b>(2)</b> Merrill Lynch, reading the lesson in real time, married Bank of America in 48 hours rather than be Monday's corpse; <b>(3)</b> within the week, Goldman Sachs and Morgan Stanley — the last two independent houses — surrendered the broker-dealer model itself, converting to bank holding companies: trading the freedom of 30:1 leverage for the shelter of the Fed's discount window. The five great houses of 2007: two dead, one captured, two converted. The independent investment bank, as a form, was abolished in eleven days.
+  <br><br>
+  <b>The regranting decided the next twenty years.</b> JPMorgan got Bear (and then WaMu) at fire-sale prices and emerged the largest bank on Earth. Barclays bought Lehman's U.S. business out of bankruptcy for ≈$1.75B — the actual trade of the decade — while Nomura took Asia and Europe for, famously, <b>two dollars</b> plus retention. Mitsubishi's $9B wire (allegedly a physical check, delivered on a holiday weekend) kept Morgan Stanley alive; Buffett's $5B blessed Goldman. And the deepest irony: the universal banks whose model the houses had spent 70 years mocking — the boring, deposit-funded giants Glass-Steagall had caged until 1999 — ended up owning the Street. The exile from independence became the throne: the survivors, fused to fortress balance sheets, grew larger than the free houses had ever been.
+</div>
+
+<div class="section-title">The Regency of 2007 — Five Houses, Sworn to Leverage</div>
+<p class="section-sub">On the eve of the crisis, five independent broker-dealers ruled the Street, funded heavily through short-term wholesale markets. The bars show approximate gross leverage at fiscal year-end 2007. Gross leverage does not translate one-for-one into losses, but it makes the thin equity cushion and dependence on creditor confidence visible. In 2004 these firms entered the SEC's voluntary Consolidated Supervised Entities program and used an alternative, model-based capital calculation; in September 2008 the SEC ended the program and called voluntary group-wide supervision fundamentally flawed. Within 18 months, two firms were dead, one was captured, and two survived after becoming bank holding companies. Hover a bar for each house's fate.</p>
+<div id="regents-wrap" style="position:relative;background:var(--ink-2);border:1px solid var(--hair);padding:6px;">
+  <svg id="regents" role="img" aria-label="Bar chart comparing the approximate 2007 gross leverage of Bear Stearns, Morgan Stanley, Merrill Lynch, Lehman Brothers, and Goldman Sachs" style="display:block;width:100%;height:auto;"></svg>
+  <div class="tooltip" id="tt3"></div>
+</div>
+
+<div class="section-title">How Every Great House Ended</div>
+<p class="section-sub">The era's major houses, in order of when they folded. "Folded" takes three forms: <span style="color:#d98a7f">destroyed</span> (scandal, bankruptcy, or a shotgun weekend), <span style="color:#d9c27f">absorbed</span> (merged into a survivor), or <span style="color:#9dbf9a">still standing in 2025</span>. Note the pattern: almost no house on this table was killed by a bad market. They were killed by <b>leverage plus one concentrated bet</b> — junk, mortgages, a rogue desk — or by selling themselves to a parent that didn't understand what it had bought. The market was merely the weather; the wound was always self-inflicted.</p>
+<div class="table-scroll"><table id="fates"></table></div>
+
+<div class="section-title">The Great Houses — Peak Share &amp; Fate</div>
+<div id="clans"></div>
+
+<div class="fermi">
+  <b>How the share estimates were made (Fermi method):</b>
+  Anchors are league tables, reported segment revenues (post-IPO), and partnership capital rankings (pre-IPO, when the houses were private and told no one anything).
+  Documented checkpoints keep the bands honest: Merrill's retail machine made it the <b>revenue giant of the Street from the 1960s onward</b>;
+  Salomon was crowned <b>"the King of Wall Street" in 1985</b> on its bond monopoly; Drexel was briefly the <b>most profitable firm on the Street (1986)</b> at the peak of junk;
+  the five independents' 2007 leverage and revenues are in their final filings; and 2025 disclosures show <b>JPMorgan first in global investment-banking fees with 8.4% share and first in Markets revenue</b>, Goldman first in M&amp;A advisory revenue for the 23rd straight year, and Morgan Stanley at $33.1B of Institutional Securities revenue.
+  Pre-1975 figures are koku-equivalents at best — partnership revenue was a secret — so early bands are inferred from capital, headcount and syndicate standing. Error bars are roughly ±1–2 points.
+  <br><br>
+  <b>Two things that look wrong but aren't.</b>
+  <b>(1) Revenue share is not prestige.</b> Merrill's giant band in the early decades is retail commissions from the thundering herd; Morgan Stanley's slim band ruled the Street anyway, because under the syndicate hierarchy it was <i>first on every tombstone</i> — precedence, not revenue, was the currency of the club, which is exactly why Mayday (1975), which repriced revenue, destroyed the club.
+  <b>(2) The biggest bankers of the early era aren't on the chart at all.</b> Glass-Steagall (1933) caged the commercial banks — Morgan Guaranty, Bankers Trust, Citibank — outside the securities business entirely, like captive IBM outside the merchant chip market. The JPMorgan band appears only in the 1990s as the wall eroded, and the wall's formal demolition (1999) was itself forced by a merger already consummated in defiance of it. When the caged banks finally invaded, they ended up owning the Street — the chart's last era is their revenge for the first.
+</div>
+
+<div class="section-title">Research Anchors</div>
+<p class="section-sub">The early partnership era is necessarily reconstructed; the modern claims below are anchored to official rules, transaction records, enforcement releases, and 2025 company disclosures. The colored bands remain estimates rather than audited market-share data because firms report unlike segments.</p>
+<div class="sources">
+  <a href="https://www.sec.gov/rules-regulations/2004/06/alternative-net-capital-requirements-broker-dealers-are-part-consolidated-supervised-entities" target="_blank" rel="noopener noreferrer">SEC · 2004 alternative net-capital rule</a>
+  <a href="https://www.sec.gov/news/press/2008/2008-230.htm" target="_blank" rel="noopener noreferrer">SEC · End of the CSE program, 2008</a>
+  <a href="https://www.newyorkfed.org/newsevents/news/markets/2008/rp080324b" target="_blank" rel="noopener noreferrer">New York Fed · Bear Stearns financing terms</a>
+  <a href="https://www.federalreserve.gov/newsevents/pressreleases/orders20080922a.htm" target="_blank" rel="noopener noreferrer">Federal Reserve · Goldman and Morgan Stanley conversions</a>
+  <a href="https://www.congress.gov/bill/106th-congress/senate-bill/900" target="_blank" rel="noopener noreferrer">Congress · Gramm–Leach–Bliley Act</a>
+  <a href="https://www.justice.gov/archives/opa/pr/goldman-sachs-charged-foreign-bribery-case-and-agrees-pay-over-29-billion" target="_blank" rel="noopener noreferrer">DOJ · Goldman Sachs 1MDB resolution</a>
+  <a href="https://www.ubs.com/global/en/media/_jcr_content/root/contentarea/mainpar/toplevelgrid_copy/col_1/tabteaser/tabteasersplit/innergrid_copy/col_1/listassets.0304895453.file/PS9jb250ZW50L2RhbS9hc3NldHMvY2MvbWVkaWEvZG9jLzIwMjMvY3JlZGl0LXN1aXNzZS1hbmQtdWJzLXRvLW1lcmdlLnBkZg==/credit-suisse-and-ubs-to-merge.pdf" target="_blank" rel="noopener noreferrer">UBS · Credit Suisse merger terms</a>
+  <a href="https://www.jpmorganchase.com/ir/annual-report/2025/ar-ceo-letters" target="_blank" rel="noopener noreferrer">JPMorganChase · 2025 annual report</a>
+  <a href="https://www.goldmansachs.com/investor-relations/financials/current/annual-reports/2025-annual-report" target="_blank" rel="noopener noreferrer">Goldman Sachs · 2025 annual report</a>
+  <a href="https://www.morganstanley.com/content/dam/msdotcom/en/about-us-2026ams/2026_Shareholder_Letter.pdf" target="_blank" rel="noopener noreferrer">Morgan Stanley · 2025 results</a>
+</div>
+
+<footer>Bands show share of global investment-banking and markets revenue attributable to each house and its securities subsidiaries ("Europeans" = UBS, Deutsche and Barclays' investment banks; "Boutiques" = Lazard, Evercore, Centerview, Moelis, PJT and peers; retail brokerage revenue is included where housed inside the firm, which is most of what made Merrill mighty). The stack always totals 100%. ※ marks Morgan Stanley's syndicate-precedence reign. Values are Fermi estimates for comparison — the partnership era published nothing, and the modern era publishes selectively.</footer>
+
+<script>
+/* ================= DATA (% of global IB & trading wallet) ================= */
+const CLANS = [
+ {id:"ms", name:"Morgan Stanley", color:"#35548f", region:"New York · heir to the House of Morgan",
+  peak:"1960s by precedence; 2025 · $33.1B of Institutional Securities revenue",
+  suzerain:{a:1960,b:1979,note:"First on every tombstone: under the syndicate hierarchy, Morgan Stanley led every deal it touched or declined to appear at all — precedence was law, and Morgan Stanley sat at its top with a fraction of Merrill's revenue. Its power, like the Ashikaga's, vastly exceeded its acreage."},
+  fate:{txt:"Victor — survived the Dean Witter civil war (1997–2005) and a near-death week in 2008 (saved by Mitsubishi's $9B and conversion to a bank); reborn under Gorman as a wealth-management fortress with an investment bank attached", kind:"live", yr:null, by:null},
+  pts:[[1960,5],[1975,4.5],[1985,6],[1996,6],[1997,8.5],[2000,10],[2007,9.5],[2009,8],[2015,10],[2025,11.5]]},
+
+ {id:"goldman", name:"Goldman Sachs", color:"#9d8a3f", region:"New York · the partnership that outlasted them all",
+  peak:"2025 · #1 in M&A advisory revenue for the 23rd straight year",
+  fate:{txt:"Victor — the last major partnership to go public (1999), the house that shorted the fatal trade in time (2007), converted to a bank in the September 2008 abolition, and emerged the Street's most feared name", kind:"live", yr:null, by:null},
+  pts:[[1960,4],[1975,5],[1985,7],[1995,8.5],[2000,10],[2007,11],[2009,12],[2015,11],[2025,12.5]]},
+
+ {id:"merrill", name:"Merrill Lynch", color:"#5a7a9e", region:"New York · the thundering herd — Wall Street brought to Main Street",
+  peak:"1960s–2000s · ≈12–13% — the revenue giant of the Street for 40 years",
+  fate:{txt:"Charlie Merrill's retail machine made it the biggest house on the Street for two generations — then $50B+ of CDO writedowns brought it to the Lehman death-weekend, and it married Bank of America in 48 hours rather than be Monday's corpse", kind:"sub", yr:2008, by:"Bank of America (shotgun wedding, Sept 14, 2008)"},
+  pts:[[1960,12],[1975,13],[1985,12],[1995,11],[2000,10],[2007,10],[2008,8],[2009,0]]},
+
+ {id:"lehman", name:"Lehman Brothers", color:"#3d8f80", region:"New York · 1850–2008 — cotton traders to the largest bankruptcy in world history",
+  peak:"2007 · ≈5.5% — the mortgage machine at full throttle",
+  fate:{txt:"Survived the Civil War, the Depression, and its own 1984 civil war (the Glucksman coup sold it to AmEx; spun back out 1994) — then rode 31:1 leverage into the mortgage market and was the one house Washington let die: Chapter 11, Sept 15, 2008, ~$613B", kind:"fall", yr:2008, by:"Its own leverage; Washington's refusal; Barclays & Nomura (the carcass)"},
+  pts:[[1960,4],[1973,4.5],[1984,3.5],[1985,0],[1993,0],[1994,3],[2000,4.5],[2007,5.5],[2008,4],[2009,0]]},
+
+ {id:"bear", name:"Bear Stearns", color:"#8a5a33", region:"New York · the scrappy outsider — 'PSD: poor, smart, and a deep desire to be rich'",
+  peak:"2000s · ≈4% — mortgage-securitization pioneer, never a losing quarter until the last",
+  fate:{txt:"The house that famously refused to join the 1998 LTCM rescue was shown no mercy in return: its hedge funds cracked in June 2007, the repo market fled in March 2008, and the Fed handed it to JPMorgan at $2 a share — raised to $10 to quell the mob", kind:"fall", yr:2008, by:"JPMorgan (Fed-financed, March 2008)"},
+  pts:[[1960,2],[1975,2.5],[1985,3],[1995,3.5],[2007,4],[2008,0.5],[2009,0]]},
+
+ {id:"salomon", name:"Salomon Brothers", color:"#b0486b", region:"New York · the bond floor — Liar's Poker played here",
+  peak:"1985 · ≈9% — 'the King of Wall Street' (BusinessWeek's coronation)",
+  fate:{txt:"Invented the mortgage bond and ruled fixed income — then the 1991 Treasury-auction scandal (Buffett flew in to take the chair) broke its swagger, and Weill's Travelers bought it in 1997. The name was retired by Citi in 2003; the culture, arguably, never was", kind:"sub", yr:1997, by:"Travelers/Citigroup ($9B)"},
+  pts:[[1960,3],[1970,4],[1978,6],[1985,9],[1991,6.5],[1997,5.5],[1998,0]]},
+
+ {id:"citi", name:"Citi (Salomon Smith Barney)", color:"#c1442e", region:"New York · Weill's everything-store — the merger that killed Glass-Steagall",
+  peak:"2000s · ≈9% — the universal-bank thesis at full size",
+  fate:{txt:"Still standing — the 1998 Travelers–Citicorp merger was consummated in defiance of Glass-Steagall and forced its repeal; near-nationalized in 2008–09, it sold Smith Barney to Morgan Stanley and spent a decade shrinking back to strength", kind:"live", yr:null, by:null},
+  pts:[[1998,8],[2000,9],[2007,9],[2009,6],[2015,6],[2025,7]]},
+
+ {id:"firstboston", name:"First Boston", color:"#7d5ba6", region:"New York · the white-shoe M&A house — Wasserstein & Perella's stage",
+  peak:"1980s · ≈5.5% — the merger boutique inside a bulge bracket",
+  fate:{txt:"The 1980s M&A power wrecked itself on bridge loans to buyouts that failed (Ohio Mattress: 'the burning bed'); Credit Suisse was forced to take control in 1990, and the WASP house became CS First Boston", kind:"sub", yr:1990, by:"Credit Suisse (forced recapitalization)"},
+  pts:[[1960,4],[1975,4],[1985,5.5],[1989,5],[1990,0]]},
+
+ {id:"cs", name:"Credit Suisse (CSFB)", color:"#6e5a7a", region:"Zurich/New York · the Swiss vessel of American ambition",
+  peak:"2000 · ≈8% after swallowing DLJ",
+  fate:{txt:"Bought First Boston (1990) and DLJ (2000, $11.5B at the exact top), and spent two decades bleeding: Archegos, Greensill, and a terminal deposit run — until the Swiss state married it to UBS for CHF 3B in a single weekend in March 2023, the 2008 playbook run fifteen years late", kind:"fall", yr:2023, by:"UBS (state-arranged, March 2023)"},
+  pts:[[1990,5],[2000,8],[2007,7.5],[2010,6],[2015,5],[2022,3.5],[2023,0]]},
+
+ {id:"dlj", name:"DLJ", color:"#5e8a5a", region:"New York · research boutique turned junk-bond heir",
+  peak:"1990s · ≈3% — Drexel's high-yield franchise reborn",
+  fate:{txt:"First Wall Street firm ever to go public (1970, breaking the NYSE's rules); inherited Drexel's junk market in the 90s; sold to CSFB for $11.5B in 2000 — the consensus pick for the worst acquisition in Street history, as the talent walked within a year", kind:"sub", yr:2000, by:"Credit Suisse First Boston"},
+  pts:[[1960,0.3],[1975,1],[1985,2],[1995,3],[2000,3],[2001,0]]},
+
+ {id:"drexel", name:"Drexel Burnham", color:"#96566b", region:"Beverly Hills, technically New York · Milken's junk-bond empire",
+  peak:"1986 · ≈7% — the most profitable firm on the Street; the X-shaped desk ruled corporate America",
+  fate:{txt:"Milken's high-yield machine financed the entire takeover decade — then RICO charges, a $650M settlement, and a frozen junk market killed it in months: the first major firm allowed to fail since the Depression. Its diaspora seeded Apollo, Ares, and Jefferies' rise", kind:"fall", yr:1990, by:"Federal prosecutors; its own concentration"},
+  pts:[[1960,1],[1975,2],[1980,3],[1986,7],[1989,5],[1990,0]]},
+
+ {id:"kidder", name:"Kidder Peabody", color:"#86a83e", region:"New York · the old-line house GE thought it could run",
+  peak:"1986 · ≈3% — 130 years of pedigree",
+  fate:{txt:"GE bought it in 1986 as a trophy; the Siegel insider-trading scandal hit within months, and the Joseph Jett phantom-trade scandal (1994) finished it — sold to PaineWebber for parts. The conglomerate discount, proven on Wall Street", kind:"fall", yr:1994, by:"GE's misadventure; PaineWebber (the remains)"},
+  pts:[[1960,3],[1975,2.5],[1986,3],[1990,2.5],[1994,2],[1995,0]]},
+
+ {id:"hutton", name:"E.F. Hutton", color:"#a08050", region:"New York · 'When E.F. Hutton talks, people listen'",
+  peak:"1985 · ≈4% — the premier retail brokerage brand in America",
+  fate:{txt:"Pleaded guilty to 2,000 counts of mail and wire fraud in a check-kiting scheme (1985); the brand that owned American trust never recovered it, and Shearson bought the remains after the 1987 crash", kind:"fall", yr:1987, by:"Its own scandal; Shearson/AmEx (the remains)"},
+  pts:[[1960,3],[1975,3.5],[1985,4],[1987,3],[1988,0]]},
+
+ {id:"kuhnloeb", name:"Kuhn, Loeb", color:"#8d7ba8", region:"New York · Schiff's house — the railroad bankers of the Harriman age",
+  peak:"1900s (before this chart) · Morgan's only true rival",
+  fate:{txt:"The house that financed Harriman's Union Pacific and rivaled Morgan himself spent the postwar decades declining gracefully on prestige; merged into Lehman in 1977 — the first of the great old names to fold", kind:"sub", yr:1977, by:"Lehman Brothers"},
+  pts:[[1960,3],[1970,2],[1977,1.2],[1978,0]]},
+
+ {id:"deanwitter", name:"Dean Witter", color:"#9e9450", region:"New York · retail brokerage — the Discover card's stablemate, once sold inside Sears",
+  peak:"1990s · ≈3.5% — Main Street money",
+  fate:{txt:"Sold to Sears in 1981 (stocks next to socks), spun back out, and in 1997 'merged' with Morgan Stanley — whereupon the retail acquirer's Phil Purcell took the corner office, igniting an eight-year civil war the blue-bloods only won in 2005", kind:"sub", yr:1997, by:"Morgan Stanley (merger — Purcell's team initially in command)"},
+  pts:[[1960,2],[1975,2.5],[1985,3],[1996,3.5],[1997,0]]},
+
+ {id:"jpm", name:"JPMorgan", color:"#7d8a99", region:"New York · the caged bank, uncaged — the fortress balance sheet",
+  peak:"2025 · #1 in global IB fees (8.4% share) and #1 in Markets revenue",
+  fate:{txt:"Victor — Glass-Steagall's most famous prisoner rebuilt an investment bank through the 1990s as the wall eroded, merged with Chase (2000), and in 2008 acquired Bear Stearns and WaMu in crisis transactions. Dimon's fortress emerged as the largest U.S. bank", kind:"live", yr:null, by:null},
+  pts:[[1990,1],[1995,2.5],[2000,5],[2008,7],[2009,11],[2015,12],[2025,13.5]]},
+
+ {id:"bofa", name:"Bank of America (Merrill)", color:"#a34a5c", region:"Charlotte · the herd, re-branded",
+  peak:"2010s– · ≈9.5% — Merrill's franchise on a deposit fortress",
+  fate:{txt:"Still standing — the 2008 shotgun wedding nearly killed the buyer (the Merrill bonuses-and-losses scandal consumed BofA's board and its CEO), but the combined firm kept the thundering herd and a top-three wallet share ever since", kind:"live", yr:null, by:null},
+  pts:[[2009,10],[2015,9],[2025,9.5]]},
+
+ {id:"euro", name:"The Europeans (UBS · Deutsche · Barclays)", color:"#7a6a4a", region:"Zurich · Frankfurt · London — the invasion of the 1990s",
+  peak:"2007 · ≈11% combined — Deutsche briefly the biggest balance sheet on Earth",
+  fate:{txt:"Still standing, reduced — they bought their way onto the Street (Warburg, Bankers Trust, PaineWebber, Lehman's U.S. corpse), peaked at the top of the bubble, and have retreated ever since; UBS's consolation prize was all of Credit Suisse for CHF 3B", kind:"live", yr:null, by:null},
+  pts:[[1990,2],[1995,4],[2000,8],[2007,11],[2009,10],[2012,9],[2015,7.5],[2025,6.5]]},
+
+ {id:"boutiques", name:"The Boutiques (Lazard · Evercore · Centerview · Moelis · PJT)", color:"#6b8f4a", region:"New York · advice without a balance sheet — the partnership model, reborn",
+  peak:"2020s · ≈6% and climbing the M&A league tables",
+  fate:{txt:"Still rising — founded largely by refugees of the fallen houses (Wasserstein's heirs, ex-Lehman, ex-Morgan Stanley rainmakers), they took the conflict-free advisory ground the giants vacated after 2008. The wheel turns back toward where the chart began: small partnerships, private books, names on the door", kind:"live", yr:null, by:null},
+  pts:[[1960,1],[1985,1],[2000,1.5],[2005,2],[2010,3.5],[2015,4.5],[2025,6]]},
+
+ {id:"other", name:"Other houses", color:"#6b6b66", region:"The club's hundreds — Dillon Read, White Weld, Loeb Rhoades, Blyth, Bache, Shearson, PaineWebber, Smith Barney — and today's rest: Jefferies, Wells, RBC, the French, the Japanese, the Chinese",
+  peak:"—", fate:{txt:"The churn layer: dozens of white-shoe names consolidated away in the 70s–90s, replaced at the margin by new invaders each cycle", kind:"live", yr:null, by:null},
+  pts:null /* remainder to 100% */},
+];
+
+const ORDER = ["other","boutiques","euro","jpm","bofa","citi","cs","firstboston","dlj","deanwitter","kuhnloeb","hutton","kidder","drexel","salomon","bear","lehman","merrill","goldman","ms"];
+const TOTAL = 100;
+/* global IB & markets wallet, USD billions, for the tooltip conversion */
+const MKT = [[1960,1],[1970,3],[1975,5],[1980,12],[1985,30],[1990,45],[1995,80],[2000,150],[2005,220],[2007,300],[2009,250],[2012,240],[2015,270],[2020,340],[2024,360],[2025,380]];
+
+const ERAS = [
+ {a:1960,b:1975,l1:"The Partnership Club",l2:"1960–1975"},
+ {a:1975,b:1990,l1:"Mayday & the Trading Revolution",l2:"1975–1990"},
+ {a:1990,b:1999,l1:"The IPO of Wall Street",l2:"1990–1999"},
+ {a:1999,b:2008,l1:"Leverage Ascendant",l2:"1999–2008"},
+ {a:2008,b:2025,l1:"The Fed's Shogunate",l2:"2008–2025"},
+];
+
+const EVENTS = [
+ {yr:1962, label:"1960s", name:"The Club", fall:false,
+  txt:"Fixed commissions (unchanged in spirit since the 1792 Buttonwood Agreement), the syndicate hierarchy, and tombstone precedence as law. Partnerships, private books, and gentlemen's hours — the Street as a guild."},
+ {yr:1970, label:"1970", name:"Penn Central defaults", fall:false,
+  txt:"The railroad colossus's commercial paper defaults — the first modern market crisis. Goldman, its lead paper dealer, is nearly ruined by the lawsuits; the Street learns that even the oldest names can be the risk."},
+ {yr:1971, label:"1970–71", name:"The partnership wall cracks", fall:false,
+  txt:"DLJ defies the NYSE and goes public — the first Wall Street firm ever to do so — and mighty Merrill follows within a year. Other people's money begins replacing the partners' own."},
+ {yr:1975, label:"1975", name:"Mayday", fall:false,
+  txt:"May 1, 1975: fixed commissions abolished after 183 years. Rates collapse, the guild's economics die, and the future passes from relationship men to traders — the Staggers Act of the Street."},
+ {yr:1977, label:"1977", name:"Kuhn, Loeb folds into Lehman", fall:false,
+  txt:"The house of Jacob Schiff — Harriman's bankers, Morgan's only true rival — merges into Lehman. The first of the great nineteenth-century names to fold; it will not be the last."},
+ {yr:1983, label:"1981–84", name:"The sellout wave", fall:false,
+  txt:"Salomon sells to Phibro, Bache to Prudential, Dean Witter to Sears, and — after the Glucksman coup, when the traders seized the firm from the bankers — Lehman to American Express. Parents' capital in, partners' discipline out."},
+ {yr:1985, label:"1985–86", name:"The King of Wall Street", fall:false,
+  txt:"BusinessWeek crowns Gutfreund's Salomon, whose bond floor (chronicled in Liar's Poker) invents the mortgage market; Drexel posts the highest profits on the Street on Milken's junk machine. Trading is now the throne."},
+ {yr:1987, label:"1987", name:"Black Monday · Hutton dies", fall:true,
+  txt:"The Dow falls 22.6% in a day. E.F. Hutton — guilty of 2,000 fraud counts in its check-kiting scandal — doesn't survive the year independently; the most trusted brand in retail broking is sold to Shearson."},
+ {yr:1990, label:"1990", name:"Drexel dies", fall:true,
+  txt:"RICO charges, Milken's indictment, and a frozen junk market kill the decade's most profitable firm in months — the first major house allowed to fail since the Depression. Its diaspora seeds Apollo, Ares, and Jefferies."},
+ {yr:1991, label:"1991", name:"The Salomon Treasury scandal", fall:false,
+  txt:"A trader's fake bids in Treasury auctions nearly get the King of Wall Street the death penalty; Warren Buffett flies in to take the chairmanship and delivers the era's warning: 'Lose money for the firm and I will be understanding. Lose a shred of reputation and I will be ruthless.'"},
+ {yr:1994, label:"1994", name:"Kidder dies · Lehman reborn", fall:true,
+  txt:"The Joseph Jett phantom-profit scandal ends GE's Wall Street misadventure — Kidder is sold for parts. The same year AmEx spins Lehman back out: small, indebted, and with fourteen years to live."},
+ {yr:1998, label:"1997–99", name:"The great rollup", fall:false,
+  txt:"Salomon to Travelers; Dean Witter takes Morgan Stanley (and Purcell takes the corner office); Travelers merges with Citicorp in open defiance of Glass-Steagall, which Congress then repeals (1999); and Goldman, the last major partnership, goes public. The club is formally dissolved."},
+ {yr:2000, label:"2000", name:"Top-of-market folly", fall:false,
+  txt:"CSFB pays $11.5B for DLJ — consensus worst deal in Street history — UBS takes PaineWebber, and Chase takes J.P. Morgan itself. Everyone buys at the exact top; the invaders pay full price for the castle."},
+ {yr:2007, label:"2007", name:"Peak leverage", fall:false,
+  txt:"The five independents run at roughly 26–33 times assets to equity and depend heavily on short-term funding. They participate in the SEC's voluntary CSE program, which uses alternative model-based capital calculations; the SEC ends the program in September 2008 after calling the voluntary framework flawed."},
+ {yr:2008, label:"2008", name:"The fall of the houses", fall:true,
+  txt:"March: Bear to JPMorgan at $2. September 13–15: Lehman dies (the largest bankruptcy in world history), Merrill marries BofA in 48 hours, and within the week Goldman and Morgan Stanley convert to bank holding companies. The independent investment bank is abolished in eleven days."},
+ {yr:2012, label:"2010–15", name:"Dodd-Frank & the Volcker retreat", fall:false,
+  txt:"Prop desks close, capital rules bite, and the Europeans who bought in at the top — Deutsche above all — begin a decade of retreat. The Fed's stress tests are now the Street's real regulator: the shogunate audits its vassals annually."},
+ {yr:2023, label:"2023", name:"Credit Suisse falls", fall:true,
+  txt:"Archegos, Greensill, and a terminal deposit run end 167 years of Credit Suisse: the Swiss state marries it to UBS for CHF 3B in a single weekend — the 2008 playbook, run fifteen years late, on the buyer of First Boston and DLJ."},
+ {yr:2020, label:"2010s–25", name:"The boutique renaissance", fall:false,
+  txt:"Centerview, Evercore, PJT and Moelis — founded largely by refugees of the fallen houses — climb the M&A league tables past the giants. Small partnerships, private economics, names on the door: the wheel turns back to where the chart began."},
+];
+
+const FATES = [
+ {c:"Kuhn, Loeb", col:"#8d7ba8", peak:"Morgan's only rival; Harriman's bankers", yr:"1977", how:"Declined gracefully on prestige for two generations, then merged into Lehman — the first great old name to fold.", by:"Lehman Brothers", kind:"submitted"},
+ {c:"White Weld", col:"#6b6b66", peak:"Old-line underwriter; Eurobond pioneer", yr:"1978", how:"Sold to Merrill; its Credit Suisse joint venture became CS's beachhead on the Street — the acorn of CSFB.", by:"Merrill Lynch", kind:"submitted"},
+ {c:"Dillon, Read", col:"#6b6b66", peak:"White-shoe aristocracy (Nitze, Brady…)", yr:"1997", how:"Sold to ING then SBC, folded into what became UBS — the quiet way an old name ends.", by:"SBC/UBS", kind:"submitted"},
+ {c:"E.F. Hutton", col:"#a08050", peak:"≈4% · America's most trusted brokerage voice", yr:"1987", how:"2,000 guilty counts of check-kiting fraud; the brand never recovered and the crash finished it. Sold to Shearson.", by:"Its own scandal; Shearson/AmEx", kind:"destroyed"},
+ {c:"Drexel Burnham", col:"#96566b", peak:"≈7% · most profitable firm on the Street (1986)", yr:"1990", how:"Milken's junk machine financed the takeover decade; RICO charges and a frozen market killed it in months. The diaspora — Apollo, Ares, Jefferies' credit shop — arguably won the next thirty years.", by:"Federal prosecutors; its own concentration", kind:"destroyed"},
+ {c:"Salomon Brothers", col:"#b0486b", peak:"≈9% · the King of Wall Street (1985)", yr:"1997", how:"The Treasury scandal broke its swagger (Buffett took the chair); Weill bought it for $9B. Citi retired the name in 2003.", by:"Travelers/Citigroup", kind:"submitted"},
+ {c:"Kidder Peabody", col:"#86a83e", peak:"≈3% · 130 years of pedigree", yr:"1994", how:"GE's trophy purchase; the Siegel and Jett scandals wrecked it inside eight years — sold to PaineWebber for parts.", by:"GE (mismanagement); PaineWebber (remains)", kind:"destroyed"},
+ {c:"Shearson / AmEx", col:"#6b6b66", peak:"The retail roll-up (Hutton, Lehman inside)", yr:"1993–94", how:"American Express's financial supermarket dream failed; Weill's Primerica bought back the retail empire he had built, and Lehman was spun out alone.", by:"Primerica/Smith Barney; Lehman (spun out)", kind:"submitted"},
+ {c:"First Boston", col:"#7d5ba6", peak:"≈5.5% · the 1980s M&A house", yr:"1990", how:"Bridge loans to failed buyouts ('the burning bed') forced Credit Suisse to take control — the WASP house became CSFB.", by:"Credit Suisse (forced recapitalization)", kind:"submitted"},
+ {c:"Dean Witter", col:"#9e9450", peak:"≈3.5% · Main Street money", yr:"1997", how:"From Sears' aisles to the 'merger of equals' with Morgan Stanley — where Purcell's team took command and held it until the 2005 palace revolt.", by:"Morgan Stanley (merger)", kind:"submitted"},
+ {c:"DLJ", col:"#5e8a5a", peak:"≈3% · Drexel's junk franchise reborn", yr:"2000", how:"First firm ever to IPO (1970); sold to CSFB for $11.5B at the exact top — the worst acquisition in Street history by acclamation, as the talent walked within the year.", by:"Credit Suisse First Boston", kind:"submitted"},
+ {c:"PaineWebber", col:"#6b6b66", peak:"Retail stalwart (+ Kidder's remains)", yr:"2000", how:"Sold to UBS at the top of the bubble for $10.8B — the tidy exit the era rarely allowed.", by:"UBS", kind:"submitted"},
+ {c:"Bear Stearns", col:"#8a5a33", peak:"≈4% · never a losing quarter — until the last one", yr:"2008", how:"Refused the LTCM rescue in 1998; a decade later the repo market refused it. Handed to JPMorgan at $2 a share, Fed-financed, in a March weekend.", by:"JPMorgan (Fed-arranged)", kind:"destroyed"},
+ {c:"Lehman Brothers", col:"#3d8f80", peak:"≈5.5% · 158 years old", yr:"2008", how:"Survived the Civil War, the Depression and its own 1984 coup — not 31:1 leverage on mortgages. The one head Washington put on a spike: the largest bankruptcy in world history, ~$613B.", by:"Its leverage; Washington's refusal; Barclays & Nomura (the carcass)", kind:"destroyed"},
+ {c:"Merrill Lynch", col:"#5a7a9e", peak:"≈13% · the Street's revenue giant for 40 years", yr:"2008", how:"The thundering herd survived everything except $50B+ of CDO writedowns; married Bank of America in 48 hours over the Lehman death weekend rather than be Monday's corpse.", by:"Bank of America (shotgun wedding)", kind:"submitted"},
+ {c:"Credit Suisse", col:"#6e5a7a", peak:"≈8% · buyer of First Boston and DLJ", yr:"2023", how:"Two decades of paying top dollar for American franchises ended in Archegos, Greensill, and a terminal run: 167 years, sold for CHF 3B in a state-arranged weekend.", by:"UBS (state-arranged)", kind:"destroyed"},
+ {c:"The Europeans (UBS·Deutsche·Barclays)", col:"#7a6a4a", peak:"≈11% combined at the 2007 top", yr:"—", how:"Bought their way in at full price, peaked with the bubble, and retreated for fifteen years — though Barclays' $1.75B purchase of Lehman's U.S. business remains the trade of the decade, and UBS inherited all of Credit Suisse for pocket change.", by:"—", kind:"survived"},
+ {c:"Citi", col:"#c1442e", peak:"≈9% · the merger that killed Glass-Steagall", yr:"—", how:"Near-nationalized in 2009, sold Smith Barney to Morgan Stanley, and spent a decade shrinking to strength. The everything-store thesis died; the bank did not.", by:"—", kind:"survived"},
+ {c:"Bank of America (Merrill)", col:"#a34a5c", peak:"≈9.5% on Merrill's franchise", yr:"—", how:"The shotgun wedding consumed a CEO and nearly the board — then quietly became one of the two or three most powerful houses on the Street.", by:"—", kind:"survived"},
+ {c:"The Boutiques (Lazard·Evercore·Centerview·Moelis·PJT)", col:"#6b8f4a", peak:"≈6% and climbing", yr:"—", how:"Founded by refugees of the fallen houses, they retook the conflict-free advisory ground the converted giants vacated — the partnership model, reborn at the top of the league tables.", by:"—", kind:"survived"},
+ {c:"Morgan Stanley", col:"#35548f", peak:"2025 · $33.1B Institutional Securities revenue", yr:"—", how:"Survived the Dean Witter civil war and the week in 2008 when its survival was an open question. Gorman's wealth-management pivot rebuilt the House of Morgan on recurring fee income.", by:"—", kind:"victor"},
+ {c:"JPMorgan", col:"#7d8a99", peak:"2025 · 8.4% global IB fee share; #1 in Markets revenue", yr:"—", how:"Glass-Steagall's most famous prisoner outlived its cage, acquired Bear and WaMu in crisis transactions, and emerged as the largest U.S. bank. The first era's exile became the last era's shogun.", by:"—", kind:"victor"},
+ {c:"Goldman Sachs", col:"#9d8a3f", peak:"2025 · #1 M&A advisor for the 23rd straight year", yr:"—", how:"The last partnership standing: private the longest, never captured by one desk, and positioned defensively before the mortgage trade broke. Its longevity rests less on one product than on repeatedly rotating the franchise toward the richest client wallet.", by:"—", kind:"victor"},
+];
+
+/* Sankey: share points of the wallet flowing from absorbed to absorber */
+const SK_NODES = ["Kuhn, Loeb","White Weld","J. Aron","E.F. Hutton","Lehman (pre-1984)","Lehman (reborn 1994)","Shearson / AmEx","Salomon Brothers","Drexel Burnham","Kidder Peabody","PaineWebber","First Boston","DLJ","Dean Witter","Bear Stearns","Merrill Lynch","Credit Suisse","Travelers / Citi","Barclays","Nomura","UBS","JPMorgan","Bank of America","Morgan Stanley","Goldman Sachs","The Drexel diaspora (Apollo·Ares·Jefferies)"];
+const SK_COLORS = {"Kuhn, Loeb":"#8d7ba8","White Weld":"#8a8a6e","J. Aron":"#9e9450","E.F. Hutton":"#a08050","Lehman (pre-1984)":"#3d8f80","Lehman (reborn 1994)":"#3d8f80","Shearson / AmEx":"#7a6a4a","Salomon Brothers":"#b0486b","Drexel Burnham":"#96566b","Kidder Peabody":"#86a83e","PaineWebber":"#6f7d8a","First Boston":"#7d5ba6","DLJ":"#5e8a5a","Dean Witter":"#9e9450","Bear Stearns":"#8a5a33","Merrill Lynch":"#5a7a9e","Credit Suisse":"#6e5a7a","Travelers / Citi":"#c1442e","Barclays":"#4a6fa8","Nomura":"#a34a5c","UBS":"#8a3a3a","JPMorgan":"#7d8a99","Bank of America":"#a34a5c","Morgan Stanley":"#35548f","Goldman Sachs":"#9d8a3f","The Drexel diaspora (Apollo·Ares·Jefferies)":"#6b8f4a"};
+const SK_LINKS = [
+ {s:"Kuhn, Loeb",t:"Lehman (pre-1984)",v:1.2, kind:"sub", e:"1977 — the railroad bankers of the Harriman age fold into Lehman: the first great old name to go"},
+ {s:"White Weld",t:"Merrill Lynch",v:0.8, kind:"sub", e:"1978 — Merrill buys the old-line house; its Eurobond JV with Credit Suisse becomes CS's beachhead on the Street"},
+ {s:"J. Aron",t:"Goldman Sachs",v:0.8, kind:"sub", e:"1981 — Goldman's one real acquisition of the era: a commodities shop whose traders (Blankfein, Cohn) ended up running Goldman itself"},
+ {s:"Lehman (pre-1984)",t:"Shearson / AmEx",v:3.5, kind:"sub", e:"1984 — the Glucksman coup: the traders seize the firm from the bankers, then sell it to American Express within a year"},
+ {s:"E.F. Hutton",t:"Shearson / AmEx",v:3, kind:"fall", e:"1988 — dead of its check-kiting scandal; Shearson buys the most trusted brand in retail broking as a remnant"},
+ {s:"Shearson / AmEx",t:"Travelers / Citi",v:2, kind:"sub", e:"1993 — AmEx gives up the supermarket dream; Weill's Primerica/Smith Barney buys back the retail empire he built"},
+ {s:"Shearson / AmEx",t:"Lehman (reborn 1994)",v:1.5, kind:"sub", e:"1994 — Lehman spun back out after a decade in captivity: small, indebted, fourteen years to live"},
+ {s:"Salomon Brothers",t:"Travelers / Citi",v:5.5, kind:"sub", e:"1997 — $9B to Weill; Salomon Smith Barney, then just Citi. The name retired in 2003; the merger it enabled killed Glass-Steagall"},
+ {s:"Drexel Burnham",t:"The Drexel diaspora (Apollo·Ares·Jefferies)",v:5, kind:"fall", e:"1990 — liquidated; the junk market outlived its temple, and Milken's people seeded Apollo, Ares, and Jefferies' credit machine"},
+ {s:"Kidder Peabody",t:"PaineWebber",v:2, kind:"fall", e:"1994 — GE's misadventure ends in the Jett scandal; sold for parts"},
+ {s:"PaineWebber",t:"UBS",v:2, kind:"sub", e:"2000 — $10.8B at the top of the bubble"},
+ {s:"First Boston",t:"Credit Suisse",v:5, kind:"sub", e:"1990 — the bridge-loan disasters force CS to take control; the WASP house becomes CSFB"},
+ {s:"DLJ",t:"Credit Suisse",v:3, kind:"sub", e:"2000 — $11.5B at the exact top: the consensus worst acquisition in Street history"},
+ {s:"Credit Suisse",t:"UBS",v:3.5, kind:"fall", e:"2023 — CHF 3B for 167 years of Credit Suisse, arranged by the Swiss state in a weekend: 2008's shotgun playbook, run late"},
+ {s:"Dean Witter",t:"Morgan Stanley",v:3.5, kind:"sub", e:"1997 — the 'merger of equals' where the retail acquirer's Purcell took the corner office; civil war until the 2005 palace revolt"},
+ {s:"Travelers / Citi",t:"Morgan Stanley",v:3, kind:"sub", e:"2009 — crisis-stricken Citi sells Smith Barney to MS: the retail ballast that re-anchored the House of Morgan"},
+ {s:"Bear Stearns",t:"JPMorgan",v:4, kind:"fall", e:"March 2008 — $2 a share, Fed-financed with $29B of the worst assets, raised to $10 to quell the shareholders' mob"},
+ {s:"Lehman (reborn 1994)",t:"Barclays",v:3, kind:"fall", e:"Sept 2008 — the U.S. business bought out of bankruptcy for ≈$1.75B: the trade of the decade"},
+ {s:"Lehman (reborn 1994)",t:"Nomura",v:1.5, kind:"fall", e:"Sept 2008 — Asia and Europe for two dollars, plus retention packages"},
+ {s:"Merrill Lynch",t:"Bank of America",v:8, kind:"sub", e:"Sept 14, 2008 — the shotgun wedding, agreed in 48 hours over the Lehman death weekend"},
+];
+
+/* ================= STACKED AREA CHART ================= */
+const Y0=1960, Y1=2025;
+const years = d3.range(Y0, Y1+1);
+const byId = Object.fromEntries(CLANS.map(c=>[c.id,c]));
+
+function powerAt(clan, y){
+  const p = clan.pts;
+  if(!p || y < p[0][0] || y > p[p.length-1][0]) return 0;
+  for(let i=0;i<p.length-1;i++){
+    const [x0,v0]=p[i],[x1,v1]=p[i+1];
+    if(y>=x0 && y<=x1) return x1===x0 ? v1 : v0 + (v1-v0)*(y-x0)/(x1-x0);
+  }
+  return 0;
+}
+function mktAt(y){ return powerAt({pts:MKT}, y); }
+
+const rows = years.map(y=>{
+  const r = {year:y}; let named=0;
+  ORDER.forEach(id=>{ if(id!=="other"){ r[id]=powerAt(byId[id],y); named+=r[id]; }});
+  r.other = Math.max(TOTAL - named, 0);   /* total is ALWAYS 100% — the wallet is always banked by someone */
+  return r;
+});
+
+const W=1500, H=580, M={t:64,r:24,b:36,l:60};
+const svg = d3.select("#chart").attr("viewBox",`0 0 ${W} ${H}`);
+const x = d3.scaleLinear([Y0,Y1],[M.l,W-M.r]);
+const yS = d3.scaleLinear([0,100],[H-M.b,M.t]);
+
+const series = d3.stack().keys(ORDER)(rows);
+const area = d3.area().x(d=>x(d.data.year)).y0(d=>yS(d[0])).y1(d=>yS(d[1])).curve(d3.curveBasis);
+
+/* era bands */
+const eraG = svg.append("g");
+ERAS.forEach((e,i)=>{
+  if(i>0) eraG.append("line").attr("x1",x(e.a)).attr("x2",x(e.a)).attr("y1",M.t-6).attr("y2",H-M.b)
+    .attr("stroke","rgba(226,228,224,.28)").attr("stroke-dasharray","2 5");
+  const cx=(x(e.a)+x(e.b))/2;
+  eraG.append("text").attr("x",cx).attr("y",22).attr("text-anchor","middle")
+    .attr("fill","#e2e4e0").attr("font-size",13).attr("letter-spacing","1.5").text(e.l1.toUpperCase());
+  eraG.append("text").attr("x",cx).attr("y",40).attr("text-anchor","middle")
+    .attr("fill","#8a7340").attr("font-size",11.5).attr("letter-spacing","1.5").text(e.l2);
+});
+
+/* grid + axes */
+d3.range(0,101,10).forEach(v=>{
+  svg.append("line").attr("x1",M.l).attr("x2",W-M.r).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke","rgba(226,228,224,.07)");
+  svg.append("text").attr("x",M.l-8).attr("y",yS(v)+4).attr("text-anchor","end")
+    .attr("fill","#636b66").attr("font-size",11).attr("font-family","var(--sans)").text(v+"%");
+});
+svg.append("text").attr("transform",`translate(16,${(M.t+H-M.b)/2}) rotate(-90)`).attr("text-anchor","middle")
+  .attr("fill","#99a09c").attr("font-size",11.5).attr("letter-spacing","1.5").text("SHARE OF THE GLOBAL IB & TRADING WALLET");
+d3.range(1960,2026,5).forEach(t=>{
+  svg.append("text").attr("x",x(t)).attr("y",H-12).attr("text-anchor","middle")
+    .attr("fill","#99a09c").attr("font-size",12.5).attr("font-family","var(--sans)").text(t);
+});
+
+/* bands */
+const paths = svg.append("g").selectAll("path").data(series).join("path")
+  .attr("d",area).attr("fill",d=>byId[d.key].color).attr("fill-opacity",.92)
+  .attr("stroke","#101216").attr("stroke-width",.7).style("cursor","crosshair");
+
+/* in-band labels at widest point */
+series.forEach(s=>{
+  let best={w:0,i:0};
+  s.forEach((d,i)=>{const w=d[1]-d[0]; if(w>best.w) best={w,i};});
+  const d=s[best.i];
+  if(best.w>3){
+    const yr=d.data.year;
+    const lx=Math.max(M.l+95, Math.min(W-M.r-95, x(yr)));
+    svg.append("text").attr("x",lx).attr("y",yS((d[0]+d[1])/2)+4.5)
+      .attr("text-anchor","middle").attr("fill","#0b0d11").attr("font-size",best.w>11?16:(best.w>5?12.5:10))
+      .attr("font-weight",700).attr("letter-spacing","1.5").attr("pointer-events","none")
+      .text(byId[s.key].name.toUpperCase().replace(/ \(.*\)/,""))
+      .clone(true).attr("fill","rgba(226,228,224,.94)").attr("dy",-1);
+  }
+});
+
+/* hegemony annotations */
+function annotate(id, yr, text, anchor){
+  const s = series.find(s=>s.key===id); if(!s) return;
+  const d = s[yr-Y0];
+  svg.append("text").attr("x",x(yr)).attr("y",yS((d[0]+d[1])/2)-14)
+    .attr("text-anchor",anchor||"middle").attr("fill","#c9a24b").attr("font-size",10.5)
+    .attr("letter-spacing","1").attr("pointer-events","none").text(text);
+}
+annotate("ms",1967,"※ FIRST ON EVERY TOMBSTONE");
+annotate("jpm",2019,"※ THE FORTRESS BALANCE SHEET","end");
+
+/* fall / merger seals */
+const tt1 = document.getElementById("tt1");
+const wrap1 = document.getElementById("chart-wrap");
+function showTip(tt, wrap, ev, html){
+  tt.style.display="block"; tt.innerHTML=html;
+  const r=wrap.getBoundingClientRect();
+  let tx=ev.clientX-r.left+16, ty=ev.clientY-r.top-10;
+  if(tx>r.width-310) tx-=330;
+  tt.style.left=tx+"px"; tt.style.top=ty+"px";
+}
+let sealIdx=0;
+CLANS.filter(c=>c.fate.yr).forEach(c=>{
+  const s = series.find(s=>s.key===c.id);
+  if(!s) return;
+  const yr = Math.min(c.fate.yr, Y1);
+  let j = yr - Y0;
+  while(j>0 && (s[j][1]-s[j][0])<0.4) j--;
+  const mid=(s[j][0]+s[j][1])/2;
+  const isSub = c.fate.kind==="sub";
+  const stagger = yr>=1987 ? -(10 + (sealIdx++ % 3)*12) : -10;
+  const g=svg.append("g").style("cursor","help");
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",12).attr("fill","transparent");
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",5.5)
+    .attr("fill",isSub?"transparent":"#b3372a").attr("stroke",isSub?"#c9a24b":"#101216").attr("stroke-width",isSub?2:1.5);
+  g.append("text").attr("x",x(yr)).attr("y",yS(mid)+stagger)
+    .attr("text-anchor", yr>2015?"end":"middle")
+    .attr("fill",isSub?"#d9c27f":"#e8b0a6").attr("font-size",10.5).attr("letter-spacing","1")
+    .text(c.name.toUpperCase().replace(/ \(.*\)/,"")+" · "+c.fate.yr);
+  g.on("mousemove",ev=>{
+     showTip(tt1,wrap1,ev,
+      `<div class="yr">${c.fate.yr} · ${isSub?"MERGED / ACQUIRED":"HOUSE FALLS"}</div>
+       <div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="fate-t" style="color:${isSub?'#d9c27f':'#d98a7f'}">${c.fate.txt}</div>
+       ${c.fate.by?`<div class="pw" style="margin-top:4px"><b style="color:#e2e4e0">Taken by:</b> ${c.fate.by}</div>`:""}`);
+   }).on("mouseleave",()=>{tt1.style.display="none";});
+});
+
+/* event marker */
+const marker = svg.append("g").style("display","none").attr("pointer-events","none");
+marker.append("line").attr("y1",M.t-4).attr("y2",H-M.b).attr("stroke","#c9a24b").attr("stroke-width",1).attr("stroke-dasharray","3 4");
+const markerLabel = marker.append("text").attr("y",M.t+8).attr("fill","#c9a24b").attr("font-size",11).attr("letter-spacing","1.5");
+
+/* hover crosshair + band tooltip */
+const cross = svg.append("line").attr("y1",M.t).attr("y2",H-M.b)
+  .attr("stroke","rgba(226,228,224,.35)").attr("stroke-width",1).style("display","none").attr("pointer-events","none");
+
+paths.on("mousemove",function(ev,d){
+    paths.attr("fill-opacity",s=>s.key===d.key?1:.35);
+    const [mx]=d3.pointer(ev,svg.node());
+    const yr=Math.max(Y0,Math.min(Y1,Math.round(x.invert(mx))));
+    cross.style("display",null).attr("x1",x(yr)).attr("x2",x(yr));
+    const row=rows[yr-Y0], c=byId[d.key], v=row[d.key];
+    const rev=(v/100*mktAt(yr));
+    const revTxt = rev>=1 ? `$${rev.toFixed(rev>20?0:1)}B` : `$${(rev*1000).toFixed(0)}M`;
+    const suz = c.suzerain && yr>=c.suzerain.a && yr<=c.suzerain.b
+      ? `<div class="pw" style="margin-top:5px;color:#d9c27f">※ ${c.suzerain.note}</div>` : "";
+    showTip(tt1,wrap1,ev,
+      `<div class="yr">${yr}</div><div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="pw">≈ <b style="color:#e2e4e0">${v.toFixed(1)}%</b> of the industry wallet</div>
+       <div class="pw">≈ ${revTxt} in revenue that year</div>
+       <div class="pw" style="margin-top:4px">${c.region}</div>${suz}`);
+  })
+  .on("mouseleave",()=>{paths.attr("fill-opacity",.92); cross.style("display","none"); tt1.style.display="none";});
+
+/* ================= SANKEY ================= */
+(function(){
+  const SW=1500, SH=640, SM={t:16,r:290,b:16,l:160};
+  const s = d3.select("#sankey").attr("viewBox",`0 0 ${SW} ${SH}`);
+  const nodes = SK_NODES.map(n=>({name:n}));
+  const idx = Object.fromEntries(SK_NODES.map((n,i)=>[n,i]));
+  const links = SK_LINKS.map(l=>({source:idx[l.s],target:idx[l.t],value:l.v,kind:l.kind,e:l.e,s:l.s,t:l.t}));
+  const sk = d3.sankey().nodeWidth(16).nodePadding(17)
+    .extent([[SM.l,SM.t],[SW-SM.r,SH-SM.b]]);
+  const graph = sk({nodes:nodes.map(d=>({...d})), links:links.map(d=>({...d}))});
+
+  const tt2=document.getElementById("tt2"), wrap2=document.getElementById("sankey-wrap");
+
+  s.append("g").selectAll("path").data(graph.links).join("path")
+    .attr("d",d3.sankeyLinkHorizontal())
+    .attr("fill","none")
+    .attr("stroke",d=>d.kind==="fall"?"#b3372a":"#c9a24b")
+    .attr("stroke-opacity",.38)
+    .attr("stroke-width",d=>Math.max(1.5,d.width))
+    .style("cursor","help")
+    .on("mousemove",function(ev,d){
+      d3.select(this).attr("stroke-opacity",.75);
+      showTip(tt2,wrap2,ev,
+        `<div class="yr">${d.kind==="fall"?"DESTROYED / SHOTGUN SALE":"MERGER / ACQUISITION"}</div>
+         <div class="nm"><span style="color:${SK_COLORS[d.s]}">${d.s}</span> → <span style="color:${SK_COLORS[d.t]}">${d.t}</span></div>
+         <div class="pw">≈ ${d.value} share points of the wallet</div>
+         <div class="pw" style="margin-top:4px">${d.e}</div>`);
+    })
+    .on("mouseleave",function(){d3.select(this).attr("stroke-opacity",.38); tt2.style.display="none";});
+
+  const ng = s.append("g").selectAll("g").data(graph.nodes).join("g");
+  ng.append("rect")
+    .attr("x",d=>d.x0).attr("y",d=>d.y0)
+    .attr("width",d=>d.x1-d.x0).attr("height",d=>Math.max(2,d.y1-d.y0))
+    .attr("fill",d=>SK_COLORS[d.name]).attr("stroke","#101216");
+  ng.append("text")
+    .attr("x",d=>d.x0 < SW/2 ? d.x0-8 : d.x1+8)
+    .attr("y",d=>(d.y0+d.y1)/2+4)
+    .attr("text-anchor",d=>d.x0 < SW/2 ? "end":"start")
+    .attr("fill","#e2e4e0").attr("font-size",12.5).attr("letter-spacing",".5")
+    .text(d=>d.name);
+})();
+
+/* ================= THE REGENCY OF 2007 ================= */
+(function(){
+  const R=[
+   {n:"Bear Stearns", v:33, col:"#8a5a33", role:"Leverage ≈ 33:1", side:"† March 2008 — to JPMorgan at $2",
+    fate:"The smallest and most concentrated of the five: mortgages, repo funding, and a CEO playing bridge as the funds cracked. The first to lose the confidence of the overnight market — and in this model, confidence was the entire capital structure.", cls:"#d98a7f"},
+   {n:"Morgan Stanley", v:33, col:"#35548f", role:"Leverage ≈ 33:1", side:"→ converted; saved by Mitsubishi's $9B",
+    fate:"Ran the same leverage as Bear — and in the week after Lehman, its survival was an open question, with hedge funds pulling balances by the hour. Mitsubishi UFJ's $9B (delivered, in legend, as a physical check on a holiday weekend) and conversion to a bank holding company closed the question. Then Gorman rebuilt the house on wealth management so it could never be asked again.", cls:"#d9c27f"},
+   {n:"Merrill Lynch", v:32, col:"#5a7a9e", role:"Leverage ≈ 32:1", side:"→ BofA, agreed in 48 hours",
+    fate:"O'Neal's push into CDO manufacturing left $50B+ of writedowns on the book. Thain read the Lehman weekend correctly and sold the herd to Bank of America on Sunday night rather than test the market's mercy on Monday morning.", cls:"#d9c27f"},
+   {n:"Lehman Brothers", v:31, col:"#3d8f80", role:"Leverage ≈ 31:1", side:"† Sept 15, 2008 — the one allowed to die",
+    fate:"Fuld turned down capital and buyers all summer at prices he considered insulting; Washington, needing one head on a spike, declined to finance a rescue. The largest bankruptcy in world history (~$613B) — and the demonstration that made every other house's fate acceptable by comparison.", cls:"#d98a7f"},
+   {n:"Goldman Sachs", v:26, col:"#9d8a3f", role:"Leverage ≈ 26:1", side:"→ converted; blessed by Buffett's $5B",
+    fate:"The lowest leverage of the five and short the fatal trade since late 2006 — yet still needed the bank-holding-company shield and Buffett's $5B imprimatur to stop the run mechanics. Survival was engineering plus luck plus the sovereign's favor; Goldman had all three.", cls:"#9dbf9a"},
+  ];
+  const RW=1500, RH=310, RM={t:20,r:340,b:30,l:210};
+  const s=d3.select("#regents").attr("viewBox",`0 0 ${RW} ${RH}`);
+  const rx=d3.scaleLinear([0,36],[RM.l,RW-RM.r]);
+  const ry=d3.scaleBand(R.map(d=>d.n),[RM.t,RH-RM.b]).padding(0.32);
+  const tt3=document.getElementById("tt3"), wrap3=document.getElementById("regents-wrap");
+
+  [10,20,30].forEach(v=>{
+    s.append("line").attr("x1",rx(v)).attr("x2",rx(v)).attr("y1",RM.t).attr("y2",RH-RM.b).attr("stroke","rgba(226,228,224,.07)");
+    s.append("text").attr("x",rx(v)).attr("y",RH-10).attr("text-anchor","middle")
+      .attr("fill","#636b66").attr("font-size",11).attr("font-family","var(--sans)").text(v+":1");
+  });
+
+  R.forEach(d=>{
+    const g=s.append("g").style("cursor","help");
+    g.append("rect").attr("x",rx(0)).attr("y",ry(d.n)).attr("width",rx(d.v)-rx(0)).attr("height",ry.bandwidth())
+      .attr("fill",d.col).attr("fill-opacity",.92).attr("stroke","#101216");
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+4).attr("text-anchor","end")
+      .attr("fill","#e2e4e0").attr("font-size",13.5).text(d.n);
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+18).attr("text-anchor","end")
+      .attr("fill","#8a7340").attr("font-size",10).attr("letter-spacing","1").text(d.role.toUpperCase());
+    g.append("text").attr("x",rx(d.v)+10).attr("y",ry(d.n)+ry.bandwidth()/2+4)
+      .attr("fill",d.cls).attr("font-size",12).attr("font-family","var(--sans)")
+      .text(d.side);
+    g.on("mousemove",ev=>showTip(tt3,wrap3,ev,
+       `<div class="yr">${d.role.toUpperCase()} · YEAR-END 2007</div>
+        <div class="nm" style="color:${d.col}">${d.n}</div>
+        <div class="pw">${d.fate}</div>`))
+     .on("mouseleave",()=>{tt3.style.display="none";});
+  });
+})();
+
+/* ================= EVENTS ================= */
+const evWrap=document.getElementById("events");
+EVENTS.forEach(e=>{
+  const div=document.createElement("button");
+  div.type="button";
+  div.dataset.year=e.yr;
+  div.className="ev"+(e.fall?" fall":"");
+  div.innerHTML=`<div class="yr">${e.label}</div><div class="nm">${e.name}</div>${e.txt}`;
+  div.onclick=()=>{
+    document.querySelectorAll(".ev").forEach(n=>n.classList.remove("active"));
+    div.classList.add("active");
+    marker.style("display",null);
+    marker.select("line").attr("x1",x(e.yr)).attr("x2",x(e.yr));
+    markerLabel.attr("text-anchor",e.yr>2012?"end":"start")
+      .attr("x",e.yr>2012?x(e.yr)-6:x(e.yr)+6).text(e.name.toUpperCase()+" · "+e.label);
+    document.getElementById("chart-wrap").scrollIntoView({behavior:"smooth",block:"center"});
+  };
+  evWrap.appendChild(div);
+});
+
+/* ================= FATES TABLE ================= */
+const KIND_LBL={destroyed:"Destroyed",submitted:"Absorbed",survived:"Still standing",victor:"Victor"};
+const tbl=document.getElementById("fates");
+tbl.innerHTML=`<tr><th>House</th><th>Peak</th><th>Folded</th><th>How it ended</th><th>Taken / absorbed by</th><th>Outcome</th></tr>`+
+ FATES.map(f=>`<tr>
+   <td><span class="sw" style="background:${f.col}"></span>${f.c}</td>
+   <td>${f.peak}</td>
+   <td class="num">${f.yr}</td>
+   <td>${f.how}</td>
+   <td>${f.by}</td>
+   <td class="k-${f.kind}">${KIND_LBL[f.kind]}</td></tr>`).join("");
+
+/* ================= HOUSE CARDS ================= */
+const clWrap=document.getElementById("clans");
+CLANS.filter(c=>c.id!=="other").forEach(c=>{
+  const div=document.createElement("div");
+  div.className="clan"; div.style.setProperty("--c",c.color);
+  const fk=c.fate.kind==="fall"?"fall":(c.fate.kind==="sub"?"sub":"live");
+  div.innerHTML=`<div class="nm"><i>▌</i> ${c.name}</div>
+    <div class="meta"><b>Core:</b> ${c.region}<br><b>Peak:</b> ${c.peak}</div>
+    <div class="fate ${fk}">${c.fate.txt}</div>`;
+  clWrap.appendChild(div);
+});
+</script>
+</body>
+</html>

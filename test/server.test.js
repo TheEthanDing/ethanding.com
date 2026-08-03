@@ -36,6 +36,16 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /href="\/sengoku-clans"/);
   assert.match(homepage, /href="\/semiconductor-wars"/);
   assert.match(homepage, /href="\/airline-wars"/);
+  assert.match(homepage, /href="\/wall-street-houses"/);
+});
+
+test('serves the researched Wall Street houses visualization', async () => {
+  const response = await fetch(`${base}/wall-street-houses`);
+  assert.equal(response.status, 200);
+  const page = await response.text();
+  assert.match(page, /THE HOUSES OF THE STREET/);
+  assert.match(page, /Research Anchors/);
+  assert.match(page, /Lehman \(reborn 1994\)/);
 });
 
 test('serves the U.S. airline consolidation visualization', async () => {
