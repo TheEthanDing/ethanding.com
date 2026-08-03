@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Iron Daimyō · Ethan Ding</title>
+<meta name="description" content="An interactive history of the great American railroad systems, their mergers, collapses, and shifting share of the national rail network from 1850 to 2026.">
+<link rel="icon" href="/images/profile.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-sankey/0.12.3/d3-sankey.min.js"></script>
+<style>
+  :root{
+    --ink:#161310; --ink-2:#1e1a15; --ink-3:#26211a;
+    --gold:#c9a24b; --gold-dim:#8a7340;
+    --paper:#e8dfc9; --paper-dim:#a89e86;
+    --seal:#b3372a;
+    --hair:rgba(201,162,75,.22);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans:"Avenir Next","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--paper);font-family:var(--serif);padding:20px clamp(14px,3vw,44px) 40px;}
+  .site-nav{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:22px;
+            font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-dim);}
+  .site-nav a{color:var(--gold);text-decoration:none;border-bottom:1px solid transparent;padding:4px 0;}
+  .site-nav a:hover{border-color:var(--gold);}
+  header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;
+         border-bottom:1px solid var(--hair);padding-bottom:18px;margin-bottom:6px;}
+  h1{font-size:clamp(20px,2.8vw,32px);font-weight:600;letter-spacing:.04em;}
+  h1 .era{color:var(--gold);font-weight:400;}
+  .sub{color:var(--paper-dim);font-size:13.5px;margin-top:6px;max-width:780px;line-height:1.55;}
+  .sub b{color:var(--paper);font-weight:600;}
+  .legend-box{border:1px solid var(--hair);padding:10px 14px;background:var(--ink-2);min-width:250px;}
+  .legend-box .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+  .legend-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--paper-dim);margin-top:5px;}
+  .seal-dot{width:12px;height:12px;border-radius:50%;background:var(--seal);box-shadow:0 0 0 2px rgba(179,55,42,.3);flex:none;}
+  .sub-dot{width:11px;height:11px;border-radius:50%;background:transparent;border:2px solid var(--gold);flex:none;}
+  .gold-tick{width:12px;height:0;border-top:1px dashed var(--gold);flex:none;}
+  #chart-wrap,#sankey-wrap{position:relative;background:var(--ink-2);border:1px solid var(--hair);margin-top:16px;padding:6px 6px 0;}
+  #chart,#sankey{display:block;width:100%;height:auto;}
+  .tooltip{position:absolute;pointer-events:none;background:#0f0d0a;border:1px solid var(--gold-dim);
+           padding:9px 12px;font-size:12.5px;line-height:1.5;color:var(--paper);display:none;z-index:5;max-width:300px;
+           box-shadow:0 6px 18px rgba(0,0,0,.55);}
+  .tooltip .yr{color:var(--gold);letter-spacing:.12em;font-size:11px;}
+  .tooltip .nm{font-size:14.5px;margin:2px 0 3px;}
+  .tooltip .pw{color:var(--paper-dim);}
+  .tooltip .fate-t{color:#d98a7f;margin-top:4px;}
+  .section-title{margin:32px 0 12px;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);
+                 display:flex;align-items:center;gap:14px;}
+  .section-title::after{content:"";flex:1;border-top:1px solid var(--hair);}
+  .section-sub{color:var(--paper-dim);font-size:13px;line-height:1.55;margin:-4px 0 12px;max-width:900px;}
+  #events{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px;}
+  .ev{background:var(--ink-3);border:1px solid rgba(201,162,75,.14);border-top:2px solid var(--gold-dim);
+      padding:12px 13px;font:inherit;font-size:12.5px;line-height:1.5;color:var(--paper-dim);cursor:pointer;
+      text-align:left;transition:border-color .15s, transform .15s;}
+  .ev:hover,.ev.active{border-color:var(--gold);transform:translateY(-2px);}
+  .ev:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .ev .yr{font-family:var(--sans);font-size:15px;color:var(--paper);letter-spacing:.02em;}
+  .ev .nm{color:var(--gold);font-size:13px;margin:3px 0 6px;font-weight:600;}
+  .ev.fall .yr::after{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--seal);margin-left:8px;}
+  #fates{width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.5;}
+  #fates th{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);text-align:left;
+            padding:8px 10px;border-bottom:1px solid var(--hair);}
+  #fates td{padding:8px 10px;border-bottom:1px solid rgba(232,223,201,.07);color:var(--paper-dim);vertical-align:top;}
+  #fates td:first-child{color:var(--paper);white-space:nowrap;font-weight:600;}
+  #fates .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:1px;}
+  #fates .k-destroyed{color:#d98a7f;} #fates .k-submitted{color:#d9c27f;} #fates .k-survived{color:#9dbf9a;} #fates .k-victor{color:#c9a24b;font-weight:600;}
+  #fates td.num{white-space:nowrap;font-family:var(--sans);}
+  #clans{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+  .clan{padding:12px 13px;border:1px solid rgba(232,223,201,.08);background:var(--ink-3);
+        border-left:5px solid var(--c);font-size:12.5px;line-height:1.55;color:var(--paper-dim);}
+  .clan .nm{color:var(--paper);font-size:14.5px;font-weight:600;letter-spacing:.03em;}
+  .clan .nm i{font-style:normal;color:var(--c);}
+  .clan .meta{margin-top:5px;}
+  .clan .meta b{color:var(--paper);font-weight:600;}
+  .clan .fate{margin-top:5px;padding-top:5px;border-top:1px dashed rgba(232,223,201,.12);}
+  .clan .fate.fall{color:#d98a7f;} .clan .fate.sub{color:#d9c27f;} .clan .fate.live{color:#9dbf9a;}
+  .fermi{margin-top:14px;border:1px dashed var(--gold-dim);padding:14px 16px;font-size:12.5px;line-height:1.7;color:var(--paper-dim);}
+  .fermi b{color:var(--gold);font-weight:600;}
+  .sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px 18px;
+           margin-top:14px;padding:14px 16px;border:1px solid var(--hair);font-family:var(--sans);font-size:11.5px;line-height:1.5;}
+  .sources a{color:var(--paper-dim);text-decoration:none;border-bottom:1px solid rgba(201,162,75,.25);}
+  .sources a:hover{color:var(--paper);border-color:var(--gold);}
+  .table-scroll{overflow-x:auto;}
+  footer{margin-top:18px;color:#736a56;font-size:11.5px;line-height:1.55;}
+  @media (max-width:760px){
+    .site-nav span{display:none}
+    #chart-wrap,#sankey-wrap,#regents-wrap,.table-scroll{overflow-x:auto}
+    #chart,#sankey,#regents{width:900px!important;max-width:none}
+    #fates{min-width:880px}
+  }
+  @media (prefers-reduced-motion:reduce){.ev{transition:none}.ev:hover{transform:none}}
+</style>
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="/">← Ethan Ding</a>
+  <span>Interactive industry history · 1850–2026</span>
+</nav>
+
+<header>
+  <div>
+    <h1>THE IRON DAIMYŌ <span class="era">(1850–2026)</span> — POWER OF THE GREAT RAILROADS, IN ROUTE-MILES</h1>
+    <p class="sub">Power is measured as an <b>illustrative share of the nation's freight-rail route-miles</b> under each system's control — the most literal
+      land-based unit in American business; a railroad's mileage was its domain. A rule of thumb: <b>1 share point ≈ 1,400 route-miles today</b>
+      (≈ 2,500 at the 1916 peak, when the network was nearly twice as large). The stack always totals 100%: when a road dies its rails are
+      regranted, abandoned lines fall out of everyone's total alike. Hover any band <i>or any fall seal</i> for details; click a timeline event to mark its year.</p>
+  </div>
+  <div class="legend-box">
+    <div class="t">Reading the chart</div>
+    <div class="legend-row"><span class="seal-dot"></span>Road dies — liquidated, embargoed, or nationalized off a corpse</div>
+    <div class="legend-row"><span class="sub-dot"></span>Merged / absorbed — the rails live on under a new herald</div>
+    <div class="legend-row"><span class="gold-tick"></span>Key event marker (click cards below)</div>
+    <div class="legend-row" style="margin-top:8px">Band height = % of national route-miles</div>
+  </div>
+</header>
+
+<div id="chart-wrap"><svg id="chart" role="img" aria-label="Stacked area chart showing estimated shares of U.S. railroad route-miles controlled by major railroad systems from 1850 to 2026"></svg><div class="tooltip" id="tt1"></div></div>
+
+<div class="section-title">Chain of Conquest — Who Absorbed Whom</div>
+<p class="section-sub">Each ribbon is territory (in share points of national mileage) passing from the absorbed to the absorber.
+  <span style="color:#d98a7f">Red ribbons</span> = road destroyed — bankruptcy, liquidation, or forced nationalization. <span style="color:#d9c27f">Gold ribbons</span> = merger or acquisition. Hover any ribbon for the deal or collapse behind it. Every domestic stream ends at one of the Big Four — except two: the Illinois Central and the Kansas City Southern, whose streams cross the border. The conquest of the American map was finished by Canadians.</p>
+<div id="sankey-wrap"><svg id="sankey" role="img" aria-label="Flow chart showing major American railroads being merged, acquired, nationalized, or liquidated"></svg><div class="tooltip" id="tt2"></div></div>
+
+<div class="section-title">Key Events Timeline</div>
+<div id="events"></div>
+
+<div class="section-title">The Hill Anomaly — The Only Transcontinental That Never Went Bankrupt</div>
+<div class="fermi">
+  <b>Why the Great Northern was so powerful.</b> Three structural advantages, compounding for a generation.
+  <b>(1) No land grants, no debt bomb:</b> every other transcontinental was built on federal land grants and bond subsidies — which meant building fast, badly, and ahead of any traffic, then drowning in interest. James J. Hill built the Great Northern with private capital, extending only as fast as paying freight followed, and reached Seattle in 1893 — the exact year the subsidized roads collapsed around him. It is the only transcontinental that never passed through receivership.
+  <b>(2) The best engineering in the West:</b> Hill personally scouted grades; his engineers found Marias Pass, the lowest crossing of the northern Rockies — and low grades meant every train ran cheaper than a rival's, forever. "What we want," Hill said, "is the best possible line, shortest distance, lowest grades and least curvature."
+  <b>(3) He grew his own traffic:</b> Hill imported farmers by the trainload, ran demonstration farms, gave away breeding stock — colonizing his own service territory the way the Hōjō drew peasants into the Kantō. The Empire Builder didn't find an economy to serve; he built one.
+  <br><br>
+  <b>Why the house endured while the flashier lords fell.</b> Strategy: Hill fought defensive, regional wars — he took the Northern Pacific out of Morgan's reorganization and the Burlington in 1901, but never speculated, never built ahead of revenue, never bet the road. When Harriman tried to take the NP from him in 1901, the fight cornered the stock at $1,000 a share and nearly crashed Wall Street — and Hill still won. Roosevelt's trust-busters broke up the resulting holding company in 1904, but the three roads waited, aligned, for 66 years.
+  <br><br>
+  <b>The consummation.</b> In 1970 the merger Roosevelt blocked was finally allowed: GN + NP + Burlington became Burlington Northern, and in 1995 BN took the Santa Fe. Then came the greatest tribute of all: Berkshire agreed in 2009 to take BNSF private in a transaction valued at about <b>$44 billion including $10 billion of BNSF debt</b>, then the largest acquisition in Berkshire history. Buffett called the $34 billion investment an "all-in wager on the economic future of the United States." Hill's patient empire outlasted every rival that ever mocked its caution.
+</div>
+
+<div class="section-title">Conrail (1976–1999) — The State Takes the Field, Then Regrants It</div>
+<div class="fermi">
+  Nationalizing the northeastern railroads looked like the industry's obituary until you see what came back out. It was a <b>forced acquisition, not a rescue anyone wanted</b>: when Penn Central failed in 1970 — 872 days after the PRR–NYC merger, the largest bankruptcy in American history to that date — the Erie Lackawanna, Reading, Lehigh Valley, Central of New Jersey and Lehigh &amp; Hudson River were also bankrupt. In 1976 Washington transferred the viable portions of six failed systems into one government-owned railroad, Conrail. The predecessor maps totaled roughly 34,000 route-miles before the Final System Plan selected and rationalized the operating network; subsequent federal support reached about $7 billion.
+  <br><br>
+  From Congress's chair, the logic was triage: <b>(1)</b> the Northeast could not physically function without these rails; <b>(2)</b> no private buyer would touch them under 1970s regulation, where the ICC still set rates as if it were 1910 and railroads were monopolies rather than roadkill; <b>(3)</b> so the state would hold the land until the rules changed. Then the rules changed: the <b>Staggers Act of 1980</b> freed rates and let railroads shed unprofitable line — and Conrail, under Stanley Crane, cut its map nearly in half, went profitable by 1981, and in 1987 was sold back to the public in what was then the largest IPO in American history.
+  <br><br>
+  <b>The regranting was the real Sekigahara.</b> In 1997–99, CSX and Norfolk Southern fought a $10 billion bidding war for the resurrected system and, unable to defeat each other, partitioned it — NS taking 58%, CSX 42% — the largest single transfer of railroad territory since the land-grant era. Roughly 11% of the national network, confiscated by the state from six dead houses, was held for a generation and then regranted to the two eastern victors, completing the map: four great systems, two per side of the Mississippi, exactly the concentration the ICC had spent 70 years preventing. The nationalization everyone called socialism turned out to be the escrow account of the final consolidation.
+</div>
+
+<div class="section-title">The Receivership of 1893 — When the Bankers Became the Shoguns</div>
+<p class="section-sub">The Panic of 1893 put 153 railroads — nearly a third of the nation's mileage — into receivership, and the power to reorganize them passed from the builders to the financiers. The bars show the great wrecks by mileage: <b style="color:#e8dfc9">whoever controlled the reorganization controlled the road for the next generation</b>. J.P. Morgan "Morganized" the East and created the Southern Railway outright; Kuhn, Loeb handed the ruined Union Pacific to an obscure broker named E.H. Harriman — the appointment that created the era's greatest railroad mind. Hover a bar for each wreck's fate.</p>
+<div id="regents-wrap" style="position:relative;background:var(--ink-2);border:1px solid var(--hair);padding:6px;">
+  <svg id="regents" role="img" aria-label="Bar chart comparing the approximate mileage of six major railroads in receivership after the Panic of 1893" style="display:block;width:100%;height:auto;"></svg>
+  <div class="tooltip" id="tt3"></div>
+</div>
+
+<div class="section-title">How Every Great Railroad Ended</div>
+<p class="section-sub">The era's major systems, in order of when they folded. "Folded" takes three forms: <span style="color:#d98a7f">destroyed</span> (liquidated, embargoed, or nationalized as a corpse), <span style="color:#d9c27f">absorbed</span> (merged into a survivor), or <span style="color:#9dbf9a">still running in 2026</span>. Note the pattern: the roads died in two great waves — the over-builders in the panics of 1873 and 1893, and the over-regulated in the collapse of 1970–80 — and almost none in between. The ICC's regulated century didn't prevent the deaths; it deferred and compounded them.</p>
+<div class="table-scroll"><table id="fates"></table></div>
+
+<div class="section-title">The Great Systems — Peak Domain &amp; Fate</div>
+<div id="clans"></div>
+
+<div class="fermi">
+  <b>How the mileage estimates were made (Fermi method):</b>
+  Anchors are ICC/AAR route-mile statistics and company reports: the national network grew from ≈9,000 miles (1850) to its all-time peak of
+  <b>≈254,000 miles in 1916</b>, then shrank by nearly half to roughly 140,000 today. Documented checkpoints keep the bands honest:
+  the Pennsylvania and New York Central each ran <b>≈10,000-mile systems</b> at midcentury; Penn Central entered bankruptcy with ≈20,000 miles;
+  Conrail inherited selected portions of six bankrupt systems and was ultimately partitioned on a <b>58% NS / 42% CSX economic basis</b>;
+  and BN was created at ≈23,000 miles in 1970. Today AAR describes a nearly <b>140,000-mile freight network</b>, with six Class I railroads accounting for about 67% of freight mileage and roughly 615 short lines operating much of the rest.
+  The four U.S.-headquartered giants' company route-mile figures overlap trackage rights and include some Canadian mileage, so this chart does not divide their disclosures by the AAR national total. Between checkpoints, shares are interpolated from system maps and reports; error bars are roughly ±1–2 points.
+  <br><br>
+  <b>Two things that look wrong but aren't.</b>
+  <b>(1) The total never shrinks — even though the network did.</b> The stack shows <i>share</i> of whatever network exists each year, so the great abandonment (254,000 → roughly 140,000 miles) is invisible in the shape and visible only in the tooltip conversion. When a road dies, its share moves to another band or to gray; when a line is simply torn up, every band shrinks alike and shares are unchanged.
+  <b>(2) The gray band grows after 1980 — on purpose.</b> "Other roads" is hundreds of houses: the granger, coal and New England lines of the first century, and then, after the Staggers Act let the majors shed branch lines instead of abandoning them, a deliberate new feudalism of <b>roughly 615 short lines</b> farming the branches. The gray band's post-1980 growth also includes the U.S. domains of Canadian National and CPKC.
+</div>
+
+<div class="section-title">The Unclosed Gate — UP + NS, Proposed in 2025</div>
+<div class="fermi">
+  The chart ends with four U.S.-headquartered giants because the newest conquest is <b>not complete</b>. Union Pacific and Norfolk Southern notified regulators in 2025 and filed a revised major-merger application in April 2026. On May 28, 2026, the Surface Transportation Board accepted that revised application for consideration, required more information, and held the proceeding in abeyance while an environmental-impact review is prepared. Acceptance starts the review; it is not approval. If the transaction ultimately closes, the map would stop being the symmetrical western-two/eastern-two order shown here and become the first U.S. transcontinental system under one corporate roof.
+</div>
+
+<div class="section-title">Research Anchors</div>
+<p class="section-sub">The colored bands are reconstructed estimates, not a continuous official series. The historical network totals, modern network context, government restructuring, and major transactions below are anchored to primary or industry sources.</p>
+<div class="sources">
+  <a href="https://rosap.ntl.bts.gov/view/dot/30032/dot_30032_DS1.pdf" target="_blank" rel="noopener noreferrer">U.S. DOT · 1916 peak of 254,000 route-miles</a>
+  <a href="https://www.bts.gov/content/system-mileage-within-united-states" target="_blank" rel="noopener noreferrer">BTS · U.S. system mileage definitions and series</a>
+  <a href="https://www.aar.org/freight-rail-facts-figures/" target="_blank" rel="noopener noreferrer">AAR · Current network, Class I, and short-line context</a>
+  <a href="https://www.gao.gov/assets/ggd-84-34.pdf" target="_blank" rel="noopener noreferrer">GAO · Federal support for Conrail</a>
+  <a href="https://www.stb.gov/wp-content/uploads/FD-33388-CSX-NS-Conrail-July-20-1998-Decision.pdf" target="_blank" rel="noopener noreferrer">STB · CSX/NS acquisition and partition of Conrail</a>
+  <a href="https://www.berkshirehathaway.com/news/nov0309.pdf" target="_blank" rel="noopener noreferrer">Berkshire Hathaway · BNSF transaction terms</a>
+  <a href="https://www.stb.gov/news-communications/latest-news/pr-23-07/" target="_blank" rel="noopener noreferrer">STB · CP/KCS approval and conditions</a>
+  <a href="https://www.cpkcr.com/en/media/canadian-pacific-and-kansas-city-southern-combine-to-create-cpkc" target="_blank" rel="noopener noreferrer">CPKC · $31B combination and tri-national network</a>
+  <a href="https://www.stb.gov/resources/major-railroad-mergers/" target="_blank" rel="noopener noreferrer">STB · Current UP–NS merger docket and status</a>
+</div>
+
+<footer>Bands show estimated route-miles operated by each system and its controlled subsidiaries, as a share of the U.S. freight-rail network (passenger operations pass to Amtrak in 1971 without transferring most ownership of the rails). The stack always totals 100%. ※ marks the Pennsylvania's corporate reign and Berkshire's outright purchase of BNSF. Values are Fermi estimates for comparison, not ICC or STB filings.</footer>
+
+<script>
+/* ================= DATA (% of national route-miles) ================= */
+const CLANS = [
+ {id:"pennsy", name:"Pennsylvania", color:"#8e2a3f", region:"Philadelphia · the Standard Railroad of the World",
+  peak:"1900s–20s · ≈5.5% of mileage but far more of everything else — an American corporate giant",
+  suzerain:{a:1880,b:1946,note:"The Standard Railroad of the World: never the largest by mileage, but for decades among America's largest corporations, with enormous traffic density and a dividend paid for a century. Its power, like the Ashikaga's, vastly exceeded its acreage."},
+  fate:{txt:"Merged with its ancient enemy the New York Central in 1968 out of shared desperation — and the combination, Penn Central, was bankrupt in 872 days", kind:"sub", yr:1968, by:"Penn Central (merger of desperation)"},
+  pts:[[1852,0.5],[1870,3.5],[1890,5],[1900,5.5],[1920,4.8],[1950,4.5],[1968,4.3],[1969,0]]},
+
+ {id:"nyc", name:"New York Central", color:"#8d7ba8", region:"New York · the Vanderbilt Water Level Route",
+  peak:"1900s–20s · ≈5% — the Commodore's empire, the 20th Century Limited",
+  fate:{txt:"The Vanderbilt house, out of family hands by the 1950s, proxy-warred over by Robert Young, merged into Penn Central 1968", kind:"sub", yr:1968, by:"Penn Central (merger of desperation)"},
+  pts:[[1853,0.5],[1870,3.5],[1890,4.5],[1900,5],[1920,4.6],[1950,4.8],[1968,4.4],[1969,0]]},
+
+ {id:"penncentral", name:"Penn Central", color:"#4a4f57", region:"Philadelphia · the doomed colossus of the Northeast",
+  peak:"1968 · ≈10% — PRR + NYC + New Haven, fused by the ICC",
+  fate:{txt:"Bankrupt June 1970, 872 days after the merger — the largest bankruptcy in American history to that date; its collapse dragged the whole Northeast down and forced nationalization", kind:"fall", yr:1970, by:"Its own merger (two incompatible wrecks); the regulated passenger burden"},
+  pts:[[1968,0],[1969,10],[1975,9.5],[1976,0]]},
+
+ {id:"conrail", name:"Conrail", color:"#5b8ea6", region:"Philadelphia · the state's vessel — six dead roads in one",
+  peak:"1976–99 · ≈11% — nationalized, rebuilt with $7B, IPO'd 1987",
+  fate:{txt:"The great regranting: after a $10B bidding war, partitioned by NS (58%) and CSX (42%) in 1999 — the largest transfer of rail territory since the land-grant era", kind:"sub", yr:1999, by:"Norfolk Southern & CSX (partition)"},
+  pts:[[1976,0],[1977,11.5],[1981,10],[1990,9],[1998,9.5],[1999,0]]},
+
+ {id:"erie", name:"Erie (→ Erie Lackawanna)", color:"#5a7a9e", region:"Jersey City · the Scarlet Woman of Wall Street",
+  peak:"1860s–70s · the prize of the Erie War — Gould, Fisk & Drew vs. Vanderbilt",
+  fate:{txt:"Looted by its own directors in the 1860s, bankrupted in every panic thereafter, merged with the Lackawanna in 1960, wrecked by Hurricane Agnes in 1972, swept into Conrail", kind:"fall", yr:1976, by:"Conrail (nationalization of the corpse)"},
+  pts:[[1851,4],[1870,2.5],[1890,1.4],[1920,1.1],[1950,1],[1960,1.4],[1975,1.3],[1976,0]]},
+
+ {id:"chessie", name:"C&O · B&O (Chessie)", color:"#b08a3f", region:"Cleveland & Baltimore · coal and the oldest charter in America (B&O, 1827)",
+  peak:"1960s–70s · ≈5% — the coal-rich C&O rescues the ancient B&O (1963)",
+  fate:{txt:"Folded into CSX in the 1980 mega-merger with the Seaboard family — the B&O name, the oldest in American railroading, retired after 160 years", kind:"sub", yr:1980, by:"CSX (founding merger)"},
+  pts:[[1850,3],[1870,2.5],[1890,3.5],[1900,3.5],[1920,4.2],[1950,4.8],[1963,4.9],[1979,5.4],[1980,0]]},
+
+ {id:"seaboard", name:"Seaboard family (ACL·SAL·L&N)", color:"#a05a4a", region:"Jacksonville · the routes to Florida and the southern coalfields",
+  peak:"1967–80 · ≈6.5% as Seaboard Coast Line — 'the Family Lines'",
+  fate:{txt:"Atlantic Coast Line + Seaboard Air Line merged 1967, controlling the Louisville & Nashville; the whole family folded into CSX in 1980", kind:"sub", yr:1980, by:"CSX (founding merger)"},
+  pts:[[1850,0.5],[1870,1.5],[1890,3],[1900,3.5],[1920,4.5],[1950,6],[1967,6.2],[1979,6.5],[1980,0]]},
+
+ {id:"csx", name:"CSX", color:"#3a6ea5", region:"Jacksonville · the eastern seaboard system",
+  peak:"2000s · ≈15% — Chessie + Seaboard + 42% of Conrail",
+  fate:{txt:"Victor — one of the Big Four; the consolidated East south of the old Central's territory, plus the Water Level Route itself from the Conrail split", kind:"live", yr:null, by:null},
+  pts:[[1980,11.9],[1990,14.5],[1998,13.5],[1999,15.5],[2010,15],[2025,14.6],[2026,14.6]]},
+
+ {id:"southern", name:"Southern Railway", color:"#3d8f80", region:"Atlanta · Morgan's 1894 creation from the wrecks of the South",
+  peak:"1960s–70s · ≈4% — 'the Southern Serves the South'; the best-run road in the East",
+  fate:{txt:"The strongest eastern road merged from strength, not weakness: joined the N&W in 1982 to form Norfolk Southern", kind:"sub", yr:1982, by:"Norfolk Southern (founding merger)"},
+  pts:[[1894,3.3],[1900,3.5],[1920,3.5],[1950,3.6],[1970,4],[1981,4.2],[1982,0]]},
+
+ {id:"nw", name:"Norfolk & Western", color:"#6e5a7a", region:"Roanoke · Pocahontas coal — the last steam holdout, the richest rails per mile",
+  peak:"1964–82 · ≈4% after swallowing the Virginian, Wabash and Nickel Plate",
+  fate:{txt:"The coal-fat N&W merged with the Southern in 1982 to form Norfolk Southern", kind:"sub", yr:1982, by:"Norfolk Southern (founding merger)"},
+  pts:[[1850,0.2],[1890,1],[1920,1.2],[1950,1.2],[1959,1.5],[1964,3.6],[1981,4],[1982,0]]},
+
+ {id:"ns", name:"Norfolk Southern", color:"#4d5566", region:"Atlanta · the eastern system, thoroughbred black",
+  peak:"1999– · ≈14% with 58% of Conrail",
+  fate:{txt:"Victor — one of the Big Four; took the lion's share of Conrail, including the old Pennsylvania main line itself", kind:"live", yr:null, by:null},
+  pts:[[1982,9.6],[1990,10.5],[1998,10],[1999,14.5],[2010,14],[2025,14.2],[2026,14.2]]},
+
+ {id:"up", name:"Union Pacific", color:"#d1a636", region:"Omaha · the Overland Route — Golden Spike, Gould, then Harriman's masterpiece",
+  peak:"2025–26 · ≈23% — the largest railroad in America; proposed NS buyer",
+  fate:{txt:"Victor — bankrupted in 1893, rebuilt by Harriman into the best-engineered road in the country, then the great consolidator of the West: MoPac & Western Pacific (1982), Katy (1988), C&NW (1995), Southern Pacific (1996)", kind:"live", yr:null, by:null},
+  pts:[[1862,0],[1869,3],[1880,2.5],[1890,3],[1900,3],[1920,3.7],[1950,4.4],[1970,4.7],[1981,4.9],[1982,9.3],[1988,9.8],[1994,10.2],[1995,12],[1996,18],[2000,17.5],[2025,23.4],[2026,23.4]]},
+
+ {id:"sp", name:"Southern Pacific", color:"#a34a5c", region:"San Francisco · the Octopus — Huntington's grip on California",
+  peak:"1900s–50s · ≈6% — with the Central Pacific inside it, the master of the Far West",
+  fate:{txt:"Frank Norris's Octopus, Harriman's other half (until the 1913 breakup), starved by the 1980s; bought by Anschutz's far smaller Rio Grande in 1988 — gekokujō — and sold on to Union Pacific in 1996", kind:"sub", yr:1996, by:"Union Pacific (after the Rio Grande's reverse takeover)"},
+  pts:[[1861,0.3],[1870,1],[1885,3],[1900,4.6],[1920,4.4],[1950,6],[1970,5.5],[1988,6.2],[1995,6.3],[1996,0]]},
+
+ {id:"atsf", name:"Santa Fe", color:"#c1442e", region:"Chicago–LA · the Warbonnet — the Super Chief's road",
+  peak:"1890 & 1950s · ≈6% — the biggest single wreck of 1893, and the finest road in the West by 1950",
+  fate:{txt:"Reorganized after the largest failure of the 1893 panic and never stumbled again; merged with Burlington Northern in 1995 to form BNSF", kind:"sub", yr:1995, by:"BNSF (founding merger)"},
+  pts:[[1868,0.2],[1880,1.5],[1890,5.5],[1900,4.7],[1920,4.6],[1950,5.8],[1970,5.9],[1990,6.4],[1994,6.5],[1995,0]]},
+
+ {id:"hill", name:"Hill Lines (GN · NP)", color:"#6b8f4a", region:"St. Paul · the Empire Builder's northern transcontinentals",
+  peak:"1900s–60s · ≈6.5% — the only transcontinental never bankrupted (GN)",
+  fate:{txt:"Held in alignment for 66 years after Roosevelt broke the Northern Securities holding company (1904); finally merged — with the Burlington — into Burlington Northern, 1970", kind:"sub", yr:1970, by:"Burlington Northern (the merger Roosevelt blocked)"},
+  pts:[[1864,0.2],[1875,1],[1883,2.5],[1893,4.5],[1900,5.6],[1920,5.8],[1950,6.6],[1969,6.6],[1970,0]]},
+
+ {id:"cbq", name:"Burlington (CB&Q)", color:"#9d8a3f", region:"Chicago · the granger aristocrat — Hill's Chicago gateway since 1901",
+  peak:"1900s–60s · ≈4% — the best of the granger roads",
+  fate:{txt:"Jointly held by GN and NP since Hill bought it in 1901 (the purchase that triggered the Northern Securities war); merged into Burlington Northern 1970", kind:"sub", yr:1970, by:"Burlington Northern (founding merger)"},
+  pts:[[1850,0.3],[1870,1.5],[1890,3],[1900,4.1],[1920,3.6],[1950,4],[1969,4.2],[1970,0]]},
+
+ {id:"bn", name:"Burlington Northern", color:"#2f6e4f", region:"St. Paul → Fort Worth · Cascade green across the North",
+  peak:"1990s · ≈16.5% — plus the Powder River coal bonanza",
+  fate:{txt:"The consummated Hill system added the Frisco (1980) and struck coal: the Powder River Basin made it the biggest hauler in America; merged with Santa Fe, 1995", kind:"sub", yr:1995, by:"BNSF (founding merger)"},
+  pts:[[1970,11],[1979,11.2],[1980,12.4],[1990,16],[1994,16.5],[1995,0]]},
+
+ {id:"bnsf", name:"BNSF", color:"#e08a3c", region:"Fort Worth · Hill's heir in pumpkin orange",
+  peak:"2010s– · ≈24% — bought outright by Berkshire Hathaway, 2009",
+  fate:{txt:"Victor — one of the Big Four, and the final tribute to Hill's method: Berkshire's 2009 take-private was valued at about $44B including BNSF debt, then its largest acquisition", kind:"live", yr:null, by:null},
+  pts:[[1995,22.8],[2000,22.5],[2010,23.5],[2025,23.7],[2026,23.7]]},
+
+ {id:"milwaukee", name:"Milwaukee Road", color:"#c05a2e", region:"Chicago–Puget Sound · the last transcontinental, electrified over the Rockies",
+  peak:"1910s–50s · ≈4.8% — the Pacific Extension, engineering marvel and financial suicide",
+  fate:{txt:"The 1909 Pacific Extension never paid for itself; bankrupt 1925, 1935, 1977. In 1980 it embargoed everything west of Miles City — walked away from a transcontinental main line — and the remnant was sold to the Soo Line (Canadian Pacific), 1985", kind:"fall", yr:1980, by:"Its own Pacific Extension; Soo Line/CP (the remnant)"},
+  pts:[[1851,0.5],[1870,1.5],[1890,3],[1909,3.8],[1920,4.2],[1950,4.8],[1970,4.9],[1979,4.6],[1980,2],[1985,0]]},
+
+ {id:"rockisland", name:"Rock Island", color:"#96566b", region:"Chicago · the granger road that ran out of time",
+  peak:"1900s–50s · ≈3.5% — 'the Mighty Fine Line' of the song",
+  fate:{txt:"Ground down by a 12-year ICC merger case (UP walked away when approval finally came), struck in 1979, ordered liquidated in 1980 — the largest railroad ever simply shut down: rails to scrap, parcels to neighbors, nothing reorganized", kind:"fall", yr:1980, by:"The ICC's delay; liquidation (no buyer)"},
+  pts:[[1852,0.5],[1870,1.5],[1890,2.5],[1920,3.2],[1950,3.5],[1970,3.4],[1979,3.3],[1980,0]]},
+
+ {id:"mopac", name:"Missouri Pacific", color:"#35548f", region:"St. Louis · Jay Gould's southwestern web",
+  peak:"1950s–70s · ≈4.5% — rebuilt from Gould's wreckage into a model road",
+  fate:{txt:"Gould's old system, bankrupt 1915 and 1933, emerged as one of the best-run roads of the 1970s and merged into Union Pacific in 1982 — the deal that began the western endgame", kind:"sub", yr:1982, by:"Union Pacific (acquisition)"},
+  pts:[[1851,0.3],[1880,2],[1890,3],[1920,3.4],[1950,4.2],[1970,4.4],[1981,4.5],[1982,0]]},
+
+ {id:"ic", name:"Illinois Central", color:"#7a6a4a", region:"Chicago–New Orleans · the Main Line of Mid-America, first land-grant road (1850)",
+  peak:"1900s–50s · ≈3% — Casey Jones's railroad",
+  fate:{txt:"The first land-grant railroad in American history ended as the first great foreign conquest: sold to Canadian National in 1998, giving CN its Gulf outlet", kind:"sub", yr:1998, by:"Canadian National (acquisition)"},
+  pts:[[1851,2],[1870,1.5],[1890,2],[1920,2.8],[1950,2.9],[1972,3],[1990,2],[1998,1.8],[1999,0]]},
+
+ {id:"kcs", name:"Kansas City Southern", color:"#9e9450", region:"Kansas City–Gulf–Mexico · the smallest Class I, the biggest border",
+  peak:"2000s–23 · ≈1.3% of U.S. miles — plus the only franchise into the Mexican heartland",
+  fate:{txt:"The runt of the Class Is held the one asset no giant had — Mexico — and joined Canadian Pacific in a US$31B transaction to form CPKC, the first single railroad spanning Canada, the U.S. and Mexico", kind:"sub", yr:2023, by:"Canadian Pacific (CPKC merger)"},
+  pts:[[1893,0.2],[1900,0.4],[1950,0.4],[2000,1.2],[2023,1.3],[2024,0]]},
+
+ {id:"other", name:"Other roads", color:"#6b6b66", region:"The first century's hundreds — granger, coal, New England and southern lines (New Haven, Reading, C&NW, Frisco, Katy, Rio Grande…) — and, after 1980, roughly 615 short lines farming the branches, plus the U.S. domains of CN and CPKC",
+  peak:"—", fate:{txt:"The churn layer: the fragmented map of the building age, consolidated for a century, then deliberately re-fragmented at the edges after Staggers — a new feudalism of shortlines under the Big Four's suzerainty", kind:"live", yr:null, by:null},
+  pts:null /* remainder to 100% */},
+];
+
+const ORDER = ["other","kcs","ic","mopac","rockisland","milwaukee","bnsf","bn","cbq","hill","atsf","sp","up","ns","nw","southern","csx","seaboard","chessie","erie","conrail","penncentral","nyc","pennsy"];
+const TOTAL = 100;
+/* national route-miles (thousands), for the tooltip conversion */
+const TM = [[1850,9],[1860,30],[1870,53],[1880,93],[1890,164],[1900,193],[1916,254],[1929,249],[1940,233],[1950,224],[1960,217],[1970,206],[1980,179],[1990,146],[2000,144],[2010,139],[2025,140],[2026,140]];
+
+const ERAS = [
+ {a:1850,b:1873,l1:"The Race to Build",l2:"1850–1873"},
+ {a:1873,b:1901,l1:"The Robber Baron Wars",l2:"1873–1901"},
+ {a:1901,b:1930,l1:"Regulated Ascendancy",l2:"1901–1930"},
+ {a:1930,b:1970,l1:"The Long Decline",l2:"1930–1970"},
+ {a:1970,b:1980,l1:"Collapse",l2:"1970–80"},
+ {a:1980,b:2026,l1:"Staggers & Final Consolidation",l2:"1980–2026"},
+];
+
+const EVENTS = [
+ {yr:1850, label:"1850", name:"The land-grant era opens", fall:false,
+  txt:"Congress grants the Illinois Central 2.6 million acres — the first railroad land grant. Over the next two decades some 130 million acres follow: the state pays for the map in land."},
+ {yr:1869, label:"1862–69", name:"Golden Spike", fall:false,
+  txt:"The Pacific Railway Act charters the Union Pacific and Central Pacific; seven years later they meet at Promontory. The continent is crossed — on subsidies, watered stock, and the Crédit Mobilier fraud."},
+ {yr:1868, label:"1866–72", name:"The Erie War", fall:false,
+  txt:"Gould, Fisk and Drew print fresh Erie stock faster than Vanderbilt can buy it, bribe the Albany legislature, and flee to Jersey City with the ledgers. The rules of the age are set: the low may rob the high."},
+ {yr:1873, label:"1873", name:"The Panic of 1873", fall:true,
+  txt:"Jay Cooke, financier of the Northern Pacific, fails — and takes the economy with him. Eighty-nine railroads go bankrupt in two years; the over-builders learn what building ahead of traffic costs."},
+ {yr:1877, label:"1877", name:"The Great Railroad Strike", fall:false,
+  txt:"A 10% wage cut on the B&O ignites the first national strike in American history; federal troops fire on crowds in Pittsburgh. The railroads are now the arena of every conflict the country has."},
+ {yr:1889, label:"1885–93", name:"The last great boom", fall:false,
+  txt:"Seventy thousand new miles in a decade — the Santa Fe reaches Chicago, Hill's Great Northern crawls toward Seattle grade by grade, everyone builds against everyone. Twice the track the traffic can pay for."},
+ {yr:1893, label:"1893", name:"The Panic of 1893", fall:true,
+  txt:"153 railroads — a third of the nation's mileage — fall into receivership, the Santa Fe and Union Pacific among them. The builders lose the roads; the bankers pick up the pieces (see the receivership chart below)."},
+ {yr:1901, label:"1901", name:"The Northern Securities corner", fall:false,
+  txt:"Harriman secretly buys the Northern Pacific out from under Hill and Morgan; the counter-scramble corners NP at $1,000 a share and nearly crashes Wall Street. The truce — one giant holding company — is dissolved by Roosevelt's trustbusters in 1904, freezing the map for 66 years."},
+ {yr:1910, label:"1906–16", name:"The ICC clamps down · peak track", fall:false,
+  txt:"The Hepburn Act gives the ICC real rate power just as costs begin to inflate. The network peaks at 254,000 miles in 1916 — the high-water mark of the empire, and the beginning of the freeze."},
+ {yr:1918, label:"1917–20", name:"Nationalized for war", fall:false,
+  txt:"The USRA runs every railroad as one system for the war. Returned in 1920 worn out, rate-capped, and facing a new rival the government would pave for free: the highway."},
+ {yr:1933, label:"1930s", name:"Depression receiverships", fall:false,
+  txt:"A third of the mileage is in bankruptcy again — the Milwaukee, MoPac, Frisco, Rock Island among them — but this time there is no Morgan and no growth to reorganize toward. The long decline sets in."},
+ {yr:1956, label:"1945–60", name:"Diesels, and the road that ate the rails", fall:false,
+  txt:"Dieselization halves crew costs but can't outrun the Interstate Highway Act (1956) and free airways. Passenger trains hemorrhage; the ICC still won't let anyone quit, merge, or reprice."},
+ {yr:1970, label:"1968–70", name:"Penn Central", fall:true,
+  txt:"The PRR and NYC — enemies for a century — merge in desperation and fail in 872 days: the largest bankruptcy in U.S. history to date. Its commercial paper default nearly takes Wall Street with it."},
+ {yr:1971, label:"1971", name:"Amtrak", fall:false,
+  txt:"The state takes the passenger burden off the freight roads — the flagships, the Broadway and the Chief, pass to a public corporation. The freight railroads are quietly freed to become what they are now."},
+ {yr:1976, label:"1976", name:"Conrail", fall:false,
+  txt:"Six dead northeastern roads — Penn Central, Erie Lackawanna, Reading, Lehigh Valley, CNJ, Lehigh & Hudson — are fused into one government-owned system. The state holds 11% of the national map in escrow."},
+ {yr:1980, label:"1980", name:"Staggers · Rock Island dies · the Milwaukee retreats", fall:true,
+  txt:"The Staggers Act frees rates and exits after a century of ICC control — days after the Rock Island is ordered liquidated outright and the Milwaukee embargoes its transcontinental line. Deregulation arrives over two corpses."},
+ {yr:1983, label:"1980–86", name:"The merger wave", fall:false,
+  txt:"CSX (Chessie + Seaboard, 1980), Norfolk Southern (N&W + Southern, 1982), UP + MoPac + Western Pacific (1982), BN + Frisco (1980). The regulated century's frozen map thaws in five years."},
+ {yr:1997, label:"1995–99", name:"Endgame in the West and East", fall:false,
+  txt:"BN + Santa Fe (1995); UP + SP (1996, digestion so chaotic it gridlocked Texas); and the $10B partition of Conrail by NS and CSX (1999). Four systems now hold the continent — two per side of the Mississippi."},
+ {yr:2023, label:"2009–23", name:"Buffett buys the railroad · CPKC", fall:false,
+  txt:"Berkshire's BNSF deal is valued at about $44B including railroad debt (2009). CP and KCS combine in 2023 after a US$31B acquisition, creating the first single-line Canada–U.S.–Mexico railroad."},
+ {yr:2026, label:"2025–26", name:"UP proposes to acquire NS", fall:false,
+  txt:"A revised transcontinental merger application is accepted for consideration in May 2026, with the STB requiring supplemental information and holding the proceeding in abeyance. Proposed is not approved: UP and NS remain separate on this chart."},
+];
+
+const FATES = [
+ {c:"Camden & Amboy and the pioneers", col:"#6b6b66", peak:"The 1830s–40s originals", yr:"1850s–70s", how:"The first generation of short local roads was leased, absorbed or trunk-lined out of existence as the systems formed — the PRR alone swallowed hundreds of charters.", by:"The trunk systems", kind:"submitted"},
+ {c:"Central Pacific", col:"#a34a5c", peak:"The western half of the Golden Spike", yr:"1885", how:"The Big Four (Stanford, Huntington, Crocker, Hopkins) folded their creation into their larger Southern Pacific — the transcontinental original became a subsidiary of its own owners' second act.", by:"Southern Pacific (its own owners)", kind:"submitted"},
+ {c:"Erie", col:"#5a7a9e", peak:"The prize of the Erie War", yr:"1976", how:"Looted by Gould, Fisk and Drew; bankrupt in 1875, 1893, 1938; merged with the Lackawanna (1960); finished by Hurricane Agnes (1972); swept into Conrail. No major road was robbed more often by more famous men.", by:"Conrail (nationalization)", kind:"destroyed"},
+ {c:"Jay Cooke & the Northern Pacific (first NP)", col:"#6b8f4a", peak:"The 1870s NP — built on Cooke's bond machine", yr:"1873", how:"Cooke's failure triggered the Panic of 1873; the NP passed through two receiverships before Morgan and Hill remade it.", by:"The Panic; Morgan & Hill (reorganization)", kind:"destroyed"},
+ {c:"Richmond & West Point Terminal", col:"#3d8f80", peak:"≈8,500 miles of tangled southern roads", yr:"1893–94", how:"The great southern wreck of 1893; Morgan welded it into the Southern Railway — a new house forged whole from a dead one.", by:"J.P. Morgan (reorganized as Southern Ry)", kind:"destroyed"},
+ {c:"New Haven", col:"#8e2a3f", peak:"Monopolist of New England (Morgan-built, ~2,000 mi)", yr:"1969", how:"Morgan and Mellen's overleveraged New England monopoly never recovered from its 1913 scandals; bankrupt from 1961, forced into Penn Central by the ICC in 1969 — a poison pill in an already-poisoned merger.", by:"Penn Central (forced inclusion)", kind:"destroyed"},
+ {c:"Pennsylvania", col:"#8e2a3f", peak:"An American corporate giant", yr:"1968", how:"A century of primacy and a century of dividends — then electrified debt, passenger losses and regulated rates. Merged with its ancient rival out of desperation.", by:"Penn Central (merger)", kind:"submitted"},
+ {c:"New York Central", col:"#8d7ba8", peak:"The Vanderbilt system · the Water Level Route", yr:"1968", how:"The Commodore's house, fought over by proxy raiders in the 1950s, chose the same desperate merger.", by:"Penn Central (merger)", kind:"submitted"},
+ {c:"Penn Central", col:"#4a4f57", peak:"≈10% of the national map", yr:"1970", how:"Two incompatible wrecks, fused; bankrupt in 872 days — the largest failure in American history to that date. Its collapse forced the nationalization of the Northeast.", by:"Itself; Conrail (the corpse)", kind:"destroyed"},
+ {c:"Reading · Lehigh Valley · CNJ", col:"#b08a3f", peak:"The anthracite roads", yr:"1976", how:"The coal that built them ran out; all three followed Penn Central into bankruptcy and were swept into Conrail together.", by:"Conrail (nationalization)", kind:"destroyed"},
+ {c:"Rock Island", col:"#96566b", peak:"≈3.5% · the Mighty Fine Line", yr:"1980", how:"A 12-year ICC merger case ended with UP walking away from its own approved deal; a 1979 strike finished it. Ordered liquidated — the largest railroad ever simply shut down and sold for parts.", by:"The ICC's delay; liquidation", kind:"destroyed"},
+ {c:"Milwaukee Road", col:"#c05a2e", peak:"≈4.8% · the electrified transcontinental", yr:"1980–85", how:"The 1909 Pacific Extension — a marvel of engineering — never earned its cost of capital for 70 years. Embargoed its own main line west of Miles City in 1980; the eastern remnant sold to the Soo Line (CP).", by:"Its own Pacific Extension; Soo/CP (remnant)", kind:"destroyed"},
+ {c:"Frisco", col:"#9e9450", peak:"The Ozark gateway (~4,700 mi)", yr:"1980", how:"Merged into Burlington Northern — the tidy kind of ending the era rarely allowed.", by:"Burlington Northern", kind:"submitted"},
+ {c:"Missouri Pacific", col:"#35548f", peak:"≈4.5% · Gould's rebuilt web", yr:"1982", how:"From Gould's wreckage to one of the best-run roads of the 1970s; merged into UP — the deal that opened the western endgame.", by:"Union Pacific", kind:"submitted"},
+ {c:"Katy (MKT)", col:"#9e9450", peak:"The Texas granger", yr:"1988", how:"Absorbed by Union Pacific.", by:"Union Pacific", kind:"submitted"},
+ {c:"Western Pacific", col:"#d1a636", peak:"The Feather River route", yr:"1982", how:"The scrappy third road to California joined UP alongside MoPac.", by:"Union Pacific", kind:"submitted"},
+ {c:"Chicago & North Western", col:"#7a6a4a", peak:"The granger giant (~10,000 mi at peak)", yr:"1995", how:"Shrank itself ruthlessly to survive the granger collapse, won the Powder River coal race, and sold to UP at the top.", by:"Union Pacific", kind:"submitted"},
+ {c:"Rio Grande (D&RGW)", col:"#a34a5c", peak:"The mountain railroad", yr:"1988 → 1996", how:"Anschutz's little Rio Grande bought the far larger Southern Pacific in 1988 — gekokujō through the Rockies — kept the SP name, and sold the whole to UP in 1996.", by:"— (it did the buying); UP (final sale)", kind:"submitted"},
+ {c:"Southern Pacific", col:"#a34a5c", peak:"≈6% · the Octopus", yr:"1996", how:"Huntington's empire and Harriman's other half, starved of capital by the 1980s; taken by the Rio Grande, then folded into UP — whose chaotic digestion of it gridlocked Texas for a year.", by:"Union Pacific", kind:"submitted"},
+ {c:"Santa Fe", col:"#c1442e", peak:"≈6% · the Warbonnet", yr:"1995", how:"The biggest wreck of 1893 became the steadiest road in the West; merged with BN from strength to form BNSF.", by:"BNSF (founding merger)", kind:"submitted"},
+ {c:"Hill Lines (GN·NP) & Burlington", col:"#6b8f4a", peak:"≈10.5% aligned", yr:"1970", how:"Blocked by Roosevelt in 1904, the three roads waited 66 years in formation and merged the moment the law allowed.", by:"Burlington Northern (consummation)", kind:"submitted"},
+ {c:"Burlington Northern", col:"#2f6e4f", peak:"≈16.5% + Powder River coal", yr:"1995", how:"Hill's consummated system struck the coal bonanza his engineers had graded past a century earlier; merged with Santa Fe.", by:"BNSF (founding merger)", kind:"submitted"},
+ {c:"Chessie & Seaboard families", col:"#b08a3f", peak:"≈12% combined", yr:"1980", how:"The two southeastern families merged into CSX — the first of the modern mega-systems, retiring the oldest name in railroading (B&O, 1827).", by:"CSX (founding merger)", kind:"submitted"},
+ {c:"Southern & N&W", col:"#3d8f80", peak:"≈8% combined · the two best-run eastern roads", yr:"1982", how:"The rare merger of two healthy roads — coal wealth plus operating excellence — forming Norfolk Southern.", by:"Norfolk Southern (founding merger)", kind:"submitted"},
+ {c:"Conrail", col:"#5b8ea6", peak:"≈11% · the state's vessel", yr:"1999", how:"Six corpses in, $7B of repairs, profitability after Staggers, the largest IPO in U.S. history (1987) — then partitioned 58/42 by NS and CSX after a $10B bidding war. The great regranting.", by:"NS & CSX (partition)", kind:"submitted"},
+ {c:"Illinois Central", col:"#7a6a4a", peak:"≈3% · the first land-grant road", yr:"1998", how:"The Main Line of Mid-America sold to Canadian National — the first great foreign conquest of the American map.", by:"Canadian National", kind:"submitted"},
+ {c:"Kansas City Southern", col:"#9e9450", peak:"The smallest Class I — with Mexico in hand", yr:"2023", how:"The runt outlived every mid-sized peer by holding the one franchise no U.S. giant had, then joined CP in a US$31B transaction to create the first Canada–U.S.–Mexico single-line railroad.", by:"Canadian Pacific (CPKC)", kind:"submitted"},
+ {c:"CSX", col:"#3a6ea5", peak:"≈15% · the consolidated Southeast + 42% of Conrail", yr:"—", how:"One of the Big Four; holder of the Water Level Route and the coal South.", by:"—", kind:"victor"},
+ {c:"Norfolk Southern", col:"#4d5566", peak:"≈14% · the consolidated East + 58% of Conrail", yr:"—", how:"One of the Big Four and still independent while UP's proposed acquisition is under STB review; heir to the Southern, N&W, and Pennsylvania routes.", by:"—", kind:"victor"},
+ {c:"Union Pacific", col:"#d1a636", peak:"≈23% · the largest railroad in America", yr:"—", how:"Bankrupted in 1893, remade by Harriman, and the great consolidator of the West. Its proposed acquisition of NS was accepted for regulatory consideration in 2026 but has not been approved.", by:"—", kind:"victor"},
+ {c:"BNSF", col:"#e08a3c", peak:"≈24% · Berkshire's railroad", yr:"—", how:"Hill's heir: the unsubsidized, never-bankrupt northern empire plus the Santa Fe, bought whole by Buffett in 2009. The Empire Builder's method — patience, grades, and no debt you can't carry — won the 175-year war.", by:"—", kind:"victor"},
+];
+
+/* Sankey: share points of national mileage flowing from absorbed to absorber */
+const SK_NODES = ["Central Pacific","Pennsylvania","New York Central","New Haven","Penn Central","Erie Lackawanna","Reading · Lehigh · CNJ","Conrail","C&O · B&O (Chessie)","Seaboard family","Southern Ry","Virginian","Wabash · Nickel Plate","N&W","Great Northern","Northern Pacific","Burlington (CB&Q)","Frisco","Burlington Northern","Santa Fe","Milwaukee Road","Rock Island","Missouri Pacific","Western Pacific","Katy","C&NW","Rio Grande","Southern Pacific","Illinois Central","Kansas City Southern","Soo / Canadian Pacific","CSX","Norfolk Southern","Union Pacific","BNSF","Canadian National","CPKC","Liquidation & scrap"];
+const SK_COLORS = {"Central Pacific":"#a34a5c","Pennsylvania":"#8e2a3f","New York Central":"#8d7ba8","New Haven":"#8e2a3f","Penn Central":"#4a4f57","Erie Lackawanna":"#5a7a9e","Reading · Lehigh · CNJ":"#b08a3f","Conrail":"#5b8ea6","C&O · B&O (Chessie)":"#b08a3f","Seaboard family":"#a05a4a","Southern Ry":"#3d8f80","Virginian":"#6e5a7a","Wabash · Nickel Plate":"#6e5a7a","N&W":"#6e5a7a","Great Northern":"#6b8f4a","Northern Pacific":"#556e3f","Burlington (CB&Q)":"#9d8a3f","Frisco":"#9e9450","Burlington Northern":"#2f6e4f","Santa Fe":"#c1442e","Milwaukee Road":"#c05a2e","Rock Island":"#96566b","Missouri Pacific":"#35548f","Western Pacific":"#d1a636","Katy":"#9e9450","C&NW":"#7a6a4a","Rio Grande":"#a34a5c","Southern Pacific":"#a34a5c","Illinois Central":"#7a6a4a","Kansas City Southern":"#9e9450","Soo / Canadian Pacific":"#8a5a33","CSX":"#3a6ea5","Norfolk Southern":"#4d5566","Union Pacific":"#d1a636","BNSF":"#e08a3c","Canadian National":"#5e6e5a","CPKC":"#8a5a33","Liquidation & scrap":"#6b6b66"};
+const SK_LINKS = [
+ {s:"Central Pacific",t:"Southern Pacific",v:2.5, kind:"sub", e:"1885 — the Big Four fold the Golden Spike's western half into their own Southern Pacific"},
+ {s:"Pennsylvania",t:"Penn Central",v:4.3, kind:"sub", e:"1968 — the Standard Railroad of the World merges with its century-long enemy, out of shared desperation"},
+ {s:"New York Central",t:"Penn Central",v:4.4, kind:"sub", e:"1968 — the Vanderbilt system's half of the doomed marriage"},
+ {s:"New Haven",t:"Penn Central",v:0.9, kind:"fall", e:"1969 — the bankrupt New England monopoly forced into the merger by the ICC: a poison pill in a poisoned deal"},
+ {s:"Penn Central",t:"Conrail",v:9.5, kind:"fall", e:"1976 — bankrupt in 872 days; the corpse becomes the core of the nationalized system"},
+ {s:"Erie Lackawanna",t:"Conrail",v:1.3, kind:"fall", e:"1976 — robbed by Gould, drowned by Agnes, buried by the state"},
+ {s:"Reading · Lehigh · CNJ",t:"Conrail",v:1.5, kind:"fall", e:"1976 — the anthracite roads, dead with their coal, swept in together"},
+ {s:"Conrail",t:"Norfolk Southern",v:6.7, kind:"sub", e:"1999 — NS takes 58% in the partition, including the old Pennsylvania main line itself"},
+ {s:"Conrail",t:"CSX",v:4.8, kind:"sub", e:"1999 — CSX takes 42%, including the Vanderbilts' Water Level Route"},
+ {s:"C&O · B&O (Chessie)",t:"CSX",v:5.4, kind:"sub", e:"1980 — the Chessie System's half of the founding merger; the B&O name, oldest in America, retires"},
+ {s:"Seaboard family",t:"CSX",v:6.5, kind:"sub", e:"1980 — ACL + SAL + L&N: the Family Lines complete CSX"},
+ {s:"Southern Ry",t:"Norfolk Southern",v:4.2, kind:"sub", e:"1982 — Morgan's 1894 creation, the best-run road in the East, merges from strength"},
+ {s:"Virginian",t:"N&W",v:0.3, kind:"sub", e:"1959 — the coal rival absorbed"},
+ {s:"Wabash · Nickel Plate",t:"N&W",v:2, kind:"sub", e:"1964 — the N&W triples overnight"},
+ {s:"N&W",t:"Norfolk Southern",v:4, kind:"sub", e:"1982 — Pocahontas coal joins southern discipline"},
+ {s:"Great Northern",t:"Burlington Northern",v:3.6, kind:"sub", e:"1970 — Hill's unsubsidized, never-bankrupt line anchors the consummated merger"},
+ {s:"Northern Pacific",t:"Burlington Northern",v:3, kind:"sub", e:"1970 — the road whose 1901 contest nearly crashed Wall Street finally joins its partner"},
+ {s:"Burlington (CB&Q)",t:"Burlington Northern",v:4.2, kind:"sub", e:"1970 — Hill's 1901 purchase, held jointly for 69 years, completes the merger Roosevelt blocked"},
+ {s:"Frisco",t:"Burlington Northern",v:2.5, kind:"sub", e:"1980 — the Ozark gateway added"},
+ {s:"Burlington Northern",t:"BNSF",v:16.5, kind:"sub", e:"1995 — BN + Santa Fe: the northern empire takes the southern transcon"},
+ {s:"Santa Fe",t:"BNSF",v:6.5, kind:"sub", e:"1995 — the Warbonnet's half of the founding merger"},
+ {s:"Milwaukee Road",t:"Soo / Canadian Pacific",v:2, kind:"fall", e:"1985 — after embargoing its own transcontinental line in 1980, the eastern remnant sells to the Soo: Canadian Pacific's first foothold"},
+ {s:"Rock Island",t:"Liquidation & scrap",v:3.3, kind:"fall", e:"1980 — the largest railroad ever simply shut down: rails to scrap, parcels to neighbors, nothing reorganized"},
+ {s:"Missouri Pacific",t:"Union Pacific",v:4.5, kind:"sub", e:"1982 — Gould's rebuilt web opens UP's consolidation of the West"},
+ {s:"Western Pacific",t:"Union Pacific",v:0.6, kind:"sub", e:"1982 — the Feather River route joins the same day"},
+ {s:"Katy",t:"Union Pacific",v:0.6, kind:"sub", e:"1988 — the Texas granger absorbed"},
+ {s:"C&NW",t:"Union Pacific",v:1.8, kind:"sub", e:"1995 — the granger giant that shrank itself to survive sells at the top"},
+ {s:"Rio Grande",t:"Southern Pacific",v:1, kind:"sub", e:"1988 — gekokujō: Anschutz's little mountain road buys the far larger SP and wears its name"},
+ {s:"Southern Pacific",t:"Union Pacific",v:6.3, kind:"sub", e:"1996 — the Octopus, Harriman's other half, finally rejoins UP; the digestion gridlocks Texas for a year"},
+ {s:"Illinois Central",t:"Canadian National",v:1.8, kind:"sub", e:"1998 — the first land-grant railroad becomes the first great foreign conquest: CN gains its Gulf outlet"},
+ {s:"Kansas City Southern",t:"CPKC",v:1.3, kind:"sub", e:"2023 — a US$31B transaction creates the first single-line Canada–U.S.–Mexico railroad"},
+ {s:"Soo / Canadian Pacific",t:"CPKC",v:2, kind:"sub", e:"2023 — CP's U.S. lines (the Milwaukee's old remnant among them) fold into the new tri-national system"},
+];
+
+/* ================= STACKED AREA CHART ================= */
+const Y0=1850, Y1=2026;
+const years = d3.range(Y0, Y1+1);
+const byId = Object.fromEntries(CLANS.map(c=>[c.id,c]));
+
+function powerAt(clan, y){
+  const p = clan.pts;
+  if(!p || y < p[0][0] || y > p[p.length-1][0]) return 0;
+  for(let i=0;i<p.length-1;i++){
+    const [x0,v0]=p[i],[x1,v1]=p[i+1];
+    if(y>=x0 && y<=x1) return x1===x0 ? v1 : v0 + (v1-v0)*(y-x0)/(x1-x0);
+  }
+  return 0;
+}
+function tmAt(y){ return powerAt({pts:TM}, y); }
+
+const rows = years.map(y=>{
+  const r = {year:y}; let named=0;
+  ORDER.forEach(id=>{ if(id!=="other"){ r[id]=powerAt(byId[id],y); named+=r[id]; }});
+  r.other = Math.max(TOTAL - named, 0);   /* total is ALWAYS 100% of whatever network exists */
+  return r;
+});
+
+const W=1500, H=580, M={t:64,r:24,b:36,l:60};
+const svg = d3.select("#chart").attr("viewBox",`0 0 ${W} ${H}`);
+const x = d3.scaleLinear([Y0,Y1],[M.l,W-M.r]);
+const yS = d3.scaleLinear([0,100],[H-M.b,M.t]);
+
+const series = d3.stack().keys(ORDER)(rows);
+const area = d3.area().x(d=>x(d.data.year)).y0(d=>yS(d[0])).y1(d=>yS(d[1])).curve(d3.curveBasis);
+
+/* era bands */
+const eraG = svg.append("g");
+ERAS.forEach((e,i)=>{
+  if(i>0) eraG.append("line").attr("x1",x(e.a)).attr("x2",x(e.a)).attr("y1",M.t-6).attr("y2",H-M.b)
+    .attr("stroke","rgba(232,223,201,.28)").attr("stroke-dasharray","2 5");
+  const cx=(x(e.a)+x(e.b))/2;
+  eraG.append("text").attr("x",cx).attr("y",22).attr("text-anchor","middle")
+    .attr("fill","#e8dfc9").attr("font-size",12.5).attr("letter-spacing","1.5").text(e.l1.toUpperCase());
+  eraG.append("text").attr("x",cx).attr("y",40).attr("text-anchor","middle")
+    .attr("fill","#8a7340").attr("font-size",11).attr("letter-spacing","1.5").text(e.l2);
+});
+
+/* grid + axes */
+d3.range(0,101,10).forEach(v=>{
+  svg.append("line").attr("x1",M.l).attr("x2",W-M.r).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke","rgba(232,223,201,.07)");
+  svg.append("text").attr("x",M.l-8).attr("y",yS(v)+4).attr("text-anchor","end")
+    .attr("fill","#736a56").attr("font-size",11).attr("font-family","var(--sans)").text(v+"%");
+});
+svg.append("text").attr("transform",`translate(16,${(M.t+H-M.b)/2}) rotate(-90)`).attr("text-anchor","middle")
+  .attr("fill","#a89e86").attr("font-size",11.5).attr("letter-spacing","1.5").text("SHARE OF NATIONAL ROUTE-MILES");
+d3.range(1850,2026,25).forEach(t=>{
+  svg.append("text").attr("x",x(t)).attr("y",H-12).attr("text-anchor","middle")
+    .attr("fill","#a89e86").attr("font-size",12.5).attr("font-family","var(--sans)").text(t);
+});
+
+/* bands */
+const paths = svg.append("g").selectAll("path").data(series).join("path")
+  .attr("d",area).attr("fill",d=>byId[d.key].color).attr("fill-opacity",.92)
+  .attr("stroke","#161310").attr("stroke-width",.7).style("cursor","crosshair");
+
+/* in-band labels at widest point */
+series.forEach(s=>{
+  let best={w:0,i:0};
+  s.forEach((d,i)=>{const w=d[1]-d[0]; if(w>best.w) best={w,i};});
+  const d=s[best.i];
+  if(best.w>3){
+    const yr=d.data.year;
+    const lx=Math.max(M.l+95, Math.min(W-M.r-95, x(yr)));
+    svg.append("text").attr("x",lx).attr("y",yS((d[0]+d[1])/2)+4.5)
+      .attr("text-anchor","middle").attr("fill","#0f0d0a").attr("font-size",best.w>11?16:(best.w>5?12.5:10))
+      .attr("font-weight",700).attr("letter-spacing","1.5").attr("pointer-events","none")
+      .text(byId[s.key].name.toUpperCase())
+      .clone(true).attr("fill","rgba(232,223,201,.94)").attr("dy",-1);
+  }
+});
+
+/* hegemony annotations */
+function annotate(id, yr, text, anchor){
+  const s = series.find(s=>s.key===id); if(!s) return;
+  const d = s[yr-Y0];
+  svg.append("text").attr("x",x(yr)).attr("y",yS((d[0]+d[1])/2)-14)
+    .attr("text-anchor",anchor||"middle").attr("fill","#c9a24b").attr("font-size",10.5)
+    .attr("letter-spacing","1").attr("pointer-events","none").text(text);
+}
+annotate("pennsy",1907,"※ THE STANDARD RAILROAD OF THE WORLD");
+annotate("bnsf",2018,"※ BERKSHIRE'S ALL-IN WAGER ON AMERICA","end");
+
+/* fall / merger seals */
+const tt1 = document.getElementById("tt1");
+const wrap1 = document.getElementById("chart-wrap");
+function showTip(tt, wrap, ev, html){
+  tt.style.display="block"; tt.innerHTML=html;
+  const r=wrap.getBoundingClientRect();
+  let tx=ev.clientX-r.left+16, ty=ev.clientY-r.top-10;
+  if(tx>r.width-310) tx-=330;
+  tt.style.left=tx+"px"; tt.style.top=ty+"px";
+}
+let sealIdx=0;
+CLANS.filter(c=>c.fate.yr).forEach(c=>{
+  const s = series.find(s=>s.key===c.id);
+  if(!s) return;
+  const yr = Math.min(c.fate.yr, Y1);
+  let j = yr - Y0;
+  while(j>0 && (s[j][1]-s[j][0])<0.4) j--;
+  const mid=(s[j][0]+s[j][1])/2;
+  const isSub = c.fate.kind==="sub";
+  const stagger = yr>=1965 ? -(10 + (sealIdx++ % 3)*12) : -10;
+  const g=svg.append("g").style("cursor","help");
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",12).attr("fill","transparent");
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",5.5)
+    .attr("fill",isSub?"transparent":"#b3372a").attr("stroke",isSub?"#c9a24b":"#161310").attr("stroke-width",isSub?2:1.5);
+  g.append("text").attr("x",x(yr)).attr("y",yS(mid)+stagger)
+    .attr("text-anchor", yr>2010?"end":"middle")
+    .attr("fill",isSub?"#d9c27f":"#e8b0a6").attr("font-size",10.5).attr("letter-spacing","1")
+    .text(c.name.toUpperCase().replace(/ \(.*\)/,"")+" · "+c.fate.yr);
+  g.on("mousemove",ev=>{
+     showTip(tt1,wrap1,ev,
+      `<div class="yr">${c.fate.yr} · ${isSub?"MERGED / ABSORBED":"ROAD FALLS"}</div>
+       <div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="fate-t" style="color:${isSub?'#d9c27f':'#d98a7f'}">${c.fate.txt}</div>
+       ${c.fate.by?`<div class="pw" style="margin-top:4px"><b style="color:#e8dfc9">Taken by:</b> ${c.fate.by}</div>`:""}`);
+   }).on("mouseleave",()=>{tt1.style.display="none";});
+});
+
+/* event marker */
+const marker = svg.append("g").style("display","none").attr("pointer-events","none");
+marker.append("line").attr("y1",M.t-4).attr("y2",H-M.b).attr("stroke","#c9a24b").attr("stroke-width",1).attr("stroke-dasharray","3 4");
+const markerLabel = marker.append("text").attr("y",M.t+8).attr("fill","#c9a24b").attr("font-size",11).attr("letter-spacing","1.5");
+
+/* hover crosshair + band tooltip */
+const cross = svg.append("line").attr("y1",M.t).attr("y2",H-M.b)
+  .attr("stroke","rgba(232,223,201,.35)").attr("stroke-width",1).style("display","none").attr("pointer-events","none");
+
+paths.on("mousemove",function(ev,d){
+    paths.attr("fill-opacity",s=>s.key===d.key?1:.35);
+    const [mx]=d3.pointer(ev,svg.node());
+    const yr=Math.max(Y0,Math.min(Y1,Math.round(x.invert(mx))));
+    cross.style("display",null).attr("x1",x(yr)).attr("x2",x(yr));
+    const row=rows[yr-Y0], c=byId[d.key], v=row[d.key];
+    const miles=Math.round(v/100*tmAt(yr)*1000);
+    const suz = c.suzerain && yr>=c.suzerain.a && yr<=c.suzerain.b
+      ? `<div class="pw" style="margin-top:5px;color:#d9c27f">※ ${c.suzerain.note}</div>` : "";
+    showTip(tt1,wrap1,ev,
+      `<div class="yr">${yr}</div><div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="pw">≈ <b style="color:#e8dfc9">${v.toFixed(1)}%</b> of national mileage</div>
+       <div class="pw">≈ ${miles.toLocaleString()} route-miles that year</div>
+       <div class="pw" style="margin-top:4px">${c.region}</div>${suz}`);
+  })
+  .on("mouseleave",()=>{paths.attr("fill-opacity",.92); cross.style("display","none"); tt1.style.display="none";});
+
+/* ================= SANKEY ================= */
+(function(){
+  const SW=1500, SH=720, SM={t:16,r:210,b:16,l:190};
+  const s = d3.select("#sankey").attr("viewBox",`0 0 ${SW} ${SH}`);
+  const nodes = SK_NODES.map(n=>({name:n}));
+  const idx = Object.fromEntries(SK_NODES.map((n,i)=>[n,i]));
+  const links = SK_LINKS.map(l=>({source:idx[l.s],target:idx[l.t],value:l.v,kind:l.kind,e:l.e,s:l.s,t:l.t}));
+  const sk = d3.sankey().nodeWidth(16).nodePadding(15)
+    .extent([[SM.l,SM.t],[SW-SM.r,SH-SM.b]]);
+  const graph = sk({nodes:nodes.map(d=>({...d})), links:links.map(d=>({...d}))});
+
+  const tt2=document.getElementById("tt2"), wrap2=document.getElementById("sankey-wrap");
+
+  s.append("g").selectAll("path").data(graph.links).join("path")
+    .attr("d",d3.sankeyLinkHorizontal())
+    .attr("fill","none")
+    .attr("stroke",d=>d.kind==="fall"?"#b3372a":"#c9a24b")
+    .attr("stroke-opacity",.38)
+    .attr("stroke-width",d=>Math.max(1.5,d.width))
+    .style("cursor","help")
+    .on("mousemove",function(ev,d){
+      d3.select(this).attr("stroke-opacity",.75);
+      showTip(tt2,wrap2,ev,
+        `<div class="yr">${d.kind==="fall"?"DESTROYED / NATIONALIZED / SCRAPPED":"MERGER / ACQUISITION"}</div>
+         <div class="nm"><span style="color:${SK_COLORS[d.s]}">${d.s}</span> → <span style="color:${SK_COLORS[d.t]}">${d.t}</span></div>
+         <div class="pw">≈ ${d.value} share points of the national map</div>
+         <div class="pw" style="margin-top:4px">${d.e}</div>`);
+    })
+    .on("mouseleave",function(){d3.select(this).attr("stroke-opacity",.38); tt2.style.display="none";});
+
+  const ng = s.append("g").selectAll("g").data(graph.nodes).join("g");
+  ng.append("rect")
+    .attr("x",d=>d.x0).attr("y",d=>d.y0)
+    .attr("width",d=>d.x1-d.x0).attr("height",d=>Math.max(2,d.y1-d.y0))
+    .attr("fill",d=>SK_COLORS[d.name]).attr("stroke","#161310");
+  ng.append("text")
+    .attr("x",d=>d.x0 < SW/2 ? d.x0-8 : d.x1+8)
+    .attr("y",d=>(d.y0+d.y1)/2+4)
+    .attr("text-anchor",d=>d.x0 < SW/2 ? "end":"start")
+    .attr("fill","#e8dfc9").attr("font-size",12.5).attr("letter-spacing",".5")
+    .text(d=>d.name);
+})();
+
+/* ================= THE RECEIVERSHIP OF 1893 ================= */
+(function(){
+  const R=[
+   {n:"Santa Fe", v:9.3, col:"#c1442e", role:"The biggest single wreck", side:"→ reorganized independent, 1895",
+    fate:"Over-expanded to 9,300 miles and collapsed under the debt. Reorganized without a banker-overlord — and ran another century without a stumble, ending as half of BNSF. The rare wreck that saved itself.", cls:"#9dbf9a"},
+   {n:"Richmond Terminal", v:8.5, col:"#3d8f80", role:"The tangled South", side:"→ Morgan forges the Southern Ry, 1894",
+    fate:"A holding-company snarl of southern roads. Morgan's men dissolved it and welded the pieces into a brand-new house — the Southern Railway — with Morgan voting trustees in control. A clan created whole from a corpse.", cls:"#d9c27f"},
+   {n:"Union Pacific", v:8.1, col:"#d1a636", role:"The fallen original", side:"→ Kuhn, Loeb & Harriman, 1897",
+    fate:"The Golden Spike road, ruined by Gould-era finance and the panic. Kuhn, Loeb's Jacob Schiff recruited an obscure broker named E.H. Harriman to run it — who rebuilt track, grades and rolling stock until it was the best railroad in America. The appointment of the age.", cls:"#c9a24b"},
+   {n:"Northern Pacific", v:5.6, col:"#556e3f", role:"Twice bankrupt", side:"→ Morganized, into Hill's orbit",
+    fate:"Cooke's 1873 wreck failed again in 1893. Morgan reorganized it and aligned it with Hill's Great Northern — the arrangement Harriman tried to break in 1901, cornering the stock at $1,000 and nearly crashing Wall Street.", cls:"#d9c27f"},
+   {n:"B&O", v:3.2, col:"#b08a3f", role:"The oldest name, humbled", side:"→ receivership 1896, Pennsylvania influence",
+    fate:"America's first common-carrier railroad fell in 1896 and emerged under its rival Pennsylvania's shareholding shadow — rescued for good only by the C&O's coal money in 1963.", cls:"#d9c27f"},
+   {n:"Erie", v:2.0, col:"#5a7a9e", role:"Bankrupt, as usual", side:"→ Morganized: 'no more Erie Wars'",
+    fate:"The Scarlet Woman of Wall Street failed on schedule. Morgan reorganized it with characteristic finality — voting trusts, no speculators — though not even Morgan could make the Erie earn money.", cls:"#d98a7f"},
+  ];
+  const RW=1500, RH=330, RM={t:20,r:330,b:30,l:200};
+  const s=d3.select("#regents").attr("viewBox",`0 0 ${RW} ${RH}`);
+  const rx=d3.scaleLinear([0,10],[RM.l,RW-RM.r]);
+  const ry=d3.scaleBand(R.map(d=>d.n),[RM.t,RH-RM.b]).padding(0.32);
+  const tt3=document.getElementById("tt3"), wrap3=document.getElementById("regents-wrap");
+
+  [2,4,6,8,10].forEach(v=>{
+    s.append("line").attr("x1",rx(v)).attr("x2",rx(v)).attr("y1",RM.t).attr("y2",RH-RM.b).attr("stroke","rgba(232,223,201,.07)");
+    s.append("text").attr("x",rx(v)).attr("y",RH-10).attr("text-anchor","middle")
+      .attr("fill","#736a56").attr("font-size",11).attr("font-family","var(--sans)").text(v+"k miles");
+  });
+
+  R.forEach(d=>{
+    const g=s.append("g").style("cursor","help");
+    g.append("rect").attr("x",rx(0)).attr("y",ry(d.n)).attr("width",rx(d.v)-rx(0)).attr("height",ry.bandwidth())
+      .attr("fill",d.col).attr("fill-opacity",.92).attr("stroke","#161310");
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+4).attr("text-anchor","end")
+      .attr("fill","#e8dfc9").attr("font-size",13.5).text(d.n);
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+18).attr("text-anchor","end")
+      .attr("fill","#8a7340").attr("font-size",10).attr("letter-spacing","1").text(d.role.toUpperCase());
+    g.append("text").attr("x",rx(d.v)+10).attr("y",ry(d.n)+ry.bandwidth()/2+4)
+      .attr("fill",d.cls).attr("font-size",12).attr("font-family","var(--sans)")
+      .text(d.v.toFixed(1)+"k mi · "+d.side);
+    g.on("mousemove",ev=>showTip(tt3,wrap3,ev,
+       `<div class="yr">IN RECEIVERSHIP · ≈${d.v}K MILES</div>
+        <div class="nm" style="color:${d.col}">${d.n}</div>
+        <div class="pw">${d.fate}</div>`))
+     .on("mouseleave",()=>{tt3.style.display="none";});
+  });
+})();
+
+/* ================= EVENTS ================= */
+const evWrap=document.getElementById("events");
+EVENTS.forEach(e=>{
+  const button=document.createElement("button");
+  button.type="button";
+  button.dataset.year=e.yr;
+  button.setAttribute("aria-pressed","false");
+  button.className="ev"+(e.fall?" fall":"");
+  button.innerHTML=`<div class="yr">${e.label}</div><div class="nm">${e.name}</div>${e.txt}`;
+  button.onclick=()=>{
+    document.querySelectorAll(".ev").forEach(n=>{n.classList.remove("active");n.setAttribute("aria-pressed","false")});
+    button.classList.add("active");
+    button.setAttribute("aria-pressed","true");
+    marker.style("display",null);
+    marker.select("line").attr("x1",x(e.yr)).attr("x2",x(e.yr));
+    markerLabel.attr("text-anchor",e.yr>1995?"end":"start")
+      .attr("x",e.yr>1995?x(e.yr)-6:x(e.yr)+6).text(e.name.toUpperCase()+" · "+e.label);
+    document.getElementById("chart-wrap").scrollIntoView({behavior:"smooth",block:"center"});
+  };
+  evWrap.appendChild(button);
+});
+
+/* ================= FATES TABLE ================= */
+const KIND_LBL={destroyed:"Destroyed",submitted:"Absorbed",survived:"Still running",victor:"Victor — Big Four"};
+const tbl=document.getElementById("fates");
+tbl.innerHTML=`<tr><th>System</th><th>Peak</th><th>Folded</th><th>How it ended</th><th>Taken / absorbed by</th><th>Outcome</th></tr>`+
+ FATES.map(f=>`<tr>
+   <td><span class="sw" style="background:${f.col}"></span>${f.c}</td>
+   <td>${f.peak}</td>
+   <td class="num">${f.yr}</td>
+   <td>${f.how}</td>
+   <td>${f.by}</td>
+   <td class="k-${f.kind}">${KIND_LBL[f.kind]}</td></tr>`).join("");
+
+/* ================= SYSTEM CARDS ================= */
+const clWrap=document.getElementById("clans");
+CLANS.filter(c=>c.id!=="other").forEach(c=>{
+  const div=document.createElement("div");
+  div.className="clan"; div.style.setProperty("--c",c.color);
+  const fk=c.fate.kind==="fall"?"fall":(c.fate.kind==="sub"?"sub":"live");
+  div.innerHTML=`<div class="nm"><i>▬</i> ${c.name}</div>
+    <div class="meta"><b>Core:</b> ${c.region}<br><b>Peak:</b> ${c.peak}</div>
+    <div class="fate ${fk}">${c.fate.txt}</div>`;
+  clWrap.appendChild(div);
+});
+</script>
+</body>
+</html>

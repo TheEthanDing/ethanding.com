@@ -37,6 +37,16 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /href="\/semiconductor-wars"/);
   assert.match(homepage, /href="\/airline-wars"/);
   assert.match(homepage, /href="\/wall-street-houses"/);
+  assert.match(homepage, /href="\/railroad-empires"/);
+});
+
+test('serves the researched railroad empires visualization', async () => {
+  const response = await fetch(`${base}/railroad-empires`);
+  assert.equal(response.status, 200);
+  const page = await response.text();
+  assert.match(page, /THE IRON DAIMYŌ/);
+  assert.match(page, /Research Anchors/);
+  assert.match(page, /UP proposes to acquire NS/);
 });
 
 test('serves the researched Wall Street houses visualization', async () => {
