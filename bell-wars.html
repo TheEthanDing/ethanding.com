@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Bell Wars · Ethan Ding</title>
+<meta name="description" content="An interactive history of American telecommunications power, from the Bell monopoly and the 1984 breakup to Verizon, AT&T, T-Mobile, cable, and satellite.">
+<link rel="icon" href="/images/favicon.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-sankey/0.12.3/d3-sankey.min.js"></script>
+<style>
+  :root{
+    --ink:#111116; --ink-2:#16161d; --ink-3:#1b1b24;
+    --gold:#c9a24b; --gold-dim:#8a7340;
+    --paper:#e3e2dc; --paper-dim:#9c9c96;
+    --seal:#b3372a;
+    --hair:rgba(201,162,75,.22);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans:"Avenir Next","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--paper);font-family:var(--serif);padding:28px clamp(14px,3vw,44px) 40px;}
+  .site-nav{display:flex;gap:14px;margin-bottom:18px;font:600 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase}
+  .site-nav a{color:var(--paper-dim);text-decoration:none}.site-nav a:hover{color:var(--gold)}
+  header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;
+         border-bottom:1px solid var(--hair);padding-bottom:18px;margin-bottom:6px;}
+  h1{font-size:clamp(20px,2.8vw,32px);font-weight:600;letter-spacing:.04em;}
+  h1 .era{color:var(--gold);font-weight:400;}
+  .sub{color:var(--paper-dim);font-size:13.5px;margin-top:6px;max-width:780px;line-height:1.55;}
+  .sub b{color:var(--paper);font-weight:600;}
+  .legend-box{border:1px solid var(--hair);padding:10px 14px;background:var(--ink-2);min-width:250px;}
+  .legend-box .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+  .legend-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--paper-dim);margin-top:5px;}
+  .seal-dot{width:12px;height:12px;border-radius:50%;background:var(--seal);box-shadow:0 0 0 2px rgba(179,55,42,.3);flex:none;}
+  .sub-dot{width:11px;height:11px;border-radius:50%;background:transparent;border:2px solid var(--gold);flex:none;}
+  .gold-tick{width:12px;height:0;border-top:1px dashed var(--gold);flex:none;}
+  #chart-wrap,#sankey-wrap{position:relative;background:var(--ink-2);border:1px solid var(--hair);margin-top:16px;padding:6px 6px 0;}
+  #chart,#sankey{display:block;width:100%;height:auto;}
+  .tooltip{position:absolute;pointer-events:none;background:#0c0c10;border:1px solid var(--gold-dim);
+           padding:9px 12px;font-size:12.5px;line-height:1.5;color:var(--paper);display:none;z-index:5;max-width:300px;
+           box-shadow:0 6px 18px rgba(0,0,0,.55);}
+  .tooltip .yr{color:var(--gold);letter-spacing:.12em;font-size:11px;}
+  .tooltip .nm{font-size:14.5px;margin:2px 0 3px;}
+  .tooltip .pw{color:var(--paper-dim);}
+  .tooltip .fate-t{color:#d98a7f;margin-top:4px;}
+  .section-title{margin:32px 0 12px;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);
+                 display:flex;align-items:center;gap:14px;}
+  .section-title::after{content:"";flex:1;border-top:1px solid var(--hair);}
+  .section-sub{color:var(--paper-dim);font-size:13px;line-height:1.55;margin:-4px 0 12px;max-width:900px;}
+  #events{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px;}
+  .ev{background:var(--ink-3);border:1px solid rgba(201,162,75,.14);border-top:2px solid var(--gold-dim);
+      width:100%;padding:12px 13px;font:12.5px/1.5 var(--serif);text-align:left;color:var(--paper-dim);cursor:pointer;transition:border-color .15s, transform .15s;}
+  .ev:hover,.ev.active{border-color:var(--gold);transform:translateY(-2px);}
+  .ev .yr{font-family:var(--sans);font-size:15px;color:var(--paper);letter-spacing:.02em;}
+  .ev .nm{color:var(--gold);font-size:13px;margin:3px 0 6px;font-weight:600;}
+  .ev.fall .yr::after{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--seal);margin-left:8px;}
+  #fates{width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.5;}
+  #fates th{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);text-align:left;
+            padding:8px 10px;border-bottom:1px solid var(--hair);}
+  #fates td{padding:8px 10px;border-bottom:1px solid rgba(227,226,220,.07);color:var(--paper-dim);vertical-align:top;}
+  #fates td:first-child{color:var(--paper);white-space:nowrap;font-weight:600;}
+  #fates .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:1px;}
+  #fates .k-destroyed{color:#d98a7f;} #fates .k-submitted{color:#d9c27f;} #fates .k-survived{color:#9dbf9a;} #fates .k-victor{color:#c9a24b;font-weight:600;}
+  #fates td.num{white-space:nowrap;font-family:var(--sans);}
+  #clans{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+  .clan{padding:12px 13px;border:1px solid rgba(227,226,220,.08);background:var(--ink-3);
+        border-left:5px solid var(--c);font-size:12.5px;line-height:1.55;color:var(--paper-dim);}
+  .clan .nm{color:var(--paper);font-size:14.5px;font-weight:600;letter-spacing:.03em;}
+  .clan .nm i{font-style:normal;color:var(--c);}
+  .clan .meta{margin-top:5px;}
+  .clan .meta b{color:var(--paper);font-weight:600;}
+  .clan .fate{margin-top:5px;padding-top:5px;border-top:1px dashed rgba(227,226,220,.12);}
+  .clan .fate.fall{color:#d98a7f;} .clan .fate.sub{color:#d9c27f;} .clan .fate.live{color:#9dbf9a;}
+  .fermi{margin-top:14px;border:1px dashed var(--gold-dim);padding:14px 16px;font-size:12.5px;line-height:1.7;color:var(--paper-dim);}
+  .fermi b{color:var(--gold);font-weight:600;}
+  .table-scroll{overflow-x:auto}
+  .chart-prompt{position:absolute;right:14px;bottom:12px;z-index:3;padding:8px 11px;border:1px solid var(--gold-dim);background:rgba(17,17,22,.92);color:var(--paper-dim);font:600 10px/1.25 var(--sans);letter-spacing:.1em;text-transform:uppercase;pointer-events:none;transition:opacity .18s}
+  .chart-prompt b{color:var(--gold)}
+  .company-selection{position:absolute;right:16px;top:58px;z-index:4;width:min(310px,calc(100% - 32px));padding:14px 42px 13px 15px;border:1px solid var(--gold);border-left:4px solid var(--selected-color,var(--gold));background:rgba(17,17,22,.97);box-shadow:0 14px 36px rgba(0,0,0,.48);color:var(--paper-dim);font:12px/1.45 var(--serif)}
+  .company-selection[hidden]{display:none}.company-selection .selection-kicker{color:var(--gold);font:600 10px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase}
+  .company-selection h2{margin:5px 0 7px;color:var(--paper);font-size:19px;line-height:1.1}.company-selection .selection-stat{color:var(--paper);font:600 13px/1.35 var(--sans)}
+  .company-selection .selection-copy{margin-top:7px}.company-selection .selection-meta{margin-top:6px}.company-selection .selection-hint{margin-top:8px;padding-top:7px;border-top:1px solid var(--hair);color:var(--gold-dim);font:600 9px/1.3 var(--sans);letter-spacing:.09em;text-transform:uppercase}
+  .impact-label{margin-top:9px;color:var(--gold);font:600 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase}.impact-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+  .impact-chip{padding:5px 7px;border:1px solid var(--chip-color,var(--gold-dim));background:var(--ink-3);color:var(--paper);font:600 9px/1.15 var(--sans);cursor:pointer}.impact-chip:hover,.impact-chip:focus-visible{outline:1px solid var(--chip-color)}
+  .selection-close{position:absolute;right:8px;top:8px;width:27px;height:27px;border:1px solid var(--hair);background:var(--ink-2);color:var(--paper);font:16px/1 var(--sans);cursor:pointer}
+  #chart .carrier-band{transition:fill-opacity .18s,stroke-width .18s,filter .18s;outline:none}#chart .carrier-band:hover,#chart .carrier-band:focus-visible{filter:brightness(1.14)}#chart .carrier-band:focus-visible{stroke:var(--gold);stroke-width:3px}
+  #chart .chart-event{cursor:pointer;outline:none}#chart .chart-event .event-core{transition:r .14s,stroke-width .14s}#chart .chart-event:hover .event-core,#chart .chart-event:focus-visible .event-core,#chart .chart-event.active .event-core{r:6px;stroke:var(--paper);stroke-width:2px}
+  footer{margin-top:18px;color:#6a6a64;font-size:11.5px;line-height:1.55;}
+  @media (max-width:760px){.company-selection{position:fixed;left:10px;right:10px;top:auto;bottom:118px;width:auto;max-height:230px;overflow:auto;z-index:12}.chart-prompt{left:12px;right:auto}}
+  @media (prefers-reduced-motion:reduce){.ev{transition:none}.ev:hover{transform:none}}
+</style>
+<link rel="stylesheet" href="/timeline-shell.css?v=8">
+</head>
+<body data-featured-event-year="1984" data-event-detail="chart">
+
+<nav class="site-nav" aria-label="Site"><a href="/">← Ethan Ding</a><a href="/#writing">Writing</a></nav>
+
+<header>
+  <div>
+    <h1>THE BELL WARS <span class="era">(1877–2025)</span> — POWER OVER THE AMERICAN NETWORK, IN MARKET SHARE</h1>
+    <p class="sub">Power is measured in <b>share of U.S. telecommunications service revenue</b> — local, long distance, wireless, and broadband.
+      A rule of thumb at today's market: <b>1 share point ≈ $4.6 billion a year</b>. The stack always totals 100%: when a carrier dies,
+      the calls don't stop — someone else completes them. This chronicle has the strangest arc in the whole series: a monopoly shattered
+      by decree into eight pieces — and then, within a single generation, <b>one of the children buys the mother and takes her name</b>.
+      Click any band to pin a carrier, or click an event to highlight every carrier it changed.</p>
+  </div>
+  <div class="legend-box">
+    <div class="t">Reading the chart</div>
+    <div class="legend-row"><span class="seal-dot"></span>Carrier destroyed — decree, fraud, or bankruptcy</div>
+    <div class="legend-row"><span class="sub-dot"></span>Merged / acquired — the network changes heralds</div>
+    <div class="legend-row"><span class="gold-tick"></span>Clickable event — highlights affected carriers</div>
+    <div class="legend-row" style="margin-top:8px">Band height = % of U.S. telecom revenue</div>
+  </div>
+</header>
+
+<div id="chart-wrap"><svg id="chart" role="img" aria-label="Stacked timeline showing control of American telecommunications revenue from 1877 to 2025, including the Bell System breakup in 1984"></svg><div class="tooltip" id="tt1"></div></div>
+
+<div class="section-title">Chain of Succession — Who Absorbed Whom</div>
+<p class="section-sub">Each ribbon is network (in share points of the market) passing from the absorbed to the absorber.
+  <span style="color:#d98a7f">Red ribbons</span> = destroyed — a court's decree, an $11B fraud, a forced spinoff. <span style="color:#d9c27f">Gold ribbons</span> = merger or acquisition. The chart contains the two most extraordinary ribbons in this whole series: the <b>eight-way shatter of the Bell System in 1984</b> — and the thin gold ribbon in 2005 where <b>AT&amp;T flows into the child that bought it</b>. Trace also the tragic loop: AT&amp;T spins off its wireless arm in 2001, and buys it back — via its siblings — three years later, at a $30B markup. Hover any ribbon for the deal or decree behind it.</p>
+<div id="sankey-wrap"><svg id="sankey"></svg><div class="tooltip" id="tt2"></div></div>
+
+<div class="section-title">Key Events Timeline</div>
+<div id="events"></div>
+
+<div class="section-title">The T-Mobile Anomaly — Funded by Its Enemy</div>
+<div class="fermi">
+  <b>Why the fourth-place carrier won.</b> Three structural advantages, compounding for a decade.
+  <b>(1) Its enemy paid for its revival:</b> when the DOJ blocked AT&amp;T's $39B purchase of T-Mobile in 2011, the contract's breakup package — <b>$3B in cash, plus billions in spectrum and a national roaming agreement</b> — flowed to the target. The largest breakup fee in corporate history capitalized the resurrection of the exact rival that would spend the next decade dismantling AT&amp;T's wireless margins. Hideyoshi arming the Tokugawa has nothing on this.
+  <b>(2) Nothing to lose, so it burned the rulebook:</b> John Legere's "Un-carrier" (2013) abolished, one by one, every profitable heresy the duopoly depended on — contracts, overage fees, international roaming charges, upgrade cycles. Fourth place could attack the industry's margin pool because it barely participated in it; AT&amp;T and Verizon had to choose, every time, between matching and bleeding.
+  <b>(3) A patient foreign sovereign:</b> Deutsche Telekom — majority state-influenced, thinking in decades — held through years when every analyst demanded a sale. The same patient-capital advantage Japan's banks gave the DRAM makers and Riyadh gave Aramco, applied to Bellevue, Washington.
+  <br><br>
+  <b>The conquest.</b> In 2020 T-Mobile captured Sprint — after Sprint's own SoftBank era failed to fix it — and with it the 2.5&nbsp;GHz mid-band spectrum trove: the Kantō plain of 5G, the one resource that let T-Mobile build the best national 5G network years before its rivals could assemble the equivalent. The carrier that was nearly sold for parts twice now trades places with Verizon for the wireless crown, and the duopoly it mocked is a triopoly it anchors.
+  <br><br>
+  <b>Why the aura is already being tested.</b> Un-carriers age into carriers: price increases on "never increase" plans, the John Legere theater retired, and the margin pool it once raided now substantially its own. The pattern from every chart in this series — Southwest, above all — suggests what comes next; the only question is which fourth place is being funded, right now, by the breakup fees of the future. (The satellite band in gray has a candidate.)
+</div>
+
+<div class="section-title timeline-featured-section" data-action-label="See the 1984 breakup">1984 — The Divestiture: AT&amp;T Chose Its Own Exile</div>
+<div class="fermi">
+  The strangest fact about the largest corporate breakup in history is that <b>AT&amp;T picked which half to keep — and picked wrong on every axis</b>. Facing Judge Greene, the company could shape the settlement, and it chose to keep the crown jewels as it understood them: long distance (the profit engine), Western Electric (the world's greatest factory), Bell Labs (the transistor, information theory, Unix — the greatest research institution ever assembled), and its computing ambitions. It surrendered what it considered the boring part: seven regional companies of regulated local copper. The mother kept Mikawa and handed the children the Kantō.
+  <br><br>
+  Every assumption inverted within a decade: <b>(1)</b> long distance, the treasure, became a commodity knife-fight — MCI's "Friends &amp; Family" and Sprint's pin-drop fiber drove margins toward zero; <b>(2)</b> the boring local loop turned out to be the bottleneck asset — the physical connection to every home became DSL, then broadband; <b>(3)</b> and the decree's quietest clause was the largest transfer of the century: <b>the cellular licenses went with the regions</b> — to the children. The mother of the telephone was born into the wireless age owning no wireless at all, bought McCaw for $12.6B in 1994 to fix it, spun that arm off at the very top in 2001, and watched its siblings' venture buy it for $41B three years later. Meanwhile Western Electric and the Labs — the jewels — were themselves spun off (Lucent, 1996), rode the bubble, crashed 99%, and ended as a subsidiary of Nokia. Every asset AT&amp;T chose to keep was eventually worth less than any asset it gave away.
+  <br><br>
+  <b>The regranting completed the inversion.</b> In 2005, Southwestern Bell — at divestiture among the least glamorous of the seven children — bought its mother for <b>$16 billion</b> (roughly what AT&amp;T had lost on cable television alone) and, in the era's perfect gesture, took her name. BellSouth followed for $86B; six of 1984's eight fragments now live inside AT&amp;T Inc. and Verizon. And then the reassembled empire proved that institutions repeat their founding mistake: convinced once again that the future lay in content rather than the network, the new AT&amp;T spent $67B on DirecTV and $108B on Time Warner — and divested both within seven years at a combined loss north of $150B. The exile taught the children everything; it taught the name nothing.
+</div>
+
+<div class="section-title">The Seven Regional Bells, 1984 — Seven Regents, One Inheritance</div>
+<p class="section-sub">On January 1, 1984, the Bell System's local networks were divided among seven regional holding companies of deliberately equal weight — the bars show access lines at divestiture. Wall Street called them the boring half of the breakup. Within 22 years, <b style="color:#e3e2dc">six of the seven had consolidated into two empires — and one of those two had purchased the mother herself</b>. The seventh wandered into fraud, three renames, and ruin. Hover a bar for each regent's fate.</p>
+<div id="regents-wrap" style="position:relative;background:var(--ink-2);border:1px solid var(--hair);padding:6px;">
+  <svg id="regents" style="display:block;width:100%;height:auto;"></svg>
+  <div class="tooltip" id="tt3"></div>
+</div>
+
+<div class="section-title">How Every Great Carrier Ended</div>
+<p class="section-sub">The era's major powers, in order of when they folded. "Folded" takes three forms: <span style="color:#d98a7f">destroyed</span> (broken by decree, fraud, or bankruptcy), <span style="color:#d9c27f">absorbed</span> (merged into a survivor), or <span style="color:#9dbf9a">still connected in 2025</span>. Note the signature of this industry: like oil, the great falls were inflicted by the state (1913, 1956, 1984, the blocked mergers) — but unlike any other chart, the shattered empire <b>substantially reassembled itself</b>, and the map of 2025 is more concentrated in wireless than regulators of 1984 would ever have permitted in wireline.</p>
+<div class="table-scroll"><table id="fates"></table></div>
+
+<div class="section-title">The Great Carriers — Peak Domain &amp; Fate</div>
+<div id="clans"></div>
+
+<div class="fermi">
+  <b>How the share estimates were made (Fermi method):</b>
+  Anchors are FCC statistics, census data and company reports. Documented checkpoints keep the bands honest:
+  the independents held <b>roughly half of America's telephones by 1907</b> (though less of its revenue — Bell held the cities and the toll lines);
+  the Bell System carried <b>~80–85% of the nation's telephones</b> through the regulated century and employed ~1 million people at its peak — the largest private employer on Earth;
+  AT&amp;T took ~<b>90% of long distance at divestiture</b> and barely half within a decade; WorldCom's fraud was <b>$11B</b> and its bankruptcy the largest in history (2002, a record it held for six years);
+  SBC paid <b>$16B for AT&amp;T</b> (2005) and $86B for BellSouth; T-Mobile's Sprint merger (2020) created today's wireless triopoly, in which the three carriers split ~97% of postpaid subscribers.
+  Bands include each carrier's wireless, wireline and broadband service revenue; media and equipment segments are excluded where separable. Error bars are ±2 points, wider before 1930.
+  <br><br>
+  <b>Two things that look wrong but aren't.</b>
+  <b>(1) The Bell band understates the monopoly — as always with the mothers.</b> Like Standard, Fairchild and the Pennsylvania before it, the Bell System's true power sat outside the revenue measure: it was a private government — its own manufacturer (Western Electric), its own research state (Bell Labs), rates set like taxes, and a workforce the size of an army. The 1956 consent decree that forced it to license every patent royalty-free is arguably the most consequential antitrust remedy ever issued: those transistor licenses seeded the entire semiconductor chart.
+  <b>(2) The gray band is three different rebellions wearing one color.</b> Before 1913 it is the 6,000 independents of the first open era; in the 1990s it is the CLECs the Telecom Act briefly conjured; today it is Dish's failed fourth network, US Cellular's remnant, the rural carriers — and Starlink, which is the 1894 patent expiry happening again, from orbit. Every closed system in this series eventually meets its independents' war; the gray band is where the next chart begins.
+</div>
+
+<footer>Bands show share of U.S. telecommunications service revenue (local, long distance, wireless, broadband) controlled by each carrier and its subsidiaries ("Cable" = Comcast, Charter and Cox's connectivity businesses; the US West band continues through Qwest, CenturyLink and Lumen; media segments such as DirecTV and Time Warner are excluded where separable — mercifully for AT&amp;T's band). The stack always totals 100%. ※ marks the Bell System's One-System reign and T-Mobile's enemy-funded rise. Values are Fermi estimates for comparison, not FCC filings.</footer>
+
+<script>
+/* ================= DATA (% of U.S. telecom service revenue) ================= */
+const CLANS = [
+ {id:"bell", name:"The Bell System", color:"#8d7ba8", region:"195 Broadway · One System, One Policy, Universal Service",
+  peak:"1913–84 · ≈80% of the nation's telephones — the largest private employer on Earth",
+  suzerain:{a:1913,b:1984,note:"One System: after the Kingsbury Commitment, the Bell System was less a company than a private government — ~1 million employees at peak, its own manufacturer (Western Electric), its own research state (Bell Labs: the transistor, information theory, the laser, Unix), and rates set like taxes. Its power exceeded any revenue measure; it WAS the network."},
+  fate:{txt:"Broken by decree, January 1, 1984 — the largest corporate reorganization in history: one company becomes eight. Unlike Standard Oil, AT&T negotiated the terms and chose which pieces to keep. It chose wrong on every axis", kind:"fall", yr:1984, by:"The United States (US v. AT&T; Judge Harold Greene)"},
+  pts:[[1877,95],[1885,92],[1894,88],[1900,65],[1907,55],[1913,60],[1925,72],[1940,78],[1960,82],[1975,82],[1983,78],[1984,0]]},
+
+ {id:"att", name:"AT&T (1984–2005)", color:"#5b8ea6", region:"Basking Ridge · the mother's chosen half: long distance, Western Electric, the Labs",
+  peak:"1984 · ≈32% — 90% of long distance, and every crown jewel",
+  fate:{txt:"Kept everything it thought was the future and watched all of it commoditize: long distance knife-fought to zero margin, Lucent spun and crashed, wireless spun at the top, $100B+ burned on cable. In 2005 its child Southwestern Bell bought it for $16B and took the name", kind:"sub", yr:2005, by:"SBC — its own child ($16B; the name survives, the company does not)"},
+  pts:[[1984,0],[1985,32],[1990,26],[1995,22],[1996,18],[1998,16],[2001,13],[2004,8],[2005,7],[2006,0]]},
+
+ {id:"sbc", name:"AT&T Inc. (Southwestern Bell)", color:"#35548f", region:"San Antonio → Dallas · the child that bought the mother",
+  peak:"2006– · ≈24% — three Bells + the mother + Cingular under the old name",
+  fate:{txt:"Victor — Ed Whitacre's SBC ate PacTel (1997), Ameritech (1999), AT&T itself (2005) and BellSouth (2006), then reassembled the crown. The new AT&T promptly repeated the mother's founding error — $175B on DirecTV and Time Warner, both divested at ruinous losses — and remains a throne with self-inflicted wounds", kind:"live", yr:null, by:null},
+  pts:[[1984,0],[1985,6],[1996,6.5],[1997,9.5],[1999,15],[2004,14],[2005,14.5],[2006,23],[2010,24],[2016,26],[2020,24],[2025,21]]},
+
+ {id:"bellatlantic", name:"Verizon (Bell Atlantic)", color:"#c1442e", region:"New York · two Bells + the great independent",
+  peak:"2010s · ≈24% — the premium network throne",
+  fate:{txt:"Victor — Bell Atlantic took NYNEX (1997), then GTE (2000, coining the name Verizon), then MCI's corpse (2005), then bought out Vodafone's 45% of the wireless business for $130B (2014) — the largest corporate transaction ever at the time. The disciplined twin: its worst wound was merely $9B on AOL and Yahoo", kind:"live", yr:null, by:null},
+  pts:[[1984,0],[1985,6.5],[1996,6.7],[1997,12.5],[2000,19],[2005,19],[2006,21],[2010,23],[2015,24],[2020,23],[2025,22]]},
+
+ {id:"nynex", name:"NYNEX", color:"#7d5ba6", region:"New York & New England · the densest, unionized child",
+  peak:"1984–97 · ≈6.5% — Manhattan's dial tone",
+  fate:{txt:"The first remarriage among the seven: merged into neighboring Bell Atlantic in 1997", kind:"sub", yr:1997, by:"Bell Atlantic (merger)"},
+  pts:[[1984,0],[1985,6.5],[1996,6.5],[1997,0]]},
+
+ {id:"ameritech", name:"Ameritech", color:"#86a83e", region:"Chicago · the industrial Midwest's Bell",
+  peak:"1984–99 · ≈6.5%",
+  fate:{txt:"Sold to SBC in 1999 for $62B — at the time the largest merger in history — making Whitacre's Texas company the biggest local carrier in America", kind:"sub", yr:1999, by:"SBC (acquisition)"},
+  pts:[[1984,0],[1985,6.5],[1998,6.5],[1999,0]]},
+
+ {id:"bellsouth", name:"BellSouth", color:"#3d8f80", region:"Atlanta · the strongest, most independent-minded child",
+  peak:"1984–2006 · ≈7% — the last Bell standing alone",
+  fate:{txt:"The best-run of the seven held out longest — then sold to the new AT&T for $86B in 2006, mainly to unify Cingular, the wireless venture the two had shared. The last regent kneels", kind:"sub", yr:2006, by:"AT&T Inc. (acquisition — unifying Cingular)"},
+  pts:[[1984,0],[1985,6.5],[2000,7],[2005,7],[2006,0]]},
+
+ {id:"pactel", name:"Pacific Telesis", color:"#d1a636", region:"San Francisco · California's Bell",
+  peak:"1984–97 · ≈6%",
+  fate:{txt:"Spun off its wireless arm (AirTouch) in 1994 — giving away its future — and sold the remainder to SBC in 1997: the first child eaten by a sibling", kind:"sub", yr:1997, by:"SBC (acquisition)"},
+  pts:[[1984,0],[1985,6],[1996,5.5],[1997,0]]},
+
+ {id:"uswest", name:"US West → Qwest → Lumen", color:"#96566b", region:"Denver · fourteen states of distance — the cursed seventh",
+  peak:"1984–2000 · ≈6.5% — the biggest territory, the fewest people",
+  fate:{txt:"The cursed child: merged into fiber upstart Qwest (2000), whose CEO Joe Nacchio was convicted of insider trading as the company nearly followed WorldCom into the abyss; renamed CenturyLink (2011), then Lumen — a long fade on old copper, the only regent whose line ended in ruin rather than a throne", kind:"live", yr:null, by:null},
+  pts:[[1984,0],[1985,6],[2000,6.5],[2001,7],[2002,5.5],[2011,4],[2015,4],[2020,3],[2025,2]]},
+
+ {id:"gte", name:"GTE", color:"#a08050", region:"Stamford · the champion of the independents — the biggest non-Bell for 80 years",
+  peak:"1990s · ≈7.5% — larger than any single Baby Bell",
+  fate:{txt:"The heir of the 6,000 independents that never joined Bell; merged with Bell Atlantic in 2000 — the combination so large it needed a new name: Verizon. The independents' century ends inside the empire they defied", kind:"sub", yr:2000, by:"Bell Atlantic (merger — creating Verizon)"},
+  pts:[[1920,2],[1940,3],[1960,5],[1980,7],[1990,7.5],[1999,7.5],[2000,0]]},
+
+ {id:"mci", name:"MCI → WorldCom", color:"#e08a3c", region:"Washington → Clinton, Mississippi · the rebel that broke the monopoly, then broke itself",
+  peak:"1998–2001 · ≈9% — the internet's backbone, on cooked books",
+  fate:{txt:"The microwave upstart whose lawsuits cracked the Bell System was swallowed by Bernie Ebbers' WorldCom (1998) — whose $11B accounting fraud produced the largest bankruptcy in history (2002) and a 25-year sentence. Verizon bought the corpse in 2005. The revolutionary died of the revolution's excesses", kind:"fall", yr:2002, by:"Its own fraud; Verizon (the corpse, 2005)"},
+  pts:[[1972,0.1],[1980,1],[1985,4],[1990,6],[1995,7],[1998,9],[2001,9],[2002,5],[2004,4],[2005,4],[2006,0]]},
+
+ {id:"sprint", name:"Sprint", color:"#cbb63a", region:"Kansas City · born of a railroad — fiber laid along the Southern Pacific's tracks",
+  peak:"1990s–2000s · ≈8.5% with Nextel — the pin-drop network",
+  fate:{txt:"Southern Pacific's telecom arm (the name means Southern Pacific Railroad Internal Networking Telephony) became the third national carrier — then the Nextel merger (2005, among the worst ever), the SoftBank era, and five straight years of losses ended in surrender to T-Mobile in 2020", kind:"sub", yr:2020, by:"T-Mobile (merger — the fourth place captures the third)"},
+  pts:[[1980,0.5],[1986,2],[1990,3.5],[1995,4.5],[2000,6],[2005,8.5],[2008,7],[2013,6],[2019,5.5],[2020,0]]},
+
+ {id:"nextel", name:"Nextel", color:"#a3743f", region:"Reston · push-to-talk — the contractors' carrier",
+  peak:"2004 · ≈3% — the industry's best margins, on a doomed network",
+  fate:{txt:"Merged with Sprint for $35B in 2005 — consistently ranked among the worst mergers in history: incompatible networks, a culture war, and the iDEN shutdown that sent its customers everywhere but Sprint", kind:"sub", yr:2005, by:"Sprint (merger — mutually ruinous)"},
+  pts:[[1994,0.3],[2000,2],[2004,3],[2005,0]]},
+
+ {id:"tmobile", name:"T-Mobile", color:"#c94f7c", region:"Bellevue · Deutsche Telekom's American gamble — the Un-carrier",
+  peak:"2020s · ≈15% and the best 5G network in the country",
+  suzerain:{a:2013,b:2025,note:"Funded by its enemy: the blocked 2011 AT&T acquisition delivered T-Mobile $3B in cash plus spectrum and roaming — the largest breakup package ever — which capitalized the Un-carrier revival that then dismantled AT&T's own wireless margins for a decade. No rival in this series was ever armed so directly by the house it defeated."},
+  fate:{txt:"Victor — the gekokujō of the final act: fourth place, nearly sold twice, revived on AT&T's breakup fee, it burned the industry's rulebook (2013), captured Sprint and its 2.5 GHz spectrum trove (2020), and now trades the wireless crown with Verizon. The foreign-owned upstart out-executed both heirs of the Bell System", kind:"live", yr:null, by:null},
+  pts:[[1996,0.3],[2001,1.5],[2005,3],[2011,4.5],[2013,5],[2015,6.5],[2019,8],[2020,13.5],[2025,15]]},
+
+ {id:"cable", name:"Cable (Comcast · Charter · Cox)", color:"#6f7d8a", region:"Philadelphia & Stamford · the invasion from the other wire",
+  peak:"2020s · ≈18% of connectivity — the broadband landlords",
+  fate:{txt:"Still invading — the television companies won the broadband war outright (the coax beat the copper), took voice almost as an afterthought, and now raid wireless through MVNOs riding Verizon's own network. The Bell heirs' most dangerous rival is the wire they never owned", kind:"live", yr:null, by:null},
+  pts:[[1995,1],[2000,3],[2005,6],[2010,10],[2015,13],[2020,16],[2025,18]]},
+
+ {id:"other", name:"Other carriers", color:"#6b6b66", region:"Three rebellions in one color: the 6,000 independents of 1894–1913, the CLECs of the late 1990s, and today's fringe — Dish's failed fourth network, US Cellular, the rural carriers, and Starlink",
+  peak:"—", fate:{txt:"The churn layer — and the recurring prophecy: every closed system in this series eventually meets its independents' war. The last one came when the patents expired; the next one is coming from orbit", kind:"live", yr:null, by:null},
+  pts:null /* remainder to 100% */},
+];
+
+const ORDER = ["other","cable","tmobile","nextel","sprint","mci","gte","uswest","pactel","bellsouth","ameritech","nynex","bellatlantic","sbc","att","bell"];
+const TOTAL = 100;
+/* U.S. telecom service revenue, USD billions, for the tooltip conversion */
+const MKT = [[1877,0.003],[1900,0.05],[1913,0.2],[1930,1.1],[1950,3.4],[1970,17],[1980,60],[1984,110],[1990,160],[1996,220],[2000,300],[2005,340],[2010,370],[2015,420],[2020,440],[2025,460]];
+
+const ERAS = [
+ {a:1877,b:1894,l1:"The Patent Monopoly",l2:"1877–1894"},
+ {a:1894,b:1913,l1:"The Independents' War",l2:"1894–1913"},
+ {a:1913,b:1984,l1:"One System — The Regulated Monopoly",l2:"1913–1984"},
+ {a:1984,b:1996,l1:"The Breakup",l2:"1984–96"},
+ {a:1996,b:2006,l1:"Remarriage",l2:"1996–2006"},
+ {a:2006,b:2025,l1:"Wireless & Cable",l2:"2006–2025"},
+];
+
+const EVENTS = [
+ {yr:1877, label:"1876–77", name:"The patent", fall:false,
+  txt:"Bell's filing beats Elisha Gray's to the patent office by hours; Western Union declines to buy the 'electrical toy' for $100,000 — the worst decision in the history of American business — and surrenders its telephone network to Bell within three years."},
+ {yr:1894, label:"1894", name:"The patents expire", fall:false,
+  txt:"Bell's monopoly lapses and 6,000 independent telephone companies bloom across rural and small-town America. By 1907 the independents connect nearly half the nation's phones — the first open era."},
+ {yr:1913, label:"1907–13", name:"Vail & the Kingsbury Commitment", fall:false,
+  txt:"Theodore Vail returns with a creed — 'One System, One Policy, Universal Service' — buys independents by the hundreds, and cuts the deal of the century: AT&T divests Western Union and interconnects the survivors, and in exchange the state blesses the monopoly."},
+ {yr:1925, label:"1925", name:"Bell Labs founded", fall:false,
+  txt:"The monopoly's rents fund the greatest research institution ever assembled: the transistor (1947), information theory (1948), the laser, the solar cell, Unix and C. The regulated monopoly's defense was that it paid for the future — and for forty years, it did."},
+ {yr:1934, label:"1934", name:"The Communications Act", fall:false,
+  txt:"The FCC is created and the regulated monopoly gets its constitution: universal service as the mission, rate-of-return as the leash. The map freezes for fifty years."},
+ {yr:1956, label:"1949–56", name:"The first antitrust suit — and the seeding of the Valley", fall:false,
+  txt:"The DOJ's suit ends in a consent decree confining Western Electric to telephony — and forcing Bell to license ALL its patents to all comers. The transistor licenses issued under this decree seed Texas Instruments, Sony, and everything in the semiconductor chronicle. Arguably the most consequential antitrust remedy ever issued."},
+ {yr:1969, label:"1968–69", name:"Carterfone & MCI — the first cracks", fall:false,
+  txt:"The FCC rules foreign devices may attach to the network (Carterfone), and licenses MCI's microwave route between Chicago and St. Louis. Bill McGowan's MCI proceeds to litigate the monopoly to death, one docket at a time."},
+ {yr:1982, label:"1974–82", name:"US v. AT&T — the consent decree", fall:false,
+  txt:"After eight years before Judge Greene, AT&T settles: it will divide itself. Crucially, AT&T shapes the terms — keeping long distance, Western Electric and Bell Labs, and surrendering the local companies it considers the boring half."},
+ {yr:1984, label:"1984", name:"THE BREAKUP", fall:true,
+  txt:"January 1: one company becomes eight — AT&T plus seven regional Bells — in the largest corporate reorganization in history. The quietest clause is the largest transfer: the cellular licenses go with the regions, to the children."},
+ {yr:1990, label:"1984–94", name:"The long-distance wars", fall:false,
+  txt:"AT&T's 90% share is knife-fought down by MCI's 'Friends & Family' and Sprint's pin-drop fiber; prices collapse. In 1994 AT&T pays $12.6B for McCaw Cellular — buying back the wireless future the decree gave away."},
+ {yr:1996, label:"1996", name:"The Telecom Act & the trivestiture", fall:false,
+  txt:"Congress opens all markets to all comers; a CLEC gold rush blooms and mostly dies. AT&T splits itself again voluntarily — spinning off Lucent (with Bell Labs inside) and NCR. The jewels leave the crown."},
+ {yr:1999, label:"1997–2000", name:"The children remarry", fall:false,
+  txt:"SBC takes Pacific Telesis, then Ameritech ($62B — largest merger in history at the time); Bell Atlantic takes NYNEX, then GTE — coining a new name, Verizon; Qwest takes US West. Seven regents become four in four years."},
+ {yr:2002, label:"2001–02", name:"The reckoning", fall:true,
+  txt:"The telecom crash: WorldCom's $11B fraud produces the largest bankruptcy in history and 25 years for Ebbers; Global Crossing dies; Qwest's Nacchio is convicted; Lucent falls 99%. The revolution's financiers are carried out."},
+ {yr:2005, label:"2005–06", name:"The child buys the mother", fall:true,
+  txt:"SBC pays $16B for AT&T — roughly what AT&T lost on cable alone — and takes her name. Verizon takes MCI's corpse for $8.5B. BellSouth follows for $86B. Six of 1984's eight fragments now live under two flags, one of them the old one."},
+ {yr:2011, label:"2011", name:"The blocked merger — and the enemy's gift", fall:false,
+  txt:"The DOJ kills AT&T's $39B purchase of T-Mobile. The breakup package — $3B cash plus spectrum and roaming, the largest ever — flows to the target, capitalizing the revival of the rival that will spend a decade dismantling AT&T's margins."},
+ {yr:2016, label:"2013–20", name:"The Un-carrier & the third throne", fall:false,
+  txt:"Legere's T-Mobile abolishes contracts, fees and every industry heresy; SoftBank's Sprint fails to fix itself; and in 2020 T-Mobile captures Sprint — and the 2.5 GHz spectrum that becomes the best 5G position in America."},
+ {yr:2018, label:"2015–22", name:"The conglomerate catastrophe", fall:false,
+  txt:"The reassembled AT&T repeats the mother's founding error at scale: $67B for DirecTV, $108B for Time Warner — both divested within seven years at a combined loss north of $150B. Convinced again the future was content, it forgot again that it was the network."},
+ {yr:2023, label:"2016–25", name:"The Labs end up Finnish · the next rebellion", fall:false,
+  txt:"Nokia absorbs Alcatel-Lucent, becoming Bell Labs' final custodian. Cable's coax wins broadband outright and raids wireless by MVNO. And Starlink opens the next independents' war from orbit — the 1894 patent expiry, happening again, overhead."},
+];
+
+const EVENT_IMPACTS = {
+  1877:["bell"], 1894:["bell","other"], 1913:["bell","gte","other"], 1925:["bell"],
+  1934:["bell","other"], 1956:["bell","other"], 1969:["bell","mci","other"],
+  1982:["bell","att","sbc","bellatlantic","nynex","ameritech","bellsouth","pactel","uswest"],
+  1984:["bell","att","sbc","bellatlantic","nynex","ameritech","bellsouth","pactel","uswest"],
+  1990:["att","mci","sprint"],
+  1996:["att","sbc","bellatlantic","nynex","ameritech","bellsouth","pactel","uswest","mci","sprint","other"],
+  1999:["sbc","bellatlantic","nynex","ameritech","bellsouth","pactel","uswest","gte"],
+  2002:["mci","uswest","att","other"], 2005:["att","sbc","bellatlantic","mci","sprint","nextel"],
+  2011:["sbc","tmobile"], 2016:["tmobile","sbc","bellatlantic","sprint"],
+  2018:["sbc","cable"], 2023:["tmobile","sprint","bellatlantic","sbc","cable","other"]
+};
+EVENTS.forEach(event=>{event.impacts=EVENT_IMPACTS[event.yr]||[];});
+
+const FATES = [
+ {c:"Western Union", col:"#6b6b66", peak:"The telegraph empire — the network before the network", yr:"1879", how:"Declined to buy Bell's patent for $100,000, lost the patent war, and surrendered its telephone business to Bell — the founding cautionary tale of every incumbent in every chart of this series.", by:"Bell (patent settlement)", kind:"destroyed"},
+ {c:"The Independents (6,000 companies)", col:"#6b6b66", peak:"~Half of America's telephones (1907)", yr:"1907–13", how:"The first open era: rural cooperatives and small-town exchanges that wired the America Bell ignored. Vail bought them by the hundreds; Kingsbury legitimized the rest as interconnected vassals; GTE became their consolidated champion.", by:"Bell (purchase); GTE (consolidation)", kind:"submitted"},
+ {c:"The Bell System", col:"#8d7ba8", peak:"~80% of phones · the largest private employer on Earth", yr:"1984", how:"The only monopoly in this series that negotiated its own dismemberment — and chose which half to keep. It kept the treasure (long distance, the factory, the Labs) and gave away the land (local copper and the cellular licenses). Every assumption inverted within a decade.", by:"The United States (US v. AT&T)", kind:"destroyed"},
+ {c:"Western Electric → Lucent (Bell Labs)", col:"#7d5ba6", peak:"The world's greatest factory + the greatest research institution ever", yr:"1996 → 2006/16", how:"Kept by the mother in 1984, spun off as Lucent in 1996, rode the bubble to a $250B valuation, crashed 99%, merged with Alcatel (2006), absorbed by Nokia (2016). The transistor's birthplace is a Finnish subsidiary.", by:"Alcatel, then Nokia", kind:"submitted"},
+ {c:"AT&T (1984–2005)", col:"#5b8ea6", peak:"≈32% · 90% of long distance at birth", yr:"2005", how:"Kept every crown jewel and watched each commoditize; spun its wireless arm at the top (2001) and watched its siblings buy it for $41B; burned $100B+ on cable. Sold to its own child for $16B — the child kept the name.", by:"SBC (its child)", kind:"submitted"},
+ {c:"Pacific Telesis", col:"#d1a636", peak:"California's Bell", yr:"1997", how:"Gave away its wireless future (the AirTouch spinoff, 1994) and sold the remainder to SBC — the first sibling eaten.", by:"SBC", kind:"submitted"},
+ {c:"NYNEX", col:"#7d5ba6", peak:"Manhattan's dial tone", yr:"1997", how:"Merged into Bell Atlantic — the first step toward Verizon.", by:"Bell Atlantic", kind:"submitted"},
+ {c:"Ameritech", col:"#86a83e", peak:"The Midwest's Bell", yr:"1999", how:"Sold to SBC for $62B — the largest merger in history at the time.", by:"SBC", kind:"submitted"},
+ {c:"GTE", col:"#a08050", peak:"≈7.5% · the independents' champion for 80 years", yr:"2000", how:"Bigger than any single Baby Bell, it merged with Bell Atlantic into a combination so large it needed a new name: Verizon. The independents' century ends inside the empire.", by:"Bell Atlantic (creating Verizon)", kind:"submitted"},
+ {c:"US West → Qwest → CenturyLink → Lumen", col:"#96566b", peak:"Fourteen states — the biggest territory, fewest people", yr:"2000–", how:"The cursed seventh: merged into fiber upstart Qwest, whose CEO was convicted of insider trading as the books unraveled; renamed twice more; fading on old copper ever since. The one regent whose line ended in ruin.", by:"Qwest (merger); its own decline", kind:"survived"},
+ {c:"MCI → WorldCom", col:"#e08a3c", peak:"≈9% · the rebel that broke the monopoly", yr:"2002 → 2005", how:"McGowan's lawsuits cracked the Bell System; Ebbers' fraud ($11B — the largest bankruptcy in history, 25 years in prison) cracked MCI. Verizon bought the corpse.", by:"Its own fraud; Verizon (the corpse)", kind:"destroyed"},
+ {c:"Global Crossing", col:"#6b6b66", peak:"The undersea fiber empire of the bubble", yr:"2002", how:"$47B of market cap and 100,000 miles of subsea fiber, bankrupt in the crash — the bubble's grandest monument, sold for fractions to Asian carriers and eventually into Level 3, and thence into Lumen.", by:"The crash; Level 3/Lumen (remains)", kind:"destroyed"},
+ {c:"AT&T Wireless", col:"#5b8ea6", peak:"The mother's wireless arm, spun at the very top", yr:"2004", how:"Spun off in the largest IPO in U.S. history (2001); bought three years later by Cingular — its siblings' joint venture — for $41B. The name returned home in 2006 when AT&T Inc. absorbed BellSouth.", by:"Cingular (SBC & BellSouth)", kind:"submitted"},
+ {c:"McCaw Cellular", col:"#6b6b66", peak:"The wireless pioneer", yr:"1994", how:"Craig McCaw assembled the first national cellular footprint from licenses the Bells didn't value; sold to AT&T for $12.6B — the mother buying back the future the decree gave away.", by:"AT&T", kind:"submitted"},
+ {c:"Nextel", col:"#a3743f", peak:"≈3% · push-to-talk, best margins in the industry", yr:"2005", how:"The $35B Sprint merger — consistently ranked among the worst in history: incompatible networks, culture war, and a customer exodus that never stopped.", by:"Sprint (mutually ruinous)", kind:"submitted"},
+ {c:"Sprint", col:"#cbb63a", peak:"≈8.5% · the pin-drop network, born of a railroad", yr:"2020", how:"Southern Pacific's fiber-along-the-rails became the third national carrier; Nextel wounded it, SoftBank couldn't heal it, and after five straight years of losses it surrendered to the fourth-place carrier it once dwarfed.", by:"T-Mobile", kind:"submitted"},
+ {c:"Alltel", col:"#6b6b66", peak:"The great rural roll-up", yr:"2009", how:"Sold to Verizon for $28B — the countryside consolidated.", by:"Verizon", kind:"submitted"},
+ {c:"US Cellular", col:"#6b6b66", peak:"The last regional holdout", yr:"2024", how:"The family-controlled remnant sold its wireless operations to T-Mobile — the final absorption of the independents' wireless era.", by:"T-Mobile", kind:"submitted"},
+ {c:"Dish / EchoStar", col:"#6b6b66", peak:"The mandated fourth carrier that never was", yr:"—", how:"Handed Boost and spectrum as the Sprint merger's antitrust remedy, ordered to build a fourth network — and built a cautionary tale instead, teetering on debt while its spectrum trove awaits a buyer.", by:"—", kind:"survived"},
+ {c:"Cable (Comcast · Charter · Cox)", col:"#6f7d8a", peak:"≈18% · the broadband landlords", yr:"—", how:"The invasion from the other wire: coax beat copper for broadband outright, took voice as an afterthought, and now raids wireless via MVNOs riding the Bells' own networks.", by:"—", kind:"survived"},
+ {c:"Starlink", col:"#6b6b66", peak:"The rebellion from orbit", yr:"—", how:"The 1894 patent expiry happening again, overhead: millions of subscribers where no wire reaches, and direct-to-phone service beginning. Every closed system meets its independents' war; this is the next one.", by:"—", kind:"survived"},
+ {c:"Lumen", col:"#96566b", peak:"The cursed line's terminus", yr:"—", how:"US West + Qwest + CenturyLink + Level 3 + Global Crossing's remains, compounding decline on old copper while pivoting to enterprise fiber. Still connected; barely crowned.", by:"—", kind:"survived"},
+ {c:"AT&T Inc.", col:"#35548f", peak:"Three Bells + the mother + Cingular", yr:"—", how:"Whitacre's SBC reassembled the crown and took the name — then burned $150B+ re-learning the mother's founding lesson (it is the network, not the content). A victor with self-inflicted scars.", by:"—", kind:"victor"},
+ {c:"Verizon", col:"#c1442e", peak:"Two Bells + GTE + MCI + Vodafone's stake", yr:"—", how:"The disciplined twin: paid $130B to own its wireless business outright (2014, then the largest transaction ever) and mostly resisted the content sirens. Its worst wound — $9B on AOL and Yahoo — is a rounding error by its sibling's standards.", by:"—", kind:"victor"},
+ {c:"T-Mobile (Deutsche Telekom)", col:"#c94f7c", peak:"≈15% and the wireless crown in contention", yr:"—", how:"The gekokujō of the whole series: fourth place, nearly sold twice, revived on its enemy's breakup fee, it burned the rulebook, captured Sprint, and out-executed both heirs of the Bell System. The foreign sovereign's patience won the American network war.", by:"—", kind:"victor"},
+];
+
+/* Sankey: share points of the market flowing from absorbed to absorber */
+const SK_NODES = ["Western Union","The Independents (6,000)","The Bell System","Western Electric · Bell Labs","AT&T (1984–2005)","AT&T Wireless","McCaw Cellular","NYNEX","Pacific Telesis","Ameritech","BellSouth","Bell Atlantic","Southwestern Bell (SBC)","US West","GTE","MCI · WorldCom","Nextel","Sprint","Alltel","US Cellular","AT&T Inc.","Verizon","T-Mobile","Qwest → Lumen","Nokia"];
+const SK_COLORS = {"Western Union":"#8a8a6e","The Independents (6,000)":"#6b6b66","The Bell System":"#8d7ba8","Western Electric · Bell Labs":"#7d5ba6","AT&T (1984–2005)":"#5b8ea6","AT&T Wireless":"#5b8ea6","McCaw Cellular":"#9e9450","NYNEX":"#7d5ba6","Pacific Telesis":"#d1a636","Ameritech":"#86a83e","BellSouth":"#3d8f80","Bell Atlantic":"#a34a5c","Southwestern Bell (SBC)":"#4a6fa8","US West":"#96566b","GTE":"#a08050","MCI · WorldCom":"#e08a3c","Nextel":"#a3743f","Sprint":"#cbb63a","Alltel":"#8a8a6e","US Cellular":"#8a8a6e","AT&T Inc.":"#35548f","Verizon":"#c1442e","T-Mobile":"#c94f7c","Qwest → Lumen":"#96566b","Nokia":"#5a7a9e"};
+const SK_LINKS = [
+ {s:"Western Union",t:"The Bell System",v:3, kind:"fall", e:"1879 — having declined the patent for $100,000, Western Union loses the patent war and surrenders its telephone network to Bell"},
+ {s:"The Independents (6,000)",t:"The Bell System",v:12, kind:"sub", e:"1907–13 — Vail buys the independents by the hundreds; the Kingsbury Commitment legitimizes the rest as interconnected vassals"},
+ {s:"The Independents (6,000)",t:"GTE",v:4, kind:"sub", e:"1918–59 — the independents that consolidated instead of selling: GTE becomes their champion, the biggest non-Bell for 80 years"},
+ {s:"The Bell System",t:"AT&T (1984–2005)",v:26, kind:"fall", e:"1984 — the mother keeps what it thinks is the treasure: long distance, Western Electric, Bell Labs, and the computing dream"},
+ {s:"The Bell System",t:"Western Electric · Bell Labs",v:5, kind:"fall", e:"1984 (kept) → 1996 (spun as Lucent) — the jewels leave the crown voluntarily, ride the bubble, and crash 99%"},
+ {s:"The Bell System",t:"NYNEX",v:6.5, kind:"fall", e:"1984 — New York & New England, with Manhattan's dial tone"},
+ {s:"The Bell System",t:"Bell Atlantic",v:6.5, kind:"fall", e:"1984 — the mid-Atlantic child that would end up wearing a new name over half the empire"},
+ {s:"The Bell System",t:"Ameritech",v:6.5, kind:"fall", e:"1984 — the industrial Midwest"},
+ {s:"The Bell System",t:"BellSouth",v:6.5, kind:"fall", e:"1984 — the strongest child, and the last to kneel"},
+ {s:"The Bell System",t:"Southwestern Bell (SBC)",v:6.5, kind:"fall", e:"1984 — the Texas child nobody watched: it would buy four of the other pieces, including the mother"},
+ {s:"The Bell System",t:"Pacific Telesis",v:6, kind:"fall", e:"1984 — California"},
+ {s:"The Bell System",t:"US West",v:6, kind:"fall", e:"1984 — fourteen states of distance: the biggest territory, the fewest people, the cursed inheritance"},
+ {s:"McCaw Cellular",t:"AT&T (1984–2005)",v:2, kind:"sub", e:"1994 — $12.6B: the mother buys back the wireless future the decree gave to her children"},
+ {s:"AT&T (1984–2005)",t:"AT&T Wireless",v:3, kind:"fall", e:"2001 — spun off at the very top of the market, in the largest IPO in U.S. history"},
+ {s:"AT&T Wireless",t:"AT&T Inc.",v:3, kind:"sub", e:"2004 — bought by Cingular, the SBC/BellSouth venture, for $41B; the tragic loop closes at a $30B markup"},
+ {s:"NYNEX",t:"Bell Atlantic",v:6.5, kind:"sub", e:"1997 — the first remarriage among the seven"},
+ {s:"Pacific Telesis",t:"Southwestern Bell (SBC)",v:5.5, kind:"sub", e:"1997 — the first sibling eaten; Whitacre's march begins"},
+ {s:"Ameritech",t:"Southwestern Bell (SBC)",v:6.5, kind:"sub", e:"1999 — $62B, the largest merger in history at the time"},
+ {s:"Bell Atlantic",t:"Verizon",v:13, kind:"sub", e:"2000 — the GTE merger creates a combination so large it needs a new name"},
+ {s:"GTE",t:"Verizon",v:7.5, kind:"sub", e:"2000 — the independents' champion completes Verizon; their century ends inside the empire they defied"},
+ {s:"US West",t:"Qwest → Lumen",v:6.5, kind:"sub", e:"2000 — the cursed marriage: Nacchio's fraud, three renames, and a long fade on old copper"},
+ {s:"AT&T (1984–2005)",t:"AT&T Inc.",v:7, kind:"sub", e:"2005 — $16B: the child buys the mother and takes her name — the purest gekokujō in American business history"},
+ {s:"BellSouth",t:"AT&T Inc.",v:7, kind:"sub", e:"2006 — $86B, mainly to unify Cingular; the last regent kneels and the crown is reassembled"},
+ {s:"MCI · WorldCom",t:"Verizon",v:4, kind:"fall", e:"2005 — $8.5B for the corpse of the $11B fraud; the rebel that broke the monopoly is buried by its heir"},
+ {s:"Nextel",t:"Sprint",v:3, kind:"sub", e:"2005 — the $35B merger consistently ranked among the worst in history"},
+ {s:"Sprint",t:"T-Mobile",v:5.5, kind:"sub", e:"2020 — the fourth place captures the third, and with it the 2.5 GHz spectrum that becomes the best 5G position in America"},
+ {s:"Alltel",t:"Verizon",v:1, kind:"sub", e:"2009 — $28B: the countryside consolidated"},
+ {s:"US Cellular",t:"T-Mobile",v:0.5, kind:"sub", e:"2024 — the last regional holdout's wireless operations absorbed"},
+ {s:"Western Electric · Bell Labs",t:"Nokia",v:2, kind:"sub", e:"2006 Alcatel → 2016 Nokia — the birthplace of the transistor, information theory and Unix ends as a Finnish subsidiary"},
+];
+
+/* ================= STACKED AREA CHART ================= */
+const Y0=1877, Y1=2025;
+const years = d3.range(Y0, Y1+1);
+const byId = Object.fromEntries(CLANS.map(c=>[c.id,c]));
+
+function powerAt(clan, y){
+  const p = clan.pts;
+  if(!p || y < p[0][0] || y > p[p.length-1][0]) return 0;
+  for(let i=0;i<p.length-1;i++){
+    const [x0,v0]=p[i],[x1,v1]=p[i+1];
+    if(y>=x0 && y<=x1) return x1===x0 ? v1 : v0 + (v1-v0)*(y-x0)/(x1-x0);
+  }
+  return 0;
+}
+function mktAt(y){ return powerAt({pts:MKT}, y); }
+
+const rows = years.map(y=>{
+  const r = {year:y}; let named=0;
+  ORDER.forEach(id=>{ if(id!=="other"){ r[id]=powerAt(byId[id],y); named+=r[id]; }});
+  r.other = Math.max(TOTAL - named, 0);   /* total is ALWAYS 100% — the calls get completed by someone */
+  return r;
+});
+
+const W=1500, H=580, M={t:64,r:24,b:36,l:60};
+const svg = d3.select("#chart").attr("viewBox",`0 0 ${W} ${H}`);
+const x = d3.scaleLinear([Y0,Y1],[M.l,W-M.r]);
+const yS = d3.scaleLinear([0,100],[H-M.b,M.t]);
+
+const series = d3.stack().keys(ORDER)(rows);
+const area = d3.area().x(d=>x(d.data.year)).y0(d=>yS(d[0])).y1(d=>yS(d[1])).curve(d3.curveBasis);
+
+/* era bands */
+const eraG = svg.append("g");
+ERAS.forEach((e,i)=>{
+  if(i>0) eraG.append("line").attr("x1",x(e.a)).attr("x2",x(e.a)).attr("y1",M.t-6).attr("y2",H-M.b)
+    .attr("stroke","rgba(227,226,220,.28)").attr("stroke-dasharray","2 5");
+  const cx=(x(e.a)+x(e.b))/2;
+  eraG.append("text").attr("x",cx).attr("y",22).attr("text-anchor","middle")
+    .attr("fill","#e3e2dc").attr("font-size",e.b-e.a<15?9:12).attr("letter-spacing",e.b-e.a<15?".7":"1.3").text(e.l1.toUpperCase());
+  eraG.append("text").attr("x",cx).attr("y",40).attr("text-anchor","middle")
+    .attr("fill","#8a7340").attr("font-size",11).attr("letter-spacing","1.5").text(e.l2);
+});
+
+/* grid + axes */
+d3.range(0,101,10).forEach(v=>{
+  svg.append("line").attr("x1",M.l).attr("x2",W-M.r).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke","rgba(227,226,220,.07)");
+  svg.append("text").attr("x",M.l-8).attr("y",yS(v)+4).attr("text-anchor","end")
+    .attr("fill","#6a6a64").attr("font-size",11).attr("font-family","var(--sans)").text(v+"%");
+});
+svg.append("text").attr("transform",`translate(16,${(M.t+H-M.b)/2}) rotate(-90)`).attr("text-anchor","middle")
+  .attr("fill","#9c9c96").attr("font-size",11.5).attr("letter-spacing","1.5").text("SHARE OF U.S. TELECOM SERVICE REVENUE");
+d3.range(1880,2026,20).forEach(t=>{
+  svg.append("text").attr("x",x(t)).attr("y",H-12).attr("text-anchor","middle")
+    .attr("fill","#9c9c96").attr("font-size",12.5).attr("font-family","var(--sans)").text(t);
+});
+
+/* bands */
+const paths = svg.append("g").selectAll("path").data(series).join("path")
+  .attr("d",area).attr("fill",d=>byId[d.key].color).attr("fill-opacity",.92)
+  .attr("class","carrier-band").attr("data-carrier",d=>d.key)
+  .attr("role","button").attr("tabindex",0).attr("aria-label",d=>`Inspect ${byId[d.key].name} on the timeline`)
+  .attr("stroke","#111116").attr("stroke-width",.7).style("cursor","pointer");
+
+/* in-band labels at widest point */
+series.forEach(s=>{
+  let best={w:0,i:0};
+  s.forEach((d,i)=>{const w=d[1]-d[0]; if(w>best.w) best={w,i};});
+  const d=s[best.i];
+  if(best.w>3){
+    const yr=d.data.year;
+    const lx=Math.max(M.l+95, Math.min(W-M.r-95, x(yr)));
+    svg.append("text").attr("x",lx).attr("y",yS((d[0]+d[1])/2)+4.5)
+      .attr("text-anchor","middle").attr("fill","#0c0c10").attr("font-size",best.w>13?16:(best.w>5?12.5:10))
+      .attr("font-weight",700).attr("letter-spacing","1.5").attr("pointer-events","none")
+      .text(byId[s.key].name.toUpperCase().replace(/ \(.*\)/,""))
+      .clone(true).attr("fill","rgba(227,226,220,.94)").attr("dy",-1);
+  }
+});
+
+/* hegemony annotations */
+function annotate(id, yr, text, anchor){
+  const s = series.find(s=>s.key===id); if(!s) return;
+  const d = s[yr-Y0];
+  svg.append("text").attr("x",x(yr)).attr("y",yS((d[0]+d[1])/2)-14)
+    .attr("text-anchor",anchor||"middle").attr("fill","#c9a24b").attr("font-size",10.5)
+    .attr("letter-spacing","1").attr("pointer-events","none").text(text);
+}
+annotate("bell",1952,"※ ONE SYSTEM — THE LARGEST EMPLOYER ON EARTH");
+annotate("tmobile",2022,"※ FUNDED BY ITS ENEMY","end");
+
+/* fall / merger seals */
+const tt1 = document.getElementById("tt1");
+const wrap1 = document.getElementById("chart-wrap");
+const chartPrompt=document.createElement("div");
+chartPrompt.className="chart-prompt";
+chartPrompt.innerHTML="<b>Click a carrier or event</b> · pin its story";
+const selectionCard=document.createElement("aside");
+selectionCard.className="company-selection";
+selectionCard.hidden=true;
+selectionCard.setAttribute("aria-live","polite");
+selectionCard.innerHTML='<button type="button" class="selection-close" aria-label="Clear selected item">×</button><div class="selection-kicker"></div><h2></h2><div class="selection-stat"></div><div class="selection-copy"></div><div class="selection-meta"></div><div class="impact-label" hidden>Affected carriers · click one to inspect</div><div class="impact-chips"></div><div class="selection-hint">Click another mark to compare · Esc clears</div>';
+wrap1.append(chartPrompt,selectionCard);
+
+let selectedKey=null;
+let impactedKeys=new Set();
+let eventDotGroups=null;
+function revenueLabel(v,yr){
+  const rev=v/100*mktAt(yr);
+  return rev>=1?`$${rev.toFixed(rev>20?0:1)}B`:`$${(rev*1000).toFixed(0)}M`;
+}
+function restoreBandState(){
+  paths.attr("fill-opacity",d=>selectedKey?(d.key===selectedKey?1:.16):(impactedKeys.size?(impactedKeys.has(d.key)?1:.12):.92))
+    .attr("stroke",d=>(d.key===selectedKey||impactedKeys.has(d.key))?"#f0d384":"#111116")
+    .attr("stroke-width",d=>d.key===selectedKey?2.8:(impactedKeys.has(d.key)?2.2:.7));
+}
+function clearSelection(){
+  selectedKey=null; impactedKeys.clear(); selectionCard.hidden=true; chartPrompt.style.opacity="1";
+  marker.style("display","none"); eventDotGroups?.classed("active",false);
+  document.querySelectorAll(".ev").forEach(node=>{node.classList.remove("active");node.setAttribute("aria-pressed","false");});
+  restoreBandState();
+}
+function selectBand(d,yr){
+  const c=byId[d.key],row=rows[yr-Y0],v=row[d.key];
+  tt1.style.display="none"; cross.style("display","none"); selectedKey=d.key; impactedKeys.clear(); eventDotGroups?.classed("active",false);
+  selectionCard.style.setProperty("--selected-color",c.color);
+  selectionCard.querySelector(".selection-kicker").textContent=`${yr} · carrier pinned`;
+  selectionCard.querySelector("h2").textContent=c.name;
+  selectionCard.querySelector(".selection-stat").textContent=`${v.toFixed(1)}% of U.S. telecom revenue · ${revenueLabel(v,yr)}`;
+  selectionCard.querySelector(".selection-copy").textContent="";
+  selectionCard.querySelector(".selection-meta").innerHTML=`${c.region}<br><b style="color:var(--paper)">Peak:</b> ${c.peak}`;
+  selectionCard.querySelector(".impact-label").hidden=true; selectionCard.querySelector(".impact-chips").replaceChildren();
+  selectionCard.hidden=false; chartPrompt.style.opacity="0"; restoreBandState();
+}
+selectionCard.querySelector(".selection-close").addEventListener("click",clearSelection);
+document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!selectionCard.hidden)clearSelection();});
+function showTip(tt, wrap, ev, html){
+  tt.style.display="block"; tt.innerHTML=html;
+  const r=wrap.getBoundingClientRect();
+  let tx=ev.clientX-r.left+16, ty=ev.clientY-r.top-10;
+  if(tx>r.width-310) tx-=330;
+  tt.style.left=tx+"px"; tt.style.top=ty+"px";
+}
+let sealIdx=0;
+CLANS.filter(c=>c.fate.yr).forEach(c=>{
+  const s = series.find(s=>s.key===c.id);
+  if(!s) return;
+  const yr = Math.min(c.fate.yr, Y1);
+  let j = yr - Y0;
+  while(j>0 && (s[j][1]-s[j][0])<0.4) j--;
+  const mid=(s[j][0]+s[j][1])/2;
+  const isSub = c.fate.kind==="sub";
+  const stagger = yr>=1995 ? -(10 + (sealIdx++ % 3)*12) : -10;
+  const g=svg.append("g").style("cursor","pointer").attr("role","button").attr("tabindex",0)
+    .attr("aria-label",`Inspect ${c.name} at its ${isSub?"merger":"fall"} in ${c.fate.yr}`);
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",12).attr("fill","transparent");
+  g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",5.5)
+    .attr("fill",isSub?"transparent":"#b3372a").attr("stroke",isSub?"#c9a24b":"#111116").attr("stroke-width",isSub?2:1.5);
+  g.append("text").attr("x",x(yr)).attr("y",yS(mid)+stagger)
+    .attr("text-anchor", yr>2012?"end":"middle")
+    .attr("fill",isSub?"#d9c27f":"#e8b0a6").attr("font-size",10.5).attr("letter-spacing","1")
+    .text(c.name.toUpperCase().replace(/ \(.*\)/,"").replace(/ →.*/,"")+" · "+c.fate.yr);
+  const chooseFate=()=>selectBand(s,yr);
+  g.on("click",chooseFate).on("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();chooseFate();}})
+   .on("mousemove",ev=>{
+     showTip(tt1,wrap1,ev,
+      `<div class="yr">${c.fate.yr} · ${isSub?"MERGED / ACQUIRED":"BROKEN / DESTROYED"}</div>
+       <div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="fate-t" style="color:${isSub?'#d9c27f':'#d98a7f'}">${c.fate.txt}</div>
+       ${c.fate.by?`<div class="pw" style="margin-top:4px"><b style="color:#e3e2dc">Taken by:</b> ${c.fate.by}</div>`:""}`);
+   }).on("mouseleave",()=>{tt1.style.display="none";});
+});
+
+/* event marker */
+const marker = svg.append("g").style("display","none").attr("pointer-events","none");
+marker.append("line").attr("y1",M.t-4).attr("y2",H-M.b).attr("stroke","#c9a24b").attr("stroke-width",1).attr("stroke-dasharray","3 4");
+const markerLabel = marker.append("text").attr("y",M.t+8).attr("fill","#c9a24b").attr("font-size",11).attr("letter-spacing","1.5");
+
+/* hover crosshair + band tooltip */
+const cross = svg.append("line").attr("y1",M.t).attr("y2",H-M.b)
+  .attr("stroke","rgba(227,226,220,.35)").attr("stroke-width",1).style("display","none").attr("pointer-events","none");
+
+function activateEvent(event,sourceButton){
+  tt1.style.display="none"; cross.style("display","none"); selectedKey=null; impactedKeys=new Set(event.impacts);
+  document.querySelectorAll(".ev").forEach(node=>{const active=node===sourceButton||node.dataset.year===String(event.yr);node.classList.toggle("active",active);node.setAttribute("aria-pressed",active?"true":"false");});
+  marker.style("display",null); marker.select("line").attr("x1",x(event.yr)).attr("x2",x(event.yr));
+  markerLabel.attr("text-anchor",event.yr>2005?"end":"start").attr("x",event.yr>2005?x(event.yr)-6:x(event.yr)+6).text(event.name.toUpperCase()+" · "+event.label);
+  eventDotGroups?.classed("active",dot=>dot===event);
+  selectionCard.style.setProperty("--selected-color",event.fall?"#b3372a":"#c9a24b");
+  selectionCard.querySelector(".selection-kicker").textContent=`${event.label} · event pinned`;
+  selectionCard.querySelector("h2").textContent=event.name;
+  selectionCard.querySelector(".selection-stat").textContent=`${event.impacts.length} affected ${event.impacts.length===1?"carrier":"carriers"} highlighted`;
+  selectionCard.querySelector(".selection-copy").textContent=event.txt; selectionCard.querySelector(".selection-meta").textContent="";
+  const label=selectionCard.querySelector(".impact-label"),chips=selectionCard.querySelector(".impact-chips"); label.hidden=!event.impacts.length; chips.replaceChildren();
+  event.impacts.forEach(id=>{const c=byId[id],band=series.find(item=>item.key===id);if(!c||!band)return;const chip=document.createElement("button");chip.type="button";chip.className="impact-chip";chip.style.setProperty("--chip-color",c.color);chip.textContent=c.name.replace(/ \(.*\)/,"");chip.addEventListener("click",()=>selectBand(band,event.yr));chips.appendChild(chip);});
+  selectionCard.hidden=false; chartPrompt.style.opacity="0"; restoreBandState();
+}
+
+const eventLaneY=H-M.b+5;
+svg.append("line").attr("x1",M.l).attr("x2",W-M.r).attr("y1",eventLaneY).attr("y2",eventLaneY).attr("stroke","rgba(201,162,75,.32)").attr("pointer-events","none");
+eventDotGroups=svg.append("g").attr("aria-label","Clickable events on the timeline").selectAll("g").data(EVENTS).join("g")
+  .attr("class","chart-event").attr("transform",event=>`translate(${x(event.yr)},${eventLaneY})`).attr("role","button").attr("tabindex",0)
+  .attr("aria-label",event=>`${event.label}. ${event.name}. Highlights ${event.impacts.length} affected carriers`);
+eventDotGroups.append("line").attr("y1",-9).attr("y2",0).attr("stroke",event=>event.fall?"#b3372a":"#c9a24b");
+eventDotGroups.append("circle").attr("r",10).attr("fill","transparent");
+eventDotGroups.append("circle").attr("class","event-core").attr("r",3.6).attr("fill",event=>event.fall?"#b3372a":"#c9a24b").attr("stroke","#111116").attr("stroke-width",1.2);
+eventDotGroups.on("click",(pointer,event)=>activateEvent(event,document.querySelector(`.ev[data-year="${event.yr}"]`)))
+  .on("keydown",(key,event)=>{if(key.key==="Enter"||key.key===" "){key.preventDefault();activateEvent(event,document.querySelector(`.ev[data-year="${event.yr}"]`));}})
+  .on("mousemove",(pointer,event)=>showTip(tt1,wrap1,pointer,`<div class="yr">${event.label} · EVENT</div><div class="nm">${event.name}</div><div class="pw">Highlights ${event.impacts.length} affected carriers</div><div class="pw" style="margin-top:5px;color:#c9a24b">Click to pin this event</div>`))
+  .on("mouseleave",()=>{tt1.style.display="none";});
+
+function yearFromPointer(ev,d){
+  if(ev?.clientX){const [mx]=d3.pointer(ev,svg.node());return Math.max(Y0,Math.min(Y1,Math.round(x.invert(mx))));}
+  let best={width:-1,year:Y0};d.forEach(point=>{const width=point[1]-point[0];if(width>best.width)best={width,year:point.data.year};});return best.year;
+}
+
+paths.on("mousemove",function(ev,d){
+    paths.attr("fill-opacity",s=>s.key===d.key?1:.2);
+    const [mx]=d3.pointer(ev,svg.node());
+    const yr=Math.max(Y0,Math.min(Y1,Math.round(x.invert(mx))));
+    cross.style("display",null).attr("x1",x(yr)).attr("x2",x(yr));
+    const row=rows[yr-Y0], c=byId[d.key], v=row[d.key];
+    const rev=(v/100*mktAt(yr));
+    const revTxt = rev>=1 ? `$${rev.toFixed(rev>20?0:1)}B` : `$${(rev*1000).toFixed(0)}M`;
+    const suz = c.suzerain && yr>=c.suzerain.a && yr<=c.suzerain.b
+      ? `<div class="pw" style="margin-top:5px;color:#d9c27f">※ ${c.suzerain.note}</div>` : "";
+    showTip(tt1,wrap1,ev,
+      `<div class="yr">${yr}</div><div class="nm" style="color:${c.color}">${c.name}</div>
+       <div class="pw">≈ <b style="color:#e3e2dc">${v.toFixed(1)}%</b> of U.S. telecom revenue</div>
+       <div class="pw">≈ ${revTxt} in revenue that year</div>
+       <div class="pw" style="margin-top:4px">${c.region}</div>${suz}`);
+  })
+  .on("click",(ev,d)=>selectBand(d,yearFromPointer(ev,d)))
+  .on("keydown",(ev,d)=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();selectBand(d,yearFromPointer(null,d));}})
+  .on("mouseleave",()=>{restoreBandState();cross.style("display","none");tt1.style.display="none";});
+
+/* ================= SANKEY ================= */
+(function(){
+  const SW=1500, SH=700, SM={t:16,r:200,b:16,l:230};
+  const s = d3.select("#sankey").attr("viewBox",`0 0 ${SW} ${SH}`);
+  const nodes = SK_NODES.map(n=>({name:n}));
+  const idx = Object.fromEntries(SK_NODES.map((n,i)=>[n,i]));
+  const links = SK_LINKS.map(l=>({source:idx[l.s],target:idx[l.t],value:l.v,kind:l.kind,e:l.e,s:l.s,t:l.t}));
+  const sk = d3.sankey().nodeWidth(16).nodePadding(15)
+    .extent([[SM.l,SM.t],[SW-SM.r,SH-SM.b]]);
+  const graph = sk({nodes:nodes.map(d=>({...d})), links:links.map(d=>({...d}))});
+
+  const tt2=document.getElementById("tt2"), wrap2=document.getElementById("sankey-wrap");
+
+  s.append("g").selectAll("path").data(graph.links).join("path")
+    .attr("d",d3.sankeyLinkHorizontal())
+    .attr("fill","none")
+    .attr("stroke",d=>d.kind==="fall"?"#b3372a":"#c9a24b")
+    .attr("stroke-opacity",.38)
+    .attr("stroke-width",d=>Math.max(1.5,d.width))
+    .style("cursor","help")
+    .on("mousemove",function(ev,d){
+      d3.select(this).attr("stroke-opacity",.75);
+      showTip(tt2,wrap2,ev,
+        `<div class="yr">${d.kind==="fall"?"BROKEN — DECREE, FRAUD OR SPINOFF":"MERGER / ACQUISITION"}</div>
+         <div class="nm"><span style="color:${SK_COLORS[d.s]}">${d.s}</span> → <span style="color:${SK_COLORS[d.t]}">${d.t}</span></div>
+         <div class="pw">≈ ${d.value} share points of the market</div>
+         <div class="pw" style="margin-top:4px">${d.e}</div>`);
+    })
+    .on("mouseleave",function(){d3.select(this).attr("stroke-opacity",.38); tt2.style.display="none";});
+
+  const ng = s.append("g").selectAll("g").data(graph.nodes).join("g");
+  ng.append("rect")
+    .attr("x",d=>d.x0).attr("y",d=>d.y0)
+    .attr("width",d=>d.x1-d.x0).attr("height",d=>Math.max(2,d.y1-d.y0))
+    .attr("fill",d=>SK_COLORS[d.name]).attr("stroke","#111116");
+  ng.append("text")
+    .attr("x",d=>d.x0 < SW/2 ? d.x0-8 : d.x1+8)
+    .attr("y",d=>(d.y0+d.y1)/2+4)
+    .attr("text-anchor",d=>d.x0 < SW/2 ? "end":"start")
+    .attr("fill","#e3e2dc").attr("font-size",12.5).attr("letter-spacing",".5")
+    .text(d=>d.name);
+})();
+
+/* ================= THE SEVEN REGIONAL BELLS, 1984 ================= */
+(function(){
+  const R=[
+   {n:"Ameritech", v:15.3, col:"#86a83e", role:"The Midwest", side:"→ SBC, 1999 ($62B)",
+    fate:"The industrial heartland's Bell, sold to SBC in what was then the largest merger in history — the deal that made the Texas child the biggest local carrier in America.", cls:"#d9c27f"},
+   {n:"Bell Atlantic", v:14.9, col:"#a34a5c", role:"The mid-Atlantic", side:"→ became Verizon, 2000",
+    fate:"Took NYNEX (1997), then GTE (2000) — a combination so large it needed a new name. One of the two regents who ended the war wearing a crown.", cls:"#c9a24b"},
+   {n:"BellSouth", v:13.9, col:"#3d8f80", role:"The South — the strongest child", side:"→ AT&T Inc., 2006 ($86B)",
+    fate:"The best-run and most independent of the seven held out longest, then sold to the reassembled AT&T — mainly to unify Cingular, the wireless venture the two shared. The last regent to kneel.", cls:"#d9c27f"},
+   {n:"NYNEX", v:13.7, col:"#7d5ba6", role:"New York & New England", side:"→ Bell Atlantic, 1997",
+    fate:"Manhattan's dial tone and the densest, most unionized territory; the first remarriage among the seven, folding into its southern neighbor.", cls:"#d9c27f"},
+   {n:"US West", v:11.2, col:"#96566b", role:"Fourteen states of distance", side:"→ Qwest, 2000 — the cursed line",
+    fate:"The biggest territory with the fewest people married the fiber upstart Qwest at the bubble's top; Nacchio's fraud conviction, three renames (Qwest, CenturyLink, Lumen) and a quarter-century fade followed. The one regent whose line ended in ruin.", cls:"#d98a7f"},
+   {n:"Pacific Telesis", v:10.8, col:"#d1a636", role:"California", side:"→ SBC, 1997 — first to fall",
+    fate:"Gave away its wireless future by spinning off AirTouch in 1994, then sold what remained to SBC — the first sibling eaten, and the start of Whitacre's march.", cls:"#d9c27f"},
+   {n:"Southwestern Bell (SBC)", v:10.7, col:"#4a6fa8", role:"Texas & the Southwest — the one nobody watched", side:"→ bought the mother; wears the crown",
+    fate:"Nearly the smallest regent at divestiture. Ed Whitacre's SBC ate Pacific Telesis, Ameritech, AT&T itself ($16B, 2005 — taking the name), and BellSouth ($86B). The least glamorous child of 1984 ended the war as AT&T.", cls:"#c9a24b"},
+  ];
+  const RW=1500, RH=360, RM={t:20,r:340,b:30,l:250};
+  const s=d3.select("#regents").attr("viewBox",`0 0 ${RW} ${RH}`);
+  const rx=d3.scaleLinear([0,17],[RM.l,RW-RM.r]);
+  const ry=d3.scaleBand(R.map(d=>d.n),[RM.t,RH-RM.b]).padding(0.32);
+  const tt3=document.getElementById("tt3"), wrap3=document.getElementById("regents-wrap");
+
+  [4,8,12,16].forEach(v=>{
+    s.append("line").attr("x1",rx(v)).attr("x2",rx(v)).attr("y1",RM.t).attr("y2",RH-RM.b).attr("stroke","rgba(227,226,220,.07)");
+    s.append("text").attr("x",rx(v)).attr("y",RH-10).attr("text-anchor","middle")
+      .attr("fill","#6a6a64").attr("font-size",11).attr("font-family","var(--sans)").text(v+"M access lines");
+  });
+
+  R.forEach(d=>{
+    const g=s.append("g").style("cursor","help");
+    g.append("rect").attr("x",rx(0)).attr("y",ry(d.n)).attr("width",rx(d.v)-rx(0)).attr("height",ry.bandwidth())
+      .attr("fill",d.col).attr("fill-opacity",.92).attr("stroke","#111116");
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+4).attr("text-anchor","end")
+      .attr("fill","#e3e2dc").attr("font-size",13).text(d.n);
+    g.append("text").attr("x",RM.l-12).attr("y",ry(d.n)+ry.bandwidth()/2+17).attr("text-anchor","end")
+      .attr("fill","#8a7340").attr("font-size",10).attr("letter-spacing","1").text(d.role.toUpperCase());
+    g.append("text").attr("x",rx(d.v)+10).attr("y",ry(d.n)+ry.bandwidth()/2+4)
+      .attr("fill",d.cls).attr("font-size",12).attr("font-family","var(--sans)")
+      .text(d.v.toFixed(1)+"M · "+d.side);
+    g.on("mousemove",ev=>showTip(tt3,wrap3,ev,
+       `<div class="yr">${d.role.toUpperCase()} · ${d.v}M ACCESS LINES (1984)</div>
+        <div class="nm" style="color:${d.col}">${d.n}</div>
+        <div class="pw">${d.fate}</div>`))
+     .on("mouseleave",()=>{tt3.style.display="none";});
+  });
+})();
+
+/* ================= EVENTS ================= */
+const evWrap=document.getElementById("events");
+EVENTS.forEach(e=>{
+  const div=document.createElement("button");
+  div.type="button";
+  div.dataset.year=String(e.yr);
+  div.className="ev"+(e.fall?" fall":"");
+  div.innerHTML=`<div class="yr">${e.label}</div><div class="nm">${e.name}</div>${e.txt}`;
+  div.onclick=()=>activateEvent(e,div);
+  evWrap.appendChild(div);
+});
+
+/* ================= FATES TABLE ================= */
+const KIND_LBL={destroyed:"Destroyed",submitted:"Absorbed",survived:"Still connected",victor:"Victor"};
+const tbl=document.getElementById("fates");
+tbl.innerHTML=`<tr><th>Carrier</th><th>Peak</th><th>Folded</th><th>How it ended</th><th>Taken / absorbed by</th><th>Outcome</th></tr>`+
+ FATES.map(f=>`<tr>
+   <td><span class="sw" style="background:${f.col}"></span>${f.c}</td>
+   <td>${f.peak}</td>
+   <td class="num">${f.yr}</td>
+   <td>${f.how}</td>
+   <td>${f.by}</td>
+   <td class="k-${f.kind}">${KIND_LBL[f.kind]}</td></tr>`).join("");
+
+/* ================= CARRIER CARDS ================= */
+const clWrap=document.getElementById("clans");
+CLANS.filter(c=>c.id!=="other").forEach(c=>{
+  const div=document.createElement("div");
+  div.className="clan"; div.style.setProperty("--c",c.color);
+  const fk=c.fate.kind==="fall"?"fall":(c.fate.kind==="sub"?"sub":"live");
+  div.innerHTML=`<div class="nm"><i>☎</i> ${c.name}</div>
+    <div class="meta"><b>Core:</b> ${c.region}<br><b>Peak:</b> ${c.peak}</div>
+    <div class="fate ${fk}">${c.fate.txt}</div>`;
+  clWrap.appendChild(div);
+});
+</script>
+<script src="/timeline-shell.js?v=8"></script>
+</body>
+</html>

@@ -303,6 +303,7 @@ async function handle(req, res) {
   if (pathname === '/wall-street-houses' || pathname === '/wall-street-houses/') return serveStatic(res, '/wall-street-houses.html');
   if (pathname === '/railroad-empires' || pathname === '/railroad-empires/') return serveStatic(res, '/railroad-empires.html');
   if (pathname === '/oil-wars' || pathname === '/oil-wars/') return serveStatic(res, '/oil-wars.html');
+  if (pathname === '/bell-wars' || pathname === '/bell-wars/') return serveStatic(res, '/bell-wars.html');
   if (/^\/(assets|images|data)\//.test(pathname) || ['/admin.js', '/healthcare-map.js', '/bi-pricing.js', '/data-agent-stack.js', '/analytics-token-tam.js', '/timeline-shell.js', '/timeline-shell.css'].includes(pathname)) return serveStatic(res, pathname);
   if (/^\/[a-z0-9-]+\/?$/.test(pathname)) return renderArticlePreview(res, req, pathname.replace(/^\/|\/$/g, ''));
   return send(res, 404, 'Not found');

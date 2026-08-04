@@ -39,6 +39,19 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /href="\/wall-street-houses"/);
   assert.match(homepage, /href="\/railroad-empires"/);
   assert.match(homepage, /href="\/oil-wars"/);
+  assert.match(homepage, /href="\/bell-wars"/);
+});
+
+test('serves the interactive Bell wars visualization', async () => {
+  const response = await fetch(`${base}/bell-wars`);
+  assert.equal(response.status, 200);
+  const page = await response.text();
+  assert.match(page, /THE BELL WARS/);
+  assert.match(page, /Chain of Succession/);
+  assert.match(page, /1984 — The Divestiture/);
+  assert.match(page, /EVENT_IMPACTS/);
+  assert.match(page, /data-event-detail="chart"/);
+  assert.match(page, /timeline-shell\.js/);
 });
 
 test('serves the researched railroad empires visualization', async () => {
