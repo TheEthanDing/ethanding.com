@@ -85,8 +85,9 @@ test('serves the shared one-page timeline interface', async () => {
   const script = await fetch(`${base}/timeline-shell.js`);
   assert.equal(script.status, 200);
   const scriptBody = await script.text();
-  assert.match(scriptBody, /Browse story chapters/);
-  assert.match(scriptBody, /timeline-chapter-map/);
+  assert.doesNotMatch(scriptBody, /Browse story chapters/);
+  assert.match(scriptBody, /timeline-story-pins/);
+  assert.match(scriptBody, /timeline-story-panel/);
   assert.match(scriptBody, /timeline-stage-instrumented/);
   assert.match(scriptBody, /click to pin/);
   const styles = await fetch(`${base}/timeline-shell.css`);

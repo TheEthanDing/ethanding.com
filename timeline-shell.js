@@ -68,11 +68,6 @@
 
   const actions = document.createElement('div');
   actions.className = 'timeline-actions';
-  const explore = document.createElement('button');
-  explore.type = 'button';
-  explore.className = 'timeline-action';
-  explore.textContent = 'Browse story chapters';
-  actions.appendChild(explore);
   const featuredIndex = sections.findIndex((section) => section.featured);
   let featuredAction = null;
   if (featuredIndex >= 0) {
@@ -80,9 +75,9 @@
     featuredAction.type = 'button';
     featuredAction.className = 'timeline-action timeline-action-primary';
     featuredAction.textContent = sections[featuredIndex].actionLabel || sections[featuredIndex].label;
-    actions.prepend(featuredAction);
+    actions.appendChild(featuredAction);
   }
-  header.appendChild(actions);
+  if (actions.childElementCount) header.appendChild(actions);
   topbar.appendChild(header);
 
   const stage = document.createElement('section');
@@ -146,62 +141,62 @@
   bottom.append(railHead, popover, events);
   app.append(topbar, stage, bottom);
 
-  const drawer = document.createElement('dialog');
-  drawer.className = 'timeline-drawer';
-  drawer.setAttribute('aria-label', 'Timeline story explorer');
-  drawer.innerHTML = '<div class="timeline-drawer-head"><div><div class="timeline-drawer-kicker">Interactive history</div><h2 class="timeline-drawer-title"></h2></div><button type="button" class="timeline-drawer-close" aria-label="Close story explorer">×</button></div><div class="timeline-drawer-tabs" role="tablist" aria-label="Story sections"></div><div class="timeline-drawer-content" role="tabpanel"></div>';
+  const storyPins = document.createElement('nav');
+  storyPins.className = 'timeline-story-pins';
+  storyPins.setAttribute('aria-label', 'Stories attached to this timeline');
+  storyPins.innerHTML = '<div class="timeline-story-pins-label">Story layer</div>';
 
-  const drawerTitle = drawer.querySelector('.timeline-drawer-title');
-  const drawerTabs = drawer.querySelector('.timeline-drawer-tabs');
-  const drawerContent = drawer.querySelector('.timeline-drawer-content');
-  const tabButtons = [];
+  const storyPanel = document.createElement('aside');
+  storyPanel.className = 'timeline-story-panel';
+  storyPanel.hidden = true;
+  storyPanel.setAttribute('aria-live', 'polite');
+  storyPanel.innerHTML = '<div class="timeline-story-panel-head"><div><div class="timeline-story-panel-kicker">Attached to the map</div><h2></h2></div><button type="button" class="timeline-story-panel-close" aria-label="Close story">×</button></div><div class="timeline-story-content"></div>';
+  const storyTitle = storyPanel.querySelector('h2');
+  const storyKicker = storyPanel.querySelector('.timeline-story-panel-kicker');
+  const storyContent = storyPanel.querySelector('.timeline-story-content');
+  const storyButtons = [];
+
+  const panelType = (section) => {
+    if (section.featured) return 'spotlight';
+    if (['Guide', 'Sources', 'Notes'].includes(section.label)) return 'dossier';
+    return 'chapter';
+  };
 
   const showSection = (index) => {
     const section = sections[index];
     if (!section) return;
-    drawerTitle.textContent = index === 0 ? 'Choose a chapter' : section.title;
-    drawerContent.replaceChildren(...section.nodes);
-    if (index === 0 && sections.length > 1) {
-      const map = document.createElement('div');
-      map.className = 'timeline-chapter-map';
-      map.innerHTML = '<div class="timeline-chapter-map-title">Follow the argument, not just the dates</div><p>Each chapter isolates one change in who held the power. Start anywhere.</p>';
-      const grid = document.createElement('div');
-      grid.className = 'timeline-chapter-grid';
-      let chapterNumber = 0;
-      sections.forEach((candidate, candidateIndex) => {
-        if (candidateIndex === 0 || candidate.label === 'Sources' || candidate.label === 'Notes') return;
-        chapterNumber += 1;
-        const chapter = document.createElement('button');
-        chapter.type = 'button';
-        chapter.className = 'timeline-chapter';
-        chapter.innerHTML = `<span class="timeline-chapter-number">${String(chapterNumber).padStart(2, '0')}</span><strong>${candidate.title}</strong><span class="timeline-chapter-open">Open chapter →</span>`;
-        chapter.addEventListener('click', () => showSection(candidateIndex));
-        grid.appendChild(chapter);
-      });
-      map.appendChild(grid);
-      drawerContent.appendChild(map);
-    }
-    tabButtons.forEach((button, buttonIndex) => button.setAttribute('aria-selected', buttonIndex === index ? 'true' : 'false'));
-    drawerContent.scrollTop = 0;
-    if (!drawer.open) drawer.showModal();
+    const type = panelType(section);
+    storyPanel.dataset.type = type;
+    storyKicker.textContent = type === 'spotlight' ? 'Pivotal moment' : type === 'dossier' ? 'Map dossier' : 'Story attached to the timeline';
+    storyTitle.textContent = section.title;
+    storyContent.replaceChildren(...section.nodes);
+    storyContent.scrollTop = 0;
+    storyButtons.forEach((button, buttonIndex) => {
+      const active = buttonIndex === index;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    storyPanel.hidden = false;
   };
 
   sections.forEach((section, index) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'timeline-drawer-tab';
-    button.setAttribute('role', 'tab');
-    button.setAttribute('aria-selected', 'false');
-    button.textContent = section.label;
+    button.className = `timeline-story-pin timeline-story-pin-${panelType(section)}`;
+    button.setAttribute('aria-pressed', 'false');
+    button.innerHTML = `<span class="timeline-story-pin-index">${String(index + 1).padStart(2, '0')}</span><span>${section.label}</span>`;
+    button.title = section.title;
     button.addEventListener('click', () => showSection(index));
-    tabButtons.push(button);
-    drawerTabs.appendChild(button);
+    storyButtons.push(button);
+    storyPins.appendChild(button);
   });
 
-  explore.addEventListener('click', () => showSection(0));
+  storyPanel.querySelector('.timeline-story-panel-close').addEventListener('click', () => {
+    storyPanel.hidden = true;
+    storyButtons.forEach((button) => { button.classList.remove('active'); button.setAttribute('aria-pressed', 'false'); });
+  });
   featuredAction?.addEventListener('click', () => showSection(featuredIndex));
-  drawer.querySelector('.timeline-drawer-close').addEventListener('click', () => drawer.close());
-  drawer.addEventListener('click', (event) => { if (event.target === drawer) drawer.close(); });
+  stage.append(storyPins, storyPanel);
 
-  document.body.replaceChildren(app, drawer);
+  document.body.replaceChildren(app);
 })();
