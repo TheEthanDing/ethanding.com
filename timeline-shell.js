@@ -4,6 +4,7 @@
   const events = document.getElementById('events');
   const header = document.querySelector('body > header');
   const nav = document.querySelector('body > .site-nav');
+  const instrument = document.querySelector('body > .signal-console');
 
   if (!chartWrap || !chart || !events || !header || document.body.classList.contains('timeline-shell-mode')) return;
   document.body.classList.add('timeline-shell-mode');
@@ -87,6 +88,10 @@
   const stage = document.createElement('section');
   stage.className = 'timeline-stage';
   stage.setAttribute('aria-label', 'Timeline chart');
+  if (instrument) {
+    stage.classList.add('timeline-stage-instrumented');
+    stage.appendChild(instrument);
+  }
   stage.appendChild(chartWrap);
 
   Array.from(chart.querySelectorAll('g')).forEach((group) => {

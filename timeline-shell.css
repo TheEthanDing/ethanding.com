@@ -110,6 +110,16 @@ body.timeline-shell-mode {
   overflow: hidden;
 }
 
+.timeline-stage-instrumented {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+}
+
+.timeline-stage-instrumented > .signal-console {
+  margin: 0;
+}
+
 .timeline-stage #chart-wrap {
   display: flex;
   align-items: center;

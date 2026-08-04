@@ -50,6 +50,8 @@ test('serves the interactive Bell wars visualization', async () => {
   assert.match(page, /Chain of Succession/);
   assert.match(page, /1984 — The Divestiture/);
   assert.match(page, /EVENT_IMPACTS/);
+  assert.match(page, /Bell network/);
+  assert.match(page, /pinArtifact/);
   assert.match(page, /data-event-detail="chart"/);
   assert.match(page, /timeline-shell\.js/);
 });
@@ -85,6 +87,7 @@ test('serves the shared one-page timeline interface', async () => {
   const scriptBody = await script.text();
   assert.match(scriptBody, /Browse story chapters/);
   assert.match(scriptBody, /timeline-chapter-map/);
+  assert.match(scriptBody, /timeline-stage-instrumented/);
   assert.match(scriptBody, /click to pin/);
   const styles = await fetch(`${base}/timeline-shell.css`);
   assert.equal(styles.status, 200);
