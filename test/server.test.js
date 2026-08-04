@@ -61,6 +61,8 @@ test('serves the oil wars and makes the Baby Standards explicit', async () => {
   assert.match(page, /Sun Oil was independent/);
   assert.match(page, /Click any colored band/);
   assert.match(page, /company-selection/);
+  assert.match(page, /EVENT_IMPACTS/);
+  assert.match(page, /data-event-detail="chart"/);
   assert.match(page, /timeline-shell\.js/);
 });
 
@@ -68,7 +70,8 @@ test('serves the shared one-page timeline interface', async () => {
   const script = await fetch(`${base}/timeline-shell.js`);
   assert.equal(script.status, 200);
   const scriptBody = await script.text();
-  assert.match(scriptBody, /Explore the story/);
+  assert.match(scriptBody, /Browse story chapters/);
+  assert.match(scriptBody, /timeline-chapter-map/);
   assert.match(scriptBody, /click to pin/);
   const styles = await fetch(`${base}/timeline-shell.css`);
   assert.equal(styles.status, 200);

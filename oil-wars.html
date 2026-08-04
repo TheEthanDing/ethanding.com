@@ -84,11 +84,14 @@
   .company-selection{position:absolute;right:16px;top:58px;z-index:4;width:min(300px,calc(100% - 32px));padding:14px 42px 13px 15px;border:1px solid var(--gold);border-left:4px solid var(--selected-color,var(--gold));background:rgba(21,18,16,.96);box-shadow:0 14px 36px rgba(0,0,0,.48);color:var(--paper-dim);font:12px/1.45 var(--serif)}
   .company-selection[hidden]{display:none}.company-selection .selection-kicker{color:var(--gold);font:600 10px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase}
   .company-selection h2{margin:5px 0 7px;color:var(--paper);font-size:19px;line-height:1.1}.company-selection .selection-stat{color:var(--paper);font:600 13px/1.35 var(--sans)}
-  .company-selection .selection-meta{margin-top:6px}.company-selection .selection-hint{margin-top:8px;padding-top:7px;border-top:1px solid var(--hair);color:var(--gold-dim);font:600 9px/1.3 var(--sans);letter-spacing:.09em;text-transform:uppercase}
+  .company-selection .selection-copy{margin-top:7px;color:var(--paper-dim)}.company-selection .selection-meta{margin-top:6px}.company-selection .selection-hint{margin-top:8px;padding-top:7px;border-top:1px solid var(--hair);color:var(--gold-dim);font:600 9px/1.3 var(--sans);letter-spacing:.09em;text-transform:uppercase}
+  .impact-label{margin-top:9px;color:var(--gold);font:600 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase}.impact-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+  .impact-chip{padding:5px 7px;border:1px solid var(--chip-color,var(--gold-dim));background:var(--ink-3);color:var(--paper);font:600 9px/1.15 var(--sans);cursor:pointer}.impact-chip:hover,.impact-chip:focus-visible{background:color-mix(in srgb,var(--chip-color) 18%,var(--ink-3));outline:1px solid var(--chip-color)}
   .selection-close{position:absolute;right:8px;top:8px;width:27px;height:27px;border:1px solid var(--hair);background:var(--ink-2);color:var(--paper);font:16px/1 var(--sans);cursor:pointer}
   #chart .oil-band{transition:fill-opacity .18s,stroke-width .18s,filter .18s;outline:none}
   #chart .oil-band:hover,#chart .oil-band:focus-visible{filter:brightness(1.14)}
   #chart .oil-band:focus-visible{stroke:var(--gold);stroke-width:3px}
+  #chart .chart-event{cursor:pointer;outline:none}#chart .chart-event .event-core{transition:r .14s,fill .14s,stroke-width .14s}#chart .chart-event:hover .event-core,#chart .chart-event:focus-visible .event-core{r:6px;stroke:var(--paper);stroke-width:2px}#chart .chart-event.active .event-core{r:7px;stroke:var(--paper);stroke-width:2.5px}
   footer{margin-top:18px;color:#726852;font-size:11.5px;line-height:1.55;}
   @media (max-width:760px){
     .chart-prompt{left:12px;right:auto;bottom:10px}
@@ -96,9 +99,9 @@
   }
   @media (prefers-reduced-motion:reduce){.ev{transition:none}.ev:hover{transform:none}}
 </style>
-<link rel="stylesheet" href="/timeline-shell.css?v=5">
+<link rel="stylesheet" href="/timeline-shell.css?v=7">
 </head>
-<body data-featured-event-year="1911">
+<body data-featured-event-year="1911" data-event-detail="chart">
 
 <nav class="site-nav" aria-label="Site"><a href="/">← Ethan Ding</a><a href="/#writing">Writing</a></nav>
 
@@ -109,13 +112,13 @@
       A rule of thumb at today's output: <b>1 share point ≈ 1 million barrels a day</b>.
       The stack always totals 100%: when a house falls, its fields keep pumping for someone else.
       Note the shape no other industry has: this chronicle <b>begins</b> with a completed shogunate — and watches the state shatter it,
-      the children remarry, and the land itself pass to a new species of lord. Hover any band <i>or any fall seal</i>; click a timeline event to mark its year.</p>
+      the children remarry, and the land itself pass to a new species of lord. Click a band to pin one house, or click an event on the chart to light up every house it changed.</p>
   </div>
   <div class="legend-box">
     <div class="t">Reading the chart</div>
     <div class="legend-row"><span class="seal-dot"></span>House destroyed — by court, coup, or revolution</div>
     <div class="legend-row"><span class="sub-dot"></span>Merged / bought out — the fields change heralds</div>
-    <div class="legend-row"><span class="gold-tick"></span>Key event marker (click cards below)</div>
+    <div class="legend-row"><span class="gold-tick"></span>Clickable event — highlights every affected house</div>
     <div class="legend-row" style="margin-top:8px">Band height = % of world crude production</div>
   </div>
 </header>
@@ -359,6 +362,28 @@ const EVENTS = [
   txt:"Aramco lists at the largest IPO in history — the most profitable company that has ever existed. Then the majors buy the frontier: Exxon takes Pioneer ($60B), Chevron takes Hess. The Permian consolidates, as every frontier before it did."},
 ];
 
+const EVENT_IMPACTS = {
+  1870:["standard"],
+  1882:["standard"],
+  1901:["standard","russia","gulf","texaco","other"],
+  1911:["standard","exxon","mobil","chevron","amoco","sohio","arco","conocophillips"],
+  1914:["bp"],
+  1917:["russia","shell"],
+  1928:["exxon","shell","bp","gulf","texaco","mobil","chevron"],
+  1938:["chevron","nocs","other"],
+  1951:["bp","nocs"],
+  1960:["aramco","nocs","exxon","shell","bp","gulf","texaco","mobil","chevron"],
+  1971:["aramco","nocs","exxon","shell","bp","gulf","texaco","mobil","chevron"],
+  1973:["aramco","nocs","exxon","shell","bp","gulf","texaco","mobil","chevron"],
+  1979:["aramco","nocs","exxon","shell","bp","gulf","texaco","mobil","chevron"],
+  1985:["gulf","chevron","sohio","bp","texaco","other"],
+  1986:["aramco","nocs","russia","other"],
+  1999:["exxon","mobil","bp","amoco","arco","chevron","texaco","conocophillips","total"],
+  2012:["shale","aramco","nocs","other"],
+  2023:["aramco","exxon","chevron","shale","other"],
+};
+EVENTS.forEach(event=>{event.impacts=EVENT_IMPACTS[event.yr]||[];});
+
 const FATES = [
  {c:"Standard Oil", col:"#8d7ba8", peak:"~90% of U.S. refining; the price itself", yr:"1911", how:"The only great house in this series destroyed at its peak, by decree: Tarbell's pen, Roosevelt's suit, the Supreme Court's order — 34 fragments. The fragments' combined value doubled within a year.", by:"The United States (Sherman Act)", kind:"destroyed"},
  {c:"Nobel Brothers (Branobel)", col:"#9e4444", peak:"Baku's masters; half the world's oil in their era", yr:"1920", how:"The dynamite family's other empire — pioneers of the tanker and the pipeline — nationalized by the Bolsheviks; the family fled with almost nothing.", by:"The Russian Revolution", kind:"destroyed"},
@@ -553,24 +578,30 @@ const selectionCard=document.createElement("aside");
 selectionCard.className="company-selection";
 selectionCard.hidden=true;
 selectionCard.setAttribute("aria-live","polite");
-selectionCard.innerHTML='<button type="button" class="selection-close" aria-label="Clear selected company">×</button><div class="selection-kicker"></div><h2></h2><div class="selection-stat"></div><div class="selection-meta"></div><div class="selection-hint">Click another band to compare · Esc clears</div>';
+selectionCard.innerHTML='<button type="button" class="selection-close" aria-label="Clear selected item">×</button><div class="selection-kicker"></div><h2></h2><div class="selection-stat"></div><div class="selection-copy"></div><div class="selection-meta"></div><div class="impact-label" hidden>Affected houses · click one to inspect</div><div class="impact-chips"></div><div class="selection-hint">Click another mark to compare · Esc clears</div>';
 wrap1.append(chartPrompt,selectionCard);
 
 let selectedKey=null;
+let impactedKeys=new Set();
+let eventDotGroups=null;
 function productionLabel(v,yr){
   const mbd=(v/100*mktAt(yr));
   return mbd>=1 ? mbd.toFixed(1)+" million barrels/day" : (mbd*1000).toFixed(0)+" thousand barrels/day";
 }
 function restoreBandState(){
   paths
-    .attr("fill-opacity",d=>!selectedKey||d.key===selectedKey?1:.16)
-    .attr("stroke",d=>d.key===selectedKey?"#f0d384":"#151210")
-    .attr("stroke-width",d=>d.key===selectedKey?2.8:.7);
+    .attr("fill-opacity",d=>selectedKey?(d.key===selectedKey?1:.16):(impactedKeys.size?(impactedKeys.has(d.key)?1:.12):.92))
+    .attr("stroke",d=>(d.key===selectedKey||impactedKeys.has(d.key))?"#f0d384":"#151210")
+    .attr("stroke-width",d=>d.key===selectedKey?2.8:(impactedKeys.has(d.key)?2.2:.7));
 }
 function clearSelection(){
   selectedKey=null;
+  impactedKeys.clear();
   selectionCard.hidden=true;
   chartPrompt.style.opacity="1";
+  marker.style("display","none");
+  eventDotGroups?.classed("active",false);
+  document.querySelectorAll(".ev").forEach(node=>{node.classList.remove("active");node.setAttribute("aria-pressed","false");});
   restoreBandState();
 }
 function selectBand(d,yr){
@@ -578,11 +609,16 @@ function selectBand(d,yr){
   tt1.style.display="none";
   cross.style("display","none");
   selectedKey=d.key;
+  impactedKeys.clear();
+  eventDotGroups?.classed("active",false);
   selectionCard.style.setProperty("--selected-color",c.color);
   selectionCard.querySelector(".selection-kicker").textContent=`${yr} · pinned on the chart`;
   selectionCard.querySelector("h2").textContent=c.name;
   selectionCard.querySelector(".selection-stat").textContent=`${v.toFixed(1)}% of world production · ${productionLabel(v,yr)}`;
+  selectionCard.querySelector(".selection-copy").textContent="";
   selectionCard.querySelector(".selection-meta").innerHTML=`${c.region}<br><b style="color:var(--paper)">Peak:</b> ${c.peak}`;
+  selectionCard.querySelector(".impact-label").hidden=true;
+  selectionCard.querySelector(".impact-chips").replaceChildren();
   selectionCard.hidden=false;
   chartPrompt.style.opacity="0";
   restoreBandState();
@@ -634,6 +670,66 @@ const markerLabel = marker.append("text").attr("y",M.t+8).attr("fill","#c9a24b")
 /* hover crosshair + band tooltip */
 const cross = svg.append("line").attr("y1",M.t).attr("y2",H-M.b)
   .attr("stroke","rgba(230,221,200,.35)").attr("stroke-width",1).style("display","none").attr("pointer-events","none");
+
+function activateEvent(event,sourceButton){
+  tt1.style.display="none";
+  cross.style("display","none");
+  selectedKey=null;
+  impactedKeys=new Set(event.impacts);
+  document.querySelectorAll(".ev").forEach(node=>{
+    const active=node===sourceButton||node.dataset.year===String(event.yr);
+    node.classList.toggle("active",active);
+    node.setAttribute("aria-pressed",active?"true":"false");
+  });
+  marker.style("display",null);
+  marker.select("line").attr("x1",x(event.yr)).attr("x2",x(event.yr));
+  markerLabel.attr("text-anchor",event.yr>2000?"end":"start")
+    .attr("x",event.yr>2000?x(event.yr)-6:x(event.yr)+6).text(event.name.toUpperCase()+" · "+event.label);
+  eventDotGroups?.classed("active",dot=>dot===event);
+
+  selectionCard.style.setProperty("--selected-color",event.fall?"#b3372a":"#c9a24b");
+  selectionCard.querySelector(".selection-kicker").textContent=`${event.label} · event pinned`;
+  selectionCard.querySelector("h2").textContent=event.name;
+  selectionCard.querySelector(".selection-stat").textContent=`${event.impacts.length} ${event.impacts.length===1?"house":"houses"} highlighted on the chart`;
+  selectionCard.querySelector(".selection-copy").textContent=event.txt;
+  selectionCard.querySelector(".selection-meta").textContent="";
+  const impactLabel=selectionCard.querySelector(".impact-label");
+  const impactChips=selectionCard.querySelector(".impact-chips");
+  impactLabel.hidden=event.impacts.length===0;
+  impactChips.replaceChildren();
+  event.impacts.forEach(id=>{
+    const c=byId[id], band=series.find(item=>item.key===id);
+    if(!c||!band)return;
+    const chip=document.createElement("button");
+    chip.type="button";
+    chip.className="impact-chip";
+    chip.style.setProperty("--chip-color",c.color);
+    chip.textContent=c.name.replace(/ \(.*\)/,"");
+    chip.addEventListener("click",()=>selectBand(band,Math.max(Y0,Math.min(Y1,event.yr))));
+    impactChips.appendChild(chip);
+  });
+  selectionCard.hidden=false;
+  chartPrompt.style.opacity="0";
+  restoreBandState();
+}
+
+const eventLaneY=H-M.b+5;
+svg.append("line").attr("x1",M.l).attr("x2",W-M.r).attr("y1",eventLaneY).attr("y2",eventLaneY)
+  .attr("stroke","rgba(201,162,75,.32)").attr("stroke-width",1).attr("pointer-events","none");
+eventDotGroups=svg.append("g").attr("aria-label","Clickable events on the timeline").selectAll("g").data(EVENTS).join("g")
+  .attr("class","chart-event").attr("transform",event=>`translate(${x(event.yr)},${eventLaneY})`)
+  .attr("role","button").attr("tabindex",0)
+  .attr("aria-label",event=>`${event.label}. ${event.name}. Highlights ${event.impacts.length} affected ${event.impacts.length===1?"house":"houses"}`);
+eventDotGroups.append("line").attr("y1",-9).attr("y2",0).attr("stroke",event=>event.fall?"#b3372a":"#c9a24b").attr("stroke-width",1);
+eventDotGroups.append("circle").attr("r",10).attr("fill","transparent");
+eventDotGroups.append("circle").attr("class","event-core").attr("r",3.6)
+  .attr("fill",event=>event.fall?"#b3372a":"#c9a24b").attr("stroke","#151210").attr("stroke-width",1.2);
+eventDotGroups
+  .on("click",(pointerEvent,event)=>activateEvent(event,document.querySelector(`.ev[data-year="${event.yr}"]`)))
+  .on("keydown",(keyEvent,event)=>{if(keyEvent.key==="Enter"||keyEvent.key===" "){keyEvent.preventDefault();activateEvent(event,document.querySelector(`.ev[data-year="${event.yr}"]`));}})
+  .on("mousemove",(pointerEvent,event)=>showTip(tt1,wrap1,pointerEvent,
+    `<div class="yr">${event.label} · EVENT</div><div class="nm">${event.name}</div><div class="pw">Highlights ${event.impacts.length} affected ${event.impacts.length===1?"house":"houses"}</div><div class="pw" style="margin-top:5px;color:#c9a24b">Click to pin this event</div>`))
+  .on("mouseleave",()=>{tt1.style.display="none";});
 
 function yearFromPointer(ev,d){
   if(ev?.clientX){
@@ -766,14 +862,7 @@ EVENTS.forEach(e=>{
   div.dataset.year=String(e.yr);
   div.className="ev"+(e.fall?" fall":"");
   div.innerHTML=`<div class="yr">${e.label}</div><div class="nm">${e.name}</div>${e.txt}`;
-  div.onclick=()=>{
-    document.querySelectorAll(".ev").forEach(n=>n.classList.remove("active"));
-    div.classList.add("active");
-    marker.style("display",null);
-    marker.select("line").attr("x1",x(e.yr)).attr("x2",x(e.yr));
-    markerLabel.attr("text-anchor",e.yr>2000?"end":"start")
-      .attr("x",e.yr>2000?x(e.yr)-6:x(e.yr)+6).text(e.name.toUpperCase()+" · "+e.label);
-  };
+  div.onclick=()=>activateEvent(e,div);
   evWrap.appendChild(div);
 });
 
@@ -801,6 +890,6 @@ CLANS.filter(c=>c.id!=="other").forEach(c=>{
   clWrap.appendChild(div);
 });
 </script>
-<script src="/timeline-shell.js?v=5"></script>
+<script src="/timeline-shell.js?v=7"></script>
 </body>
 </html>

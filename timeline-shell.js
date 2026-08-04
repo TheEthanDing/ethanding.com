@@ -70,7 +70,7 @@
   const explore = document.createElement('button');
   explore.type = 'button';
   explore.className = 'timeline-action';
-  explore.textContent = 'Explore the story';
+  explore.textContent = 'Browse story chapters';
   actions.appendChild(explore);
   const featuredIndex = sections.findIndex((section) => section.featured);
   let featuredAction = null;
@@ -116,6 +116,7 @@
 
   events.classList.add('timeline-event-rail');
   const featuredYear = document.body.dataset.featuredEventYear;
+  const chartHandlesEventDetails = document.body.dataset.eventDetail === 'chart';
   Array.from(events.querySelectorAll('.ev')).forEach((eventButton) => {
     const year = eventButton.querySelector('.yr')?.textContent.trim() || '';
     const name = eventButton.querySelector('.nm')?.textContent.trim() || '';
@@ -129,6 +130,7 @@
     eventButton.setAttribute('aria-pressed', eventButton.classList.contains('active') ? 'true' : 'false');
     eventButton.addEventListener('click', () => {
       events.querySelectorAll('.ev').forEach((button) => button.setAttribute('aria-pressed', button === eventButton ? 'true' : 'false'));
+      if (chartHandlesEventDetails) return;
       popover.querySelector('.timeline-event-date').textContent = year;
       popover.querySelector('h2').textContent = name;
       popover.querySelector('p').textContent = copy;
@@ -142,7 +144,7 @@
   const drawer = document.createElement('dialog');
   drawer.className = 'timeline-drawer';
   drawer.setAttribute('aria-label', 'Timeline story explorer');
-  drawer.innerHTML = '<div class="timeline-drawer-head"><div><div class="timeline-drawer-kicker">Story explorer</div><h2 class="timeline-drawer-title"></h2></div><button type="button" class="timeline-drawer-close" aria-label="Close story explorer">×</button></div><div class="timeline-drawer-tabs" role="tablist" aria-label="Story sections"></div><div class="timeline-drawer-content" role="tabpanel"></div>';
+  drawer.innerHTML = '<div class="timeline-drawer-head"><div><div class="timeline-drawer-kicker">Interactive history</div><h2 class="timeline-drawer-title"></h2></div><button type="button" class="timeline-drawer-close" aria-label="Close story explorer">×</button></div><div class="timeline-drawer-tabs" role="tablist" aria-label="Story sections"></div><div class="timeline-drawer-content" role="tabpanel"></div>';
 
   const drawerTitle = drawer.querySelector('.timeline-drawer-title');
   const drawerTabs = drawer.querySelector('.timeline-drawer-tabs');
@@ -152,8 +154,28 @@
   const showSection = (index) => {
     const section = sections[index];
     if (!section) return;
-    drawerTitle.textContent = section.title;
+    drawerTitle.textContent = index === 0 ? 'Choose a chapter' : section.title;
     drawerContent.replaceChildren(...section.nodes);
+    if (index === 0 && sections.length > 1) {
+      const map = document.createElement('div');
+      map.className = 'timeline-chapter-map';
+      map.innerHTML = '<div class="timeline-chapter-map-title">Follow the argument, not just the dates</div><p>Each chapter isolates one change in who held the power. Start anywhere.</p>';
+      const grid = document.createElement('div');
+      grid.className = 'timeline-chapter-grid';
+      let chapterNumber = 0;
+      sections.forEach((candidate, candidateIndex) => {
+        if (candidateIndex === 0 || candidate.label === 'Sources' || candidate.label === 'Notes') return;
+        chapterNumber += 1;
+        const chapter = document.createElement('button');
+        chapter.type = 'button';
+        chapter.className = 'timeline-chapter';
+        chapter.innerHTML = `<span class="timeline-chapter-number">${String(chapterNumber).padStart(2, '0')}</span><strong>${candidate.title}</strong><span class="timeline-chapter-open">Open chapter →</span>`;
+        chapter.addEventListener('click', () => showSection(candidateIndex));
+        grid.appendChild(chapter);
+      });
+      map.appendChild(grid);
+      drawerContent.appendChild(map);
+    }
     tabButtons.forEach((button, buttonIndex) => button.setAttribute('aria-selected', buttonIndex === index ? 'true' : 'false'));
     drawerContent.scrollTop = 0;
     if (!drawer.open) drawer.showModal();
