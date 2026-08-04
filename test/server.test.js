@@ -59,13 +59,17 @@ test('serves the oil wars and makes the Baby Standards explicit', async () => {
   assert.match(page, /34-way Breakup/);
   assert.match(page, /Standard Oil of New Jersey/);
   assert.match(page, /Sun Oil was independent/);
+  assert.match(page, /Click any colored band/);
+  assert.match(page, /company-selection/);
   assert.match(page, /timeline-shell\.js/);
 });
 
 test('serves the shared one-page timeline interface', async () => {
   const script = await fetch(`${base}/timeline-shell.js`);
   assert.equal(script.status, 200);
-  assert.match(await script.text(), /Explore the story/);
+  const scriptBody = await script.text();
+  assert.match(scriptBody, /Explore the story/);
+  assert.match(scriptBody, /click to pin/);
   const styles = await fetch(`${base}/timeline-shell.css`);
   assert.equal(styles.status, 200);
   assert.match(await styles.text(), /timeline-event-rail/);

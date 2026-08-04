@@ -79,10 +79,24 @@
   .breakup-line small{display:block;margin-top:5px;color:var(--paper-dim);font:12px/1.45 var(--serif)}
   .breakup-count{color:var(--seal);font-size:clamp(42px,8vw,86px);line-height:.9;font-weight:600;float:left;margin:3px 18px 8px 0}
   .table-scroll{overflow-x:auto} .sources a{color:var(--gold)}
+  .chart-prompt{position:absolute;right:14px;bottom:12px;z-index:3;padding:8px 11px;border:1px solid var(--gold-dim);background:rgba(21,18,16,.9);color:var(--paper-dim);font:600 10px/1.25 var(--sans);letter-spacing:.1em;text-transform:uppercase;pointer-events:none;transition:opacity .18s}
+  .chart-prompt b{color:var(--gold);font-weight:700}
+  .company-selection{position:absolute;right:16px;top:58px;z-index:4;width:min(300px,calc(100% - 32px));padding:14px 42px 13px 15px;border:1px solid var(--gold);border-left:4px solid var(--selected-color,var(--gold));background:rgba(21,18,16,.96);box-shadow:0 14px 36px rgba(0,0,0,.48);color:var(--paper-dim);font:12px/1.45 var(--serif)}
+  .company-selection[hidden]{display:none}.company-selection .selection-kicker{color:var(--gold);font:600 10px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase}
+  .company-selection h2{margin:5px 0 7px;color:var(--paper);font-size:19px;line-height:1.1}.company-selection .selection-stat{color:var(--paper);font:600 13px/1.35 var(--sans)}
+  .company-selection .selection-meta{margin-top:6px}.company-selection .selection-hint{margin-top:8px;padding-top:7px;border-top:1px solid var(--hair);color:var(--gold-dim);font:600 9px/1.3 var(--sans);letter-spacing:.09em;text-transform:uppercase}
+  .selection-close{position:absolute;right:8px;top:8px;width:27px;height:27px;border:1px solid var(--hair);background:var(--ink-2);color:var(--paper);font:16px/1 var(--sans);cursor:pointer}
+  #chart .oil-band{transition:fill-opacity .18s,stroke-width .18s,filter .18s;outline:none}
+  #chart .oil-band:hover,#chart .oil-band:focus-visible{filter:brightness(1.14)}
+  #chart .oil-band:focus-visible{stroke:var(--gold);stroke-width:3px}
   footer{margin-top:18px;color:#726852;font-size:11.5px;line-height:1.55;}
+  @media (max-width:760px){
+    .chart-prompt{left:12px;right:auto;bottom:10px}
+    .company-selection{position:fixed;left:10px;right:10px;top:auto;bottom:118px;width:auto;max-height:230px;overflow:auto;z-index:12}
+  }
   @media (prefers-reduced-motion:reduce){.ev{transition:none}.ev:hover{transform:none}}
 </style>
-<link rel="stylesheet" href="/timeline-shell.css?v=3">
+<link rel="stylesheet" href="/timeline-shell.css?v=5">
 </head>
 <body data-featured-event-year="1911">
 
@@ -487,7 +501,11 @@ svg.append("rect")
 /* bands */
 const paths = svg.append("g").selectAll("path").data(series).join("path")
   .attr("d",area).attr("fill",d=>byId[d.key].color).attr("fill-opacity",.92)
-  .attr("stroke","#151210").attr("stroke-width",.7).style("cursor","crosshair");
+  .attr("class","oil-band")
+  .attr("data-house",d=>d.key)
+  .attr("role","button").attr("tabindex",0)
+  .attr("aria-label",d=>`Inspect ${byId[d.key].name} on the timeline`)
+  .attr("stroke","#151210").attr("stroke-width",.7).style("cursor","pointer");
 
 /* in-band labels at widest point */
 series.forEach(s=>{
@@ -528,6 +546,49 @@ breakupMark.append("text")
 /* fall / merger seals */
 const tt1 = document.getElementById("tt1");
 const wrap1 = document.getElementById("chart-wrap");
+const chartPrompt=document.createElement("div");
+chartPrompt.className="chart-prompt";
+chartPrompt.innerHTML="<b>Click any colored band</b> · pin its story";
+const selectionCard=document.createElement("aside");
+selectionCard.className="company-selection";
+selectionCard.hidden=true;
+selectionCard.setAttribute("aria-live","polite");
+selectionCard.innerHTML='<button type="button" class="selection-close" aria-label="Clear selected company">×</button><div class="selection-kicker"></div><h2></h2><div class="selection-stat"></div><div class="selection-meta"></div><div class="selection-hint">Click another band to compare · Esc clears</div>';
+wrap1.append(chartPrompt,selectionCard);
+
+let selectedKey=null;
+function productionLabel(v,yr){
+  const mbd=(v/100*mktAt(yr));
+  return mbd>=1 ? mbd.toFixed(1)+" million barrels/day" : (mbd*1000).toFixed(0)+" thousand barrels/day";
+}
+function restoreBandState(){
+  paths
+    .attr("fill-opacity",d=>!selectedKey||d.key===selectedKey?1:.16)
+    .attr("stroke",d=>d.key===selectedKey?"#f0d384":"#151210")
+    .attr("stroke-width",d=>d.key===selectedKey?2.8:.7);
+}
+function clearSelection(){
+  selectedKey=null;
+  selectionCard.hidden=true;
+  chartPrompt.style.opacity="1";
+  restoreBandState();
+}
+function selectBand(d,yr){
+  const c=byId[d.key], row=rows[yr-Y0], v=row[d.key];
+  tt1.style.display="none";
+  cross.style("display","none");
+  selectedKey=d.key;
+  selectionCard.style.setProperty("--selected-color",c.color);
+  selectionCard.querySelector(".selection-kicker").textContent=`${yr} · pinned on the chart`;
+  selectionCard.querySelector("h2").textContent=c.name;
+  selectionCard.querySelector(".selection-stat").textContent=`${v.toFixed(1)}% of world production · ${productionLabel(v,yr)}`;
+  selectionCard.querySelector(".selection-meta").innerHTML=`${c.region}<br><b style="color:var(--paper)">Peak:</b> ${c.peak}`;
+  selectionCard.hidden=false;
+  chartPrompt.style.opacity="0";
+  restoreBandState();
+}
+selectionCard.querySelector(".selection-close").addEventListener("click",clearSelection);
+document.addEventListener("keydown",ev=>{if(ev.key==="Escape"&&!selectionCard.hidden)clearSelection();});
 function showTip(tt, wrap, ev, html){
   tt.style.display="block"; tt.innerHTML=html;
   const r=wrap.getBoundingClientRect();
@@ -545,7 +606,8 @@ CLANS.filter(c=>c.fate.yr).forEach(c=>{
   const mid=(s[j][0]+s[j][1])/2;
   const isSub = c.fate.kind==="sub";
   const stagger = yr>=1980 ? -(10 + (sealIdx++ % 3)*12) : -10;
-  const g=svg.append("g").style("cursor","help");
+  const g=svg.append("g").style("cursor","pointer").attr("role","button").attr("tabindex",0)
+    .attr("aria-label",`Inspect ${c.name} at its ${isSub?"merger":"fall"} in ${c.fate.yr}`);
   g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",12).attr("fill","transparent");
   g.append("circle").attr("cx",x(yr)).attr("cy",yS(mid)).attr("r",5.5)
     .attr("fill",isSub?"transparent":"#b3372a").attr("stroke",isSub?"#c9a24b":"#151210").attr("stroke-width",isSub?2:1.5);
@@ -553,7 +615,9 @@ CLANS.filter(c=>c.fate.yr).forEach(c=>{
     .attr("text-anchor", yr>2010?"end":"middle")
     .attr("fill",isSub?"#d9c27f":"#e8b0a6").attr("font-size",10.5).attr("letter-spacing","1")
     .text(c.name.toUpperCase().replace(/ \(.*\)/,"")+" · "+c.fate.yr);
-  g.on("mousemove",ev=>{
+  const chooseFate=()=>selectBand(s,yr);
+  g.on("click",chooseFate).on("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();chooseFate();}})
+   .on("mousemove",ev=>{
      showTip(tt1,wrap1,ev,
       `<div class="yr">${c.fate.yr} · ${isSub?"MERGED / BOUGHT OUT":"HOUSE FALLS"}</div>
        <div class="nm" style="color:${c.color}">${c.name}</div>
@@ -571,23 +635,36 @@ const markerLabel = marker.append("text").attr("y",M.t+8).attr("fill","#c9a24b")
 const cross = svg.append("line").attr("y1",M.t).attr("y2",H-M.b)
   .attr("stroke","rgba(230,221,200,.35)").attr("stroke-width",1).style("display","none").attr("pointer-events","none");
 
+function yearFromPointer(ev,d){
+  if(ev?.clientX){
+    const [mx]=d3.pointer(ev,svg.node());
+    return Math.max(Y0,Math.min(Y1,Math.round(x.invert(mx))));
+  }
+  let best={width:-1,year:Y0};
+  d.forEach(point=>{const width=point[1]-point[0];if(width>best.width)best={width,year:point.data.year};});
+  return best.year;
+}
+
 paths.on("mousemove",function(ev,d){
-    paths.attr("fill-opacity",s=>s.key===d.key?1:.35);
+    paths.attr("fill-opacity",s=>s.key===d.key?1:((selectedKey && s.key===selectedKey) ? 0.68 : 0.2));
     const [mx]=d3.pointer(ev,svg.node());
     const yr=Math.max(Y0,Math.min(Y1,Math.round(x.invert(mx))));
     cross.style("display",null).attr("x1",x(yr)).attr("x2",x(yr));
     const row=rows[yr-Y0], c=byId[d.key], v=row[d.key];
-    const mbd=(v/100*mktAt(yr));
-    const mbdTxt = mbd>=1 ? mbd.toFixed(1)+" million barrels/day" : (mbd*1000).toFixed(0)+" thousand barrels/day";
+    const mbdTxt = productionLabel(v,yr);
     const suz = c.suzerain && yr>=c.suzerain.a && yr<=c.suzerain.b
       ? `<div class="pw" style="margin-top:5px;color:#d9c27f">※ ${c.suzerain.note}</div>` : "";
     showTip(tt1,wrap1,ev,
       `<div class="yr">${yr}</div><div class="nm" style="color:${c.color}">${c.name}</div>
        <div class="pw">≈ <b style="color:#e6ddc8">${v.toFixed(1)}%</b> of world production</div>
        <div class="pw">≈ ${mbdTxt} that year</div>
-       <div class="pw" style="margin-top:4px">${c.region}</div>${suz}`);
+       <div class="pw" style="margin-top:4px">${c.region}</div><div class="pw" style="margin-top:5px;color:#c9a24b">Click to pin this house</div>${suz}`);
   })
-  .on("mouseleave",()=>{paths.attr("fill-opacity",.92); cross.style("display","none"); tt1.style.display="none";});
+  .on("click",(ev,d)=>selectBand(d,yearFromPointer(ev,d)))
+  .on("keydown",(ev,d)=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();selectBand(d,yearFromPointer(null,d));}})
+  .on("focus",(ev,d)=>{paths.attr("fill-opacity",s=>s.key===d.key?1:.2);})
+  .on("blur",restoreBandState)
+  .on("mouseleave",()=>{restoreBandState(); cross.style("display","none"); tt1.style.display="none";});
 
 /* ================= SANKEY ================= */
 (function(){
@@ -724,6 +801,6 @@ CLANS.filter(c=>c.id!=="other").forEach(c=>{
   clWrap.appendChild(div);
 });
 </script>
-<script src="/timeline-shell.js?v=3"></script>
+<script src="/timeline-shell.js?v=5"></script>
 </body>
 </html>

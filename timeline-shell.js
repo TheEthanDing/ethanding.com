@@ -105,7 +105,7 @@
 
   const railHead = document.createElement('div');
   railHead.className = 'timeline-rail-head';
-  railHead.innerHTML = '<span>Events</span><span>Choose a moment to pin it on the chart</span>';
+  railHead.innerHTML = '<span>Events · click to pin</span><span>Choose a moment to highlight it on the chart</span>';
 
   const popover = document.createElement('aside');
   popover.className = 'timeline-event-popover';

@@ -90,6 +90,7 @@ body.timeline-shell-mode {
 .timeline-drawer-tab[aria-selected="true"] {
   border-color: var(--gold);
   color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 10%, var(--ink-2));
 }
 
 .timeline-action:focus-visible,
@@ -190,6 +191,28 @@ body.timeline-shell-mode {
   text-align: left;
   scroll-snap-align: start;
   transform: none !important;
+  cursor: pointer;
+  transition: border-color .14s ease, background .14s ease, color .14s ease;
+}
+
+.timeline-event-rail .ev::after {
+  content: "Pin year →";
+  display: block;
+  margin-top: 6px;
+  color: var(--gold-dim);
+  font: 600 8px/1 var(--sans);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.timeline-event-rail .ev:hover {
+  border-color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 7%, var(--ink-3));
+}
+
+.timeline-event-rail .ev:hover::after,
+.timeline-event-rail .ev[aria-pressed="true"]::after {
+  color: var(--gold);
 }
 
 .timeline-event-rail .ev .yr {
@@ -379,6 +402,20 @@ body.timeline-shell-mode {
   .timeline-topbar h1 {
     font-size: 14px;
     letter-spacing: .02em;
+  }
+
+  .timeline-topbar header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 9px;
+  }
+
+  .timeline-actions {
+    width: 100%;
+  }
+
+  .timeline-actions .timeline-action {
+    flex: 1;
   }
 
   .timeline-action {
