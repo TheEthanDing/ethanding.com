@@ -3,7 +3,7 @@
     "id": "3aca75de-abf4-4c29-a9e9-f038ad72b344",
     "title": "The Little Kingdom",
     "authors": [
-      "Michael M"
+      "Michael Moritz"
     ],
     "categories": [],
     "sagas": [],
@@ -18,7 +18,9 @@
   {
     "id": "6a1e31f3-2822-41c2-95b9-86df9d58c551",
     "title": "Dogfight: Apple and Google",
-    "authors": [],
+    "authors": [
+      "Fred V"
+    ],
     "categories": [],
     "sagas": [],
     "dateStarted": "",
@@ -27,7 +29,7 @@
     "rating": null,
     "notes": "",
     "owned": false,
-    "cover": ""
+    "cover": "/images/books/custom/1785993801267-dogfight-apple-and-google.jpg"
   },
   {
     "id": "99c65eb1-4dc2-4ba3-93b0-26be0cfb0e1e",
