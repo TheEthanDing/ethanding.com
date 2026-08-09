@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Docs Complexity Map</title>
+<script src="https://cdn.jsdelivr.net/npm/d3-quadtree@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-force@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/force-graph@1.43.4/dist/force-graph.min.js"></script>
+<style>
+  :root{
+    --bg:#0a0e14; --panel:#11161f; --panel2:#161d29; --line:#222c3a;
+    --txt:#e6edf3; --dim:#8b97a7; --accent:#4ea1ff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;overflow:hidden}
+  #graph{position:fixed;inset:0}
+  #top{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:flex-start;gap:14px;
+    padding:12px 18px;background:linear-gradient(180deg,rgba(10,14,20,.95),rgba(10,14,20,.0));pointer-events:none}
+  #brand{display:flex;flex-direction:column;gap:7px}
+  .tabs{display:flex;gap:6px;pointer-events:auto}
+  .tab{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);
+    color:var(--dim);font-size:13px;font-weight:600;padding:7px 13px;border-radius:9px;cursor:pointer;
+    transition:.15s}
+  .tab:hover{color:var(--txt);border-color:#33425a}
+  .tab.on{color:#05101f;background:var(--accent);border-color:var(--accent)}
+  .tab .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  #brand .sub{font-size:12px;color:var(--dim);padding-left:3px}
+  .stat{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    padding:6px 12px;display:flex;flex-direction:column;line-height:1.15}
+  .stat .n{font-size:15px;font-weight:700}
+  .stat .l{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+  #search{pointer-events:auto;margin-left:auto;background:var(--panel);border:1px solid var(--line);
+    border-radius:8px;color:var(--txt);padding:8px 12px;font-size:13px;width:220px;outline:none}
+  #search:focus{border-color:var(--accent)}
+  #legend{position:fixed;left:14px;bottom:14px;z-index:5;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px;max-height:52vh;overflow:auto;width:230px}
+  #legend h3{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim)}
+  .leg{display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 4px;border-radius:5px;cursor:pointer}
+  .leg:hover{background:var(--panel2)}
+  .leg .sw{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
+  .leg .nm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .leg .ct{color:var(--dim);font-size:11px}
+  .leg.off{opacity:.32}
+  #info{position:fixed;right:14px;top:74px;z-index:5;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:14px;width:300px;display:none}
+  #info .crumb{font-size:11px;color:var(--dim);margin-bottom:6px;word-break:break-all}
+  #info .ttl{font-size:15px;font-weight:650;margin-bottom:10px;line-height:1.3}
+  #info .row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-top:1px solid var(--line)}
+  #info .row .v{font-weight:600}
+  #info a{display:inline-block;margin-top:12px;background:var(--accent);color:#05101f;font-weight:650;
+    text-decoration:none;padding:8px 14px;border-radius:7px;font-size:13px}
+  #info .hint{font-size:11px;color:var(--dim);margin-top:10px}
+  #hint{position:fixed;right:14px;bottom:14px;z-index:5;font-size:11px;color:var(--dim);text-align:right;
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:20;
+    background:var(--bg);font-size:14px;color:var(--dim)}
+  .seg-toggle{pointer-events:auto;display:flex;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;height:36px}
+  .seg-toggle button{background:transparent;border:0;color:var(--dim);font-size:12px;padding:7px 11px;cursor:pointer}
+  .seg-toggle button.on{background:var(--accent);color:#05101f;font-weight:650}
+</style>
+</head>
+<body>
+<div id="loading">Loading docs map…</div>
+<div id="graph"></div>
+
+<div id="top">
+  <div id="brand">
+    <div class="tabs" id="tabs"></div>
+    <div class="sub">node size = page length · color = product domain · zoom for detail</div>
+  </div>
+  <div class="stat"><span class="n" id="s-pages">–</span><span class="l">pages</span></div>
+  <div class="stat"><span class="n" id="s-words">–</span><span class="l">total words</span></div>
+  <div class="stat"><span class="n" id="s-areas">–</span><span class="l">domains</span></div>
+  <div class="seg-toggle">
+    <button id="m-size" class="on">size by length</button>
+    <button id="m-flat">uniform</button>
+  </div>
+  <input id="search" placeholder="Search pages…" />
+</div>
+
+<div id="legend"><h3>Product domains</h3><div id="legend-body"></div></div>
+<div id="info"></div>
+<div id="hint">drag to pan · scroll to zoom · click node to open doc</div>
+
+<script>
+// ============================ DATASETS ============================
+const DATASETS={
+ palantir:{
+   label:"Palantir Foundry", root:"foundry", data:"data.json", accent:"#4ea1ff", dot:"#4ea1ff",
+   groups:{
+    "APIs & SDKs":["api","api-reference","ontology-sdk","ontology-sdk-react-applications","ontology-mcp","palantir-mcp","custom-endpoints","developer-console","palantir-extension-for-visual-studio-code","vs-code","dev-toolchain","developers","code-examples","custom-docs"],
+    "Pipelines & Code":["pipeline-builder","building-pipelines","optimizing-pipelines","maintaining-pipelines","pb-functions-expression","pb-functions-transform","transforms-python","transforms-python-spark","transforms-java","transforms-sql","transforms-r","transforms-container","transforms-common","code-repositories","code-workbook","code-workspaces","recipes","data-lineage","dynamic-scheduling","preparation","linter"],
+    "Data Integration":["data-connection","available-connectors","data-integration","analytics-connectivity","sap","hyperauto","iceberg","sql-warehousing","private-link","peer-manager","flow-capture","media-sets-advanced-formats","document-intelligence","dataset-preview"],
+    "Ontology & Objects":["ontology","ontologies","ontology-manager","object-link-types","object-views","object-explorer","object-monitors","object-edits","object-permissioning","object-indexing","object-backend","object-databases","interfaces","foundry-rules","action-types","logic"],
+    "Analytics & Viz":["quiver","contour","time-series","foundryts","map","geospatial","reports","analytics","insight","fusion"],
+    "AI & Models":["aip","aip-evals","aip-analyst","aip-observability","assist","autopilot","model-studio","model-integration","model-catalog","manage-models","integrate-models","evaluate-models","migrate-models","machinery","vertex","chatbot-studio","ai-fde","compute-modules","functions"],
+    "App Building":["workshop","slate","carbon","forms","notepad","custom-widgets","app-building","solution-designer","cross-app-interactivity","marketplace","consumer-mode","threads","automate"],
+    "Security & Governance":["administration","security","authentication","platform-security-management","platform-security-third-party","resource-management","sensitive-data-scanner","cipher","retention","data-lifetime","compass","global-branching","checkpoints","approvals","upgrade-assistant"],
+    "Monitoring & DevOps":["foundry-devops","devops","devops-release-management","architecture-center","platform-overview","monitoring-views","health-checks","observability","workflow-lineage"],
+    "Getting Started & Guides":["getting-started","getting-help","use-cases","use-case-examples","use-case-life-cycle","use-case-patterns","walkthroughs","guides-and-workflows","questions-answers","foundry-adoption","announcements","release-notes","search","pilot","email","microsoft-excel"],
+   },
+   palette:{
+    "APIs & SDKs":"#4ea1ff","Pipelines & Code":"#ff7a59","Data Integration":"#5ad19a",
+    "Ontology & Objects":"#c792ea","Analytics & Viz":"#ffd166","AI & Models":"#ef5da8",
+    "App Building":"#52d6e2","Security & Governance":"#a3e635","Monitoring & DevOps":"#f9a03f",
+    "Getting Started & Guides":"#9aa7ff","Other":"#7b8794"},
+ },
+ braintrust:{
+   label:"Braintrust", root:"braintrust", data:"braintrust.json", accent:"#f25d3b", dot:"#f25d3b",
+   groups:{
+    "API & SDK Reference":["api-reference","reference"],
+    "Evaluation":["evaluate","evaluation-quickstart"],
+    "Observability & Review":["observe","instrument","tracing-quickstart","annotate"],
+    "Integrations":["integrations"],
+    "Guides & Cookbook":["kb","cookbook","best-practices","workflow","loop"],
+    "Admin & Platform":["admin","deploy","security","plans-and-limits","changelog","data-plane-changelog"],
+   },
+   palette:{
+    "API & SDK Reference":"#4ea1ff","Evaluation":"#ef5da8","Observability & Review":"#5ad19a",
+    "Integrations":"#ffd166","Guides & Cookbook":"#c792ea","Admin & Platform":"#f9a03f","Other":"#7b8794"},
+ },
+};
+
+// ============================ STATE ============================
+const NODE_REL=4;
+let CUR,GROUPS,SEC2GROUP,GROUP_ORDER,PALETTE,ROOT;
+let NODES=[],LINKS=[],byId={},Graph,sizeMode=true,searchQuery="";
+const hiddenGroups=new Set();
+const groupOf=sec=> SEC2GROUP[sec]||"Other";
+const fmt=n=> n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(1)+"k":""+n;
+
+// Build hierarchy: root -> meta-group -> section -> ... -> pages
+function buildGraph(raw){
+  const nodes={},links=[];
+  function ensure(path){
+    if(nodes[path]) return nodes[path];
+    const segs=path.split("/");
+    const name=segs[segs.length-1]||ROOT;
+    const section=segs.length>=2?segs[1]:"";
+    const n={id:path,name,section,group:groupOf(section),words:0,page:false,
+             depth:segs.length-1,children:0,kind:"struct"};
+    nodes[path]=n;
+    if(segs.length>1){
+      let parent=segs.slice(0,-1).join("/");
+      if(segs.length===2){
+        const g=groupOf(section), mid="meta:"+g;
+        if(!nodes[mid]){
+          nodes[mid]={id:mid,name:g,section:"",group:g,words:0,page:false,depth:0,children:0,kind:"meta"};
+          links.push({source:ROOT,target:mid}); nodes[ROOT].children++;
+        }
+        parent=mid; n.kind="section";
+      }
+      ensure(parent).children++;
+      links.push({source:parent,target:path});
+    }
+    return n;
+  }
+  nodes[ROOT]={id:ROOT,name:CUR.label,section:"",group:"",words:0,page:false,depth:0,children:0,kind:"root"};
+  for(const r of raw){
+    let p=r.url.replace(/^https?:\/\/[^/]+\/docs\//,"").replace(/\/$/,"");
+    if(!p) continue;
+    if(p.split("/")[0]!==ROOT) p=ROOT+"/"+p;   // normalize so section = segs[1]
+    if(p===ROOT) continue;
+    const n=ensure(p);
+    n.page=true; if(n.kind==="struct") n.kind="page";
+    n.words=Math.max(0,r.words||0); n.chars=r.chars||0;
+    if(r.title) n.title=r.title.replace(/\s*[•|·|—]\s*(Palantir|Braintrust).*$/,"").trim();
+    n.url=r.url.replace("palantir.com","www.palantir.com").replace("www.www.","www.");
+  }
+  return {nodes:Object.values(nodes),links};
+}
+
+function groupStats(){
+  const m={};
+  for(const n of NODES){ if(!n.page) continue;
+    (m[n.group]=m[n.group]||{count:0,words:0}); m[n.group].count++; m[n.group].words+=n.words; }
+  return GROUP_ORDER.filter(g=>m[g]).map(g=>[g,m[g]]);
+}
+function nodeVal(n){
+  if(n.kind==="root") return 6;
+  if(n.kind==="meta") return 55;
+  if(!sizeMode) return n.page?5:(n.kind==="section"?14:3);
+  if(n.kind==="section") return Math.max(10,Math.min(40,n.children*0.9+6));
+  return n.page? Math.max(2,n.words/120) : Math.max(1.5,n.children*0.6);
+}
+const radiusOf=n=> Math.sqrt(Math.max(0.5,nodeVal(n)))*NODE_REL;
+function matchesQuery(n){
+  if(!searchQuery) return false;
+  return (n.title||n.name||"").toLowerCase().includes(searchQuery)||n.id.toLowerCase().includes(searchQuery);
+}
+function colorOf(n){
+  if(hiddenGroups.has(n.group)) return "rgba(120,130,145,.05)";
+  if(matchesQuery(n)) return "#fff200";
+  if(n.kind==="root") return "#cdd6e0";
+  return PALETTE[n.group]||"#7b8794";
+}
+function drawNode(n,ctx){
+  if(n.kind==="root") return;
+  const r=radiusOf(n);
+  ctx.beginPath(); ctx.arc(n.x,n.y,r,0,2*Math.PI);
+  ctx.fillStyle=colorOf(n); ctx.globalAlpha=hiddenGroups.has(n.group)?1:(n.kind==="meta"?.32:.92);
+  ctx.fill(); ctx.globalAlpha=1;
+  if(n.kind==="meta"){ ctx.lineWidth=1.2; ctx.strokeStyle=PALETTE[n.group]; ctx.stroke(); }
+}
+// labels with collision avoidance + hard cap => never a wall of text
+function drawLabels(ctx,scale){
+  const el=document.getElementById("graph"), W=el.clientWidth, H=el.clientHeight;
+  const cand=[];
+  for(const n of NODES){
+    if(n.kind==="root"||hiddenGroups.has(n.group)) continue;
+    const sr=radiusOf(n)*scale;
+    let tier; if(n.kind==="meta"||matchesQuery(n)) tier=3; else if(n.kind==="section") tier=2; else if(n.big) tier=1; else tier=0;
+    let want = tier>=3 || (tier===2 && (sr>2||scale>0.12)) || (tier===1 && (sr>3||scale>0.3)) || (tier===0 && sr>10);
+    if(!want) continue;
+    const sp=Graph.graph2ScreenCoords(n.x,n.y);
+    if(sp.x<-60||sp.x>W+60||sp.y<-40||sp.y>H+40) continue;
+    cand.push({n,tier,sr,sx:sp.x,sy:sp.y});
+  }
+  cand.sort((a,b)=> b.tier-a.tier || b.sr-a.sr);
+  const placed=[]; const MAX=80; let count=0;
+  ctx.textBaseline="middle"; ctx.textAlign="center";
+  for(const c of cand){
+    if(count>=MAX) break;
+    const n=c.n;
+    const fs = n.kind==="meta"?17 : c.tier===2?12.5 : c.tier===1?12 : 11;
+    const fGraph=fs/scale;
+    ctx.font=`${c.tier>=2?"600 ":""}${fGraph}px -apple-system,Segoe UI,sans-serif`;
+    const label = n.kind==="meta"? n.name : (n.title||n.name);
+    const wScreen=ctx.measureText(label).width*scale, hScreen=fs+2;
+    const cx=c.sx, cy=c.sy - c.sr - hScreen*0.7;
+    const rect={x:cx-wScreen/2-2,y:cy-hScreen/2,w:wScreen+4,h:hScreen};
+    if(rect.y<46) continue;
+    let hit=false;
+    for(const p of placed){ if(!(rect.x>p.x+p.w||rect.x+rect.w<p.x||rect.y>p.y+p.h||rect.y+rect.h<p.y)){hit=true;break;} }
+    if(hit) continue;
+    placed.push(rect); count++;
+    const ty = n.y - radiusOf(n) - (hScreen*0.7)/scale;
+    ctx.lineWidth=3.4/scale; ctx.strokeStyle="rgba(7,10,15,.92)"; ctx.strokeText(label,n.x,ty);
+    ctx.fillStyle = matchesQuery(n)?"#fff200" : n.kind==="meta"?"#ffffff" : c.tier>=2?"#e7eef5":"rgba(214,224,233,.92)";
+    ctx.fillText(label,n.x,ty);
+  }
+}
+function refresh(){ if(Graph) Graph.nodeCanvasObject(drawNode); }
+
+function render(){
+  const el=document.getElementById("graph");
+  if(Graph && Graph._destructor){ Graph._destructor(); }
+  el.innerHTML="";
+  const groups=GROUP_ORDER.filter(g=>NODES.some(n=>n.kind==="meta"&&n.group===g));
+  const anchor={}, R=420;
+  groups.forEach((g,i)=>{ const a=(i/groups.length)*2*Math.PI-Math.PI/2;
+    anchor[g]={x:Math.cos(a)*R,y:Math.sin(a)*R}; });
+  const ax=n=> (anchor[n.group]||{x:0}).x, ay=n=> (anchor[n.group]||{y:0}).y;
+
+  Graph=ForceGraph()(el)
+    .backgroundColor("#0a0e14")
+    .graphData({nodes:NODES,links:LINKS})
+    .nodeId("id").nodeVal(nodeVal).nodeRelSize(NODE_REL)
+    .nodeCanvasObject(drawNode)
+    .nodePointerAreaPaint((n,color,ctx)=>{ if(n.kind==="root")return;
+      const r=radiusOf(n); ctx.fillStyle=color; ctx.beginPath(); ctx.arc(n.x,n.y,r,0,2*Math.PI); ctx.fill(); })
+    .nodeLabel(n=>{
+      if(n.kind==="root") return "";
+      const t=n.kind==="meta"?n.name:(n.title||n.name);
+      const sub=n.kind==="meta"?`${n.children} sections`:n.page?`${fmt(n.words)} words`:n.kind==="section"?`${n.children} sub-pages`:"section";
+      return `<div style="font:12px sans-serif;color:#e6edf3"><b>${t}</b><br><span style="color:#8b97a7">${n.group||""} · ${sub}</span></div>`;
+    })
+    .linkColor(()=> "rgba(120,140,170,.10)").linkWidth(0.5)
+    .onRenderFramePost((ctx,scale)=> drawLabels(ctx,scale))
+    .warmupTicks(60).cooldownTicks(160)
+    .onNodeClick(showInfo)
+    .onBackgroundClick(()=>{document.getElementById("info").style.display="none";});
+
+  Graph.d3Force("charge").strength(n=> n.kind==="meta"?-260:n.kind==="section"?-90:-22);
+  Graph.d3Force("link").distance(l=> l.target.kind==="meta"?120:l.target.kind==="section"?34:14).strength(.9);
+  Graph.d3Force("x", d3.forceX(ax).strength(n=> n.kind==="meta"?.30:.10));
+  Graph.d3Force("y", d3.forceY(ay).strength(n=> n.kind==="meta"?.30:.10));
+  setTimeout(()=>Graph.zoomToFit(700,90),1100);
+}
+
+function showInfo(n){
+  if(n.kind==="root") return;
+  const box=document.getElementById("info"); const t=n.kind==="meta"?n.name:(n.title||n.name);
+  box.innerHTML =
+    `<div class="crumb">${n.id.replace("meta:","").replace(/\//g," / ")}</div>`+
+    `<div class="ttl">${t}</div>`+
+    `<div class="row"><span>Domain</span><span class="v">${n.group||"—"}</span></div>`+
+    (n.kind==="meta"?`<div class="row"><span>Sections</span><span class="v">${n.children}</span></div>`:"")+
+    (n.page?`<div class="row"><span>Length</span><span class="v">${n.words.toLocaleString()} words</span></div>`:"")+
+    (n.page?`<div class="row"><span>Characters</span><span class="v">${(n.chars||0).toLocaleString()}</span></div>`:"")+
+    (n.kind!=="meta"?`<div class="row"><span>Sub-pages</span><span class="v">${n.children}</span></div>`:"")+
+    (n.page&&n.url?`<a href="${n.url}" target="_blank" rel="noopener">Open doc ↗</a>`
+      :`<div class="hint">${n.kind==="meta"?"Product domain — zoom in to explore":"Structural node"}</div>`);
+  box.style.display="block";
+  Graph.centerAt(n.x,n.y,500); Graph.zoom(Math.max(2,Graph.zoom()),500);
+}
+function buildLegend(){
+  const body=document.getElementById("legend-body"); body.innerHTML="";
+  for(const [g,info] of groupStats()){
+    const d=document.createElement("div"); d.className="leg";
+    d.innerHTML=`<span class="sw" style="background:${PALETTE[g]}"></span><span class="nm">${g}</span><span class="ct">${info.count}</span>`;
+    d.onclick=()=>{ if(hiddenGroups.has(g)){hiddenGroups.delete(g);d.classList.remove("off");}
+      else{hiddenGroups.add(g);d.classList.add("off");} refresh(); };
+    body.appendChild(d);
+  }
+}
+function setupChrome(){
+  document.getElementById("search").oninput=function(){ searchQuery=this.value.toLowerCase().trim(); refresh();
+    if(searchQuery){ const hit=NODES.find(matchesQuery); if(hit){Graph.centerAt(hit.x,hit.y,600);Graph.zoom(3.5,600);} } };
+  const a=document.getElementById("m-size"),b=document.getElementById("m-flat");
+  a.onclick=()=>{sizeMode=true;a.classList.add("on");b.classList.remove("on");Graph.nodeVal(nodeVal);};
+  b.onclick=()=>{sizeMode=false;b.classList.add("on");a.classList.remove("on");Graph.nodeVal(nodeVal);};
+}
+function buildTabs(active){
+  const bar=document.getElementById("tabs"); bar.innerHTML="";
+  for(const key in DATASETS){
+    const d=DATASETS[key], btn=document.createElement("button");
+    btn.className="tab"+(key===active?" on":"");
+    btn.innerHTML=`<span class="dot" style="background:${key===active?'#05101f':d.dot}"></span>${d.label}`;
+    btn.onclick=()=> loadDataset(key);
+    bar.appendChild(btn);
+  }
+}
+function loadDataset(key){
+  if(CUR && CUR.key===key) return;
+  CUR=DATASETS[key]; CUR.key=key;
+  GROUPS=CUR.groups; ROOT=CUR.root; PALETTE=CUR.palette;
+  SEC2GROUP={}; for(const g in GROUPS) for(const s of GROUPS[g]) SEC2GROUP[s]=g;
+  GROUP_ORDER=Object.keys(GROUPS).concat(["Other"]);
+  hiddenGroups.clear(); searchQuery=""; document.getElementById("search").value="";
+  document.documentElement.style.setProperty("--accent",CUR.accent);
+  buildTabs(key);
+  document.getElementById("loading").style.display="flex";
+  document.getElementById("info").style.display="none";
+  fetch(CUR.data).then(r=>r.json()).then(raw=>{
+    const g=buildGraph(raw); NODES=g.nodes; LINKS=g.links;
+    byId={}; NODES.forEach(n=>byId[n.id]=n);
+    NODES.filter(n=>n.page).sort((a,b)=>b.words-a.words).slice(0,40).forEach(n=>n.big=true);
+    const pages=NODES.filter(n=>n.page);
+    document.getElementById("s-pages").textContent=pages.length.toLocaleString();
+    document.getElementById("s-words").textContent=fmt(pages.reduce((s,n)=>s+n.words,0));
+    document.getElementById("s-areas").textContent=groupStats().length;
+    render(); buildLegend();
+    document.getElementById("loading").style.display="none";
+  });
+}
+
+setupChrome();
+loadDataset("palantir");
+</script>
+</body>
+</html>

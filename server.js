@@ -293,6 +293,8 @@ async function handle(req, res) {
 
   if (pathname === '/') return serveStatic(res, '/index.html');
   if (pathname === '/admin' || pathname === '/admin/') return serveStatic(res, '/admin.html');
+  if (pathname === '/foundry-viz') return send(res, 308, '', { Location: '/foundry-viz/' });
+  if (pathname === '/foundry-viz/') return serveStatic(res, '/foundry-viz/index.html');
   if (pathname === '/healthcare-map' || pathname === '/healthcare-map/') return serveStatic(res, '/healthcare-map.html');
   if (pathname === '/bi-pricing' || pathname === '/bi-pricing/') return serveStatic(res, '/bi-pricing.html');
   if (pathname === '/data-agent-stack' || pathname === '/data-agent-stack/') return serveStatic(res, '/data-agent-stack.html');
@@ -304,7 +306,7 @@ async function handle(req, res) {
   if (pathname === '/railroad-empires' || pathname === '/railroad-empires/') return serveStatic(res, '/railroad-empires.html');
   if (pathname === '/oil-wars' || pathname === '/oil-wars/') return serveStatic(res, '/oil-wars.html');
   if (pathname === '/bell-wars' || pathname === '/bell-wars/') return serveStatic(res, '/bell-wars.html');
-  if (/^\/(assets|images|data)\//.test(pathname) || ['/admin.js', '/healthcare-map.js', '/bi-pricing.js', '/data-agent-stack.js', '/analytics-token-tam.js', '/timeline-shell.js', '/timeline-shell.css'].includes(pathname)) return serveStatic(res, pathname);
+  if (/^\/(assets|images|data|foundry-viz)\//.test(pathname) || ['/admin.js', '/healthcare-map.js', '/bi-pricing.js', '/data-agent-stack.js', '/analytics-token-tam.js', '/timeline-shell.js', '/timeline-shell.css'].includes(pathname)) return serveStatic(res, pathname);
   if (/^\/[a-z0-9-]+\/?$/.test(pathname)) return renderArticlePreview(res, req, pathname.replace(/^\/|\/$/g, ''));
   return send(res, 404, 'Not found');
 }

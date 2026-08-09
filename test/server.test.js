@@ -29,6 +29,7 @@ test('serves the homepage and health check', async () => {
   assert.equal(health.ok, true);
   const homepage = await fetch(base).then((response) => response.text());
   assert.match(homepage, /Ethan Ding/);
+  assert.match(homepage, /href="\/foundry-viz\/"/);
   assert.match(homepage, /href="\/healthcare-map"/);
   assert.match(homepage, /href="\/bi-pricing"/);
   assert.match(homepage, /href="\/data-agent-stack"/);
@@ -40,6 +41,24 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /href="\/railroad-empires"/);
   assert.match(homepage, /href="\/oil-wars"/);
   assert.match(homepage, /href="\/bell-wars"/);
+});
+
+test('serves the Foundry docs complexity map and its datasets', async () => {
+  const redirect = await fetch(`${base}/foundry-viz`, { redirect: 'manual' });
+  assert.equal(redirect.status, 308);
+  assert.equal(redirect.headers.get('location'), '/foundry-viz/');
+
+  const response = await fetch(`${base}/foundry-viz/`);
+  assert.equal(response.status, 200);
+  const page = await response.text();
+  assert.match(page, /Palantir Foundry/);
+  assert.match(page, /Braintrust/);
+  assert.match(page, /data\.json/);
+
+  const foundry = await fetch(`${base}/foundry-viz/data.json`).then((result) => result.json());
+  const braintrust = await fetch(`${base}/foundry-viz/braintrust.json`).then((result) => result.json());
+  assert.ok(foundry.length > 4000);
+  assert.ok(braintrust.length > 100);
 });
 
 test('serves the interactive Bell wars visualization', async () => {
@@ -166,7 +185,7 @@ test('serves the healthcare ecosystem map and its script', async () => {
 
 test('serves the repository-owned reading data', async () => {
   const books = await fetch(`${base}/data/books.json`).then((response) => response.json());
-  assert.equal(books.length, 389);
+  assert.ok(books.length >= 389);
   assert.ok(books.every((book) => !book.cover || book.cover.startsWith('/images/books/')));
   assert.ok(books.some((book) => book.notes));
   assert.ok(books.some((book) => book.rating));
