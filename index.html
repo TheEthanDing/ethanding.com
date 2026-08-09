@@ -766,6 +766,14 @@
           const monthKey = section.getAttribute('data-month');
           window.monthPositions[monthKey] = section.offsetLeft;
         });
+
+        // Start at the newest end of the reading history.
+        const carousel = document.getElementById('booksCarousel');
+        if (carousel) {
+          carousel.style.scrollBehavior = 'auto';
+          carousel.scrollLeft = carousel.scrollWidth;
+          carousel.style.scrollBehavior = '';
+        }
         
         // Set up lazy loading with Intersection Observer
         setupLazyLoading();

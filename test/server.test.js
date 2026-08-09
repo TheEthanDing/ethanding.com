@@ -30,6 +30,8 @@ test('serves the homepage and health check', async () => {
   const homepage = await fetch(base).then((response) => response.text());
   assert.match(homepage, /Ethan Ding/);
   assert.match(homepage, /href="\/foundry-viz\/"/);
+  assert.match(homepage, /carousel\.style\.scrollBehavior = 'auto'/);
+  assert.match(homepage, /carousel\.scrollLeft = carousel\.scrollWidth/);
   assert.match(homepage, /href="\/healthcare-map"/);
   assert.match(homepage, /href="\/bi-pricing"/);
   assert.match(homepage, /href="\/data-agent-stack"/);
