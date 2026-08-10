@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940" role="img" aria-labelledby="title desc">
+  <title id="title">The conditions that made Palantir</title>
+  <desc id="desc">Three unusual inputs feed twelve years of full-stack deployments, producing differentiated talent, product, and business model assets.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#ee8b00"/></marker>
+    <style>
+      text { text-transform: lowercase !important; }
+      .sans{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif}.hand{font-family:'Comic Sans MS','Marker Felt',cursive}.ink{fill:#282828}.muted{fill:#6f6c67}.orange{fill:#ee8b00}.box{fill:#fff;stroke:#ee8b00;stroke-width:3}.soft{fill:#fff8ec;stroke:#ee8b00;stroke-width:4}.wire{fill:none;stroke:#ee8b00;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}.head{font:800 28px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#282828}.body{font:500 21px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#55524e}.label{font:700 25px 'Comic Sans MS','Marker Felt',cursive;fill:#ee8b00}
+    </style>
+  </defs>
+  <rect width="1600" height="940" fill="#fff"/>
+  <text x="70" y="75" class="sans ink" font-size="47" font-weight="800">the machine that made Palantir</text>
+  <text x="72" y="114" class="sans muted" font-size="21">three conditions held together long enough for deployment work to compound</text>
+
+  <text x="90" y="170" class="label">inputs</text>
+  <rect x="80" y="205" width="430" height="150" rx="18" class="box"/>
+  <text x="110" y="250" class="head">government customers with</text>
+  <text x="110" y="285" class="head">no usable modern stack</text>
+  <text x="110" y="323" class="body">hard constraints forced full-chain ownership</text>
+
+  <rect x="80" y="395" width="430" height="150" rx="18" class="box"/>
+  <text x="110" y="440" class="head">patient capital + paying</text>
+  <text x="110" y="475" class="head">government deployments</text>
+  <text x="110" y="513" class="body">enough time not to die while building it</text>
+
+  <rect x="80" y="585" width="430" height="150" rx="18" class="box"/>
+  <text x="110" y="630" class="head">twelve-ish years wandering</text>
+  <text x="110" y="665" class="head">through the PMF desert</text>
+  <text x="110" y="703" class="body">the company stayed ugly, weird, and selective</text>
+
+  <path d="M512 278 C576 286 605 362 645 405" class="wire" marker-end="url(#arrow)"/>
+  <path d="M512 470 C574 469 603 469 645 469" class="wire" marker-end="url(#arrow)"/>
+  <path d="M512 659 C578 641 605 557 645 520" class="wire" marker-end="url(#arrow)"/>
+
+  <rect x="650" y="316" width="355" height="310" rx="96" class="soft"/>
+  <text x="828" y="373" text-anchor="middle" class="label">the part people skip</text>
+  <text x="828" y="426" text-anchor="middle" class="head">12 years of full-stack</text>
+  <text x="828" y="461" text-anchor="middle" class="head">deployments</text>
+  <text x="828" y="511" text-anchor="middle" class="body">own the whole problem</text>
+  <text x="828" y="545" text-anchor="middle" class="body">solve it inside the operation</text>
+  <text x="828" y="579" text-anchor="middle" class="body">return repeated parts to product</text>
+
+  <path d="M1006 397 C1030 364 1045 286 1072 280" class="wire" marker-end="url(#arrow)"/>
+  <path d="M1006 470 C1030 470 1045 470 1072 470" class="wire" marker-end="url(#arrow)"/>
+  <path d="M1006 545 C1030 571 1045 652 1072 660" class="wire" marker-end="url(#arrow)"/>
+
+  <text x="1090" y="170" class="label">outputs that compounded</text>
+  <rect x="1080" y="205" width="445" height="150" rx="18" class="box"/>
+  <text x="1110" y="250" class="head">talent</text>
+  <text x="1110" y="286" class="body">SWE-quality people doing implementation</text>
+  <text x="1110" y="318" class="body">orthogonal filter · leadership grown inside</text>
+
+  <rect x="1080" y="395" width="445" height="150" rx="18" class="box"/>
+  <text x="1110" y="440" class="head">product</text>
+  <text x="1110" y="476" class="body">analytical scale ↔ Ontology ↔ operations</text>
+  <text x="1110" y="508" class="body">deployed on-prem, air-gapped, and at the edge</text>
+
+  <rect x="1080" y="585" width="445" height="150" rx="18" class="box"/>
+  <text x="1110" y="630" class="head">business model + culture</text>
+  <text x="1110" y="666" class="body">invest up front · afford expensive people</text>
+  <text x="1110" y="698" class="body">underwrite the account, not hours or queries</text>
+
+  <path d="M1260 758 C1205 850 992 878 820 838 C641 797 527 795 434 754" class="wire" marker-end="url(#arrow)"/>
+  <text x="824" y="875" text-anchor="middle" class="hand orange" font-size="25">stronger platform → harder customer → run the loop again</text>
+</svg>

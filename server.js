@@ -293,6 +293,8 @@ async function handle(req, res) {
 
   if (pathname === '/') return serveStatic(res, '/index.html');
   if (pathname === '/admin' || pathname === '/admin/') return serveStatic(res, '/admin.html');
+  if (pathname === '/palantir' || pathname === '/palantir/') return send(res, 308, '', { Location: '/what-people-misunderstand-about-palantir' });
+  if (pathname === '/what-people-misunderstand-about-palantir' || pathname === '/what-people-misunderstand-about-palantir/') return serveStatic(res, '/what-people-misunderstand-about-palantir.html');
   if (pathname === '/foundry-viz') return send(res, 308, '', { Location: '/foundry-viz/' });
   if (pathname === '/foundry-viz/') return serveStatic(res, '/foundry-viz/index.html');
   if (pathname === '/healthcare-map' || pathname === '/healthcare-map/') return serveStatic(res, '/healthcare-map.html');

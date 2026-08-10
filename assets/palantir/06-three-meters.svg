@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="780" viewBox="0 0 1400 780" role="img" aria-labelledby="title desc">
+  <title id="title">Three companies, three meters</title>
+  <desc id="desc">Snowflake and Databricks optimize for usage, consultancies optimize for labor, and Palantir can optimize for account renewal and outcome-linked expansion.</desc>
+  <defs>
+    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.014 0.075" numOctaves="1" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.05"/>
+    </filter>
+    <style>
+      text { text-transform: lowercase !important; }
+      .bg{fill:#fff}.ink{fill:#292929}.muted{fill:#717171}.orange{fill:#e88700}
+      .title{font:700 44px 'Comic Sans MS','Bradley Hand',Arial,sans-serif}.sub{font:18px Arial,Helvetica,sans-serif}
+      .card{fill:#fff;stroke:#d8d8d8;stroke-width:2.5}.card.hot{fill:#fff8ed;stroke:#e88700;stroke-width:3.5;filter:url(#rough)}
+      .brand{font:700 24px 'Comic Sans MS','Bradley Hand',Arial,sans-serif}.meterlabel{font:700 20px Arial,Helvetica,sans-serif}.body{font:17px Arial,Helvetica,sans-serif;fill:#454545}.tag{font:700 15px Arial,Helvetica,sans-serif;letter-spacing:.8px;text-transform:uppercase}
+      .arc{fill:none;stroke:#d1d1d1;stroke-width:18;stroke-linecap:round}.arc.hot{stroke:#f4c47e}.tick{stroke:#777;stroke-width:2;stroke-linecap:round}.needle{stroke:#e88700;stroke-width:6;stroke-linecap:round;filter:url(#rough)}
+      .bottom{fill:#fff4e3;stroke:#efb35a;stroke-width:2}
+    </style>
+  </defs>
+  <rect class="bg" width="1400" height="780"/>
+  <text x="70" y="80" class="title ink">everyone says “customer success.” the meter says what they mean.</text>
+  <text x="72" y="116" class="sub muted">three business models reward three different kinds of motion</text>
+
+  <g transform="translate(70 165)">
+    <rect width="390" height="480" rx="20" class="card"/>
+    <text x="30" y="48" class="brand ink">Snowflake / Databricks</text>
+    <text x="30" y="79" class="tag muted">usage meter</text>
+    <path d="M98 218 A98 98 0 0 1 292 218" class="arc"/>
+    <line x1="195" y1="218" x2="272" y2="151" class="needle"/>
+    <circle cx="195" cy="218" r="9" fill="#e88700"/>
+    <text x="195" y="258" text-anchor="middle" class="meterlabel ink">bytes / compute</text>
+    <text x="30" y="318" class="body">more consumption</text>
+    <text x="30" y="344" class="body">→ more revenue</text>
+    <line x1="30" y1="373" x2="360" y2="373" stroke="#e6e6e6"/>
+    <text x="30" y="408" class="body">hard to justify valuable work</text>
+    <text x="30" y="434" class="body">that barely moves consumption</text>
+  </g>
+
+  <g transform="translate(505 165)">
+    <rect width="390" height="480" rx="20" class="card"/>
+    <text x="30" y="48" class="brand ink">SI / consultancy</text>
+    <text x="30" y="79" class="tag muted">labor meter</text>
+    <path d="M98 218 A98 98 0 0 1 292 218" class="arc"/>
+    <line x1="195" y1="218" x2="259" y2="139" class="needle"/>
+    <circle cx="195" cy="218" r="9" fill="#e88700"/>
+    <text x="195" y="258" text-anchor="middle" class="meterlabel ink">hours / scope</text>
+    <text x="30" y="318" class="body">more billed labor</text>
+    <text x="30" y="344" class="body">→ more revenue</text>
+    <line x1="30" y1="373" x2="360" y2="373" stroke="#e6e6e6"/>
+    <text x="30" y="408" class="body">each project has to carry</text>
+    <text x="30" y="434" class="body">its own delivery margin</text>
+  </g>
+
+  <g transform="translate(940 165)">
+    <rect width="390" height="480" rx="20" class="card hot"/>
+    <text x="30" y="48" class="brand ink">Palantir</text>
+    <text x="30" y="79" class="tag orange">account / outcome meter</text>
+    <path d="M98 218 A98 98 0 0 1 292 218" class="arc hot"/>
+    <line x1="195" y1="218" x2="278" y2="160" class="needle"/>
+    <circle cx="195" cy="218" r="9" fill="#e88700"/>
+    <text x="195" y="258" text-anchor="middle" class="meterlabel ink">renew + expand</text>
+    <text x="30" y="318" class="body">move a P&amp;L number</text>
+    <text x="30" y="344" class="body">→ earn the next project</text>
+    <line x1="30" y1="373" x2="360" y2="373" stroke="#efcf9d"/>
+    <text x="30" y="408" class="body">can overinvest now if the</text>
+    <text x="30" y="434" class="body">software becomes durable</text>
+  </g>
+
+  <rect x="255" y="683" width="890" height="58" rx="16" class="bottom"/>
+  <text x="700" y="719" text-anchor="middle" class="meterlabel ink">not pure outcome pricing — a different account-level incentive</text>
+</svg>

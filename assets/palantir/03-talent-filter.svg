@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1050" viewBox="0 0 1500 1050" role="img" aria-labelledby="title desc">
+  <title id="title">Palantir stacked independent talent filters</title>
+  <desc id="desc">A narrowing stack shows the independent filters that selected Palantir forward-deployed engineers.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#ee8b00"/></marker>
+    <style>
+      text { text-transform: lowercase !important; }
+      .sans{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif}.hand{font-family:'Comic Sans MS','Marker Felt',cursive}.ink{fill:#282828}.muted{fill:#706d68}.orange{fill:#ee8b00}.filter{fill:#fff;stroke:#ee8b00;stroke-width:3}.arrow{stroke:#ee8b00;stroke-width:3;stroke-linecap:round}.label{font:700 23px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#2c2c2c}.out{fill:#ee8b00;stroke:#ee8b00;stroke-width:3}.out-text{font:800 30px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#fff}
+    </style>
+  </defs>
+  <rect width="1500" height="1050" fill="#fff"/>
+  <text x="750" y="70" text-anchor="middle" class="sans ink" font-size="45" font-weight="800">Palantir stacked independent filters on the same person</text>
+  <text x="750" y="108" text-anchor="middle" class="sans muted" font-size="21">each filter removed a different kind of applicant</text>
+
+  <rect x="120" y="155" width="1260" height="76" rx="16" class="filter"/>
+  <text x="750" y="203" text-anchor="middle" class="label">could clear a real production software-engineering interview</text>
+  <line x1="750" y1="232" x2="750" y2="257" class="arrow" marker-end="url(#arrow)"/>
+
+  <rect x="175" y="266" width="1150" height="76" rx="16" class="filter"/>
+  <text x="750" y="314" text-anchor="middle" class="label">had credentials and a background that created unusually good outside options</text>
+  <line x1="750" y1="343" x2="750" y2="368" class="arrow" marker-end="url(#arrow)"/>
+
+  <rect x="230" y="377" width="1040" height="76" rx="16" class="filter"/>
+  <text x="750" y="425" text-anchor="middle" class="label">was willing to travel and live inside the customer’s operational mess</text>
+  <line x1="750" y1="454" x2="750" y2="479" class="arrow" marker-end="url(#arrow)"/>
+
+  <rect x="285" y="488" width="930" height="76" rx="16" class="filter"/>
+  <text x="750" y="520" text-anchor="middle" class="label">
+    <tspan x="750">wanted factory, airline, army, and supply-chain problems</tspan>
+    <tspan x="750" dy="30">instead of clean product work</tspan>
+  </text>
+  <line x1="750" y1="565" x2="750" y2="590" class="arrow" marker-end="url(#arrow)"/>
+
+  <rect x="340" y="599" width="820" height="76" rx="16" class="filter"/>
+  <text x="750" y="631" text-anchor="middle" class="label">
+    <tspan x="750">joined when Palantir was weird and government-shaped</tspan>
+    <tspan x="750" dy="30">and hard to explain at parties</tspan>
+  </text>
+  <line x1="750" y1="676" x2="750" y2="701" class="arrow" marker-end="url(#arrow)"/>
+
+  <rect x="395" y="710" width="710" height="76" rx="16" class="filter"/>
+  <text x="750" y="742" text-anchor="middle" class="label">
+    <tspan x="750">was mission-driven, contrarian, patient,</tspan>
+    <tspan x="750" dy="30">or uncomfortable enough to stay</tspan>
+  </text>
+  <line x1="750" y1="787" x2="750" y2="817" class="arrow" marker-end="url(#arrow)"/>
+
+  <rect x="460" y="828" width="580" height="92" rx="20" class="out"/>
+  <text x="750" y="884" text-anchor="middle" class="out-text">forward-deployed engineer</text>
+
+  <path d="M1215 273 C1385 336 1388 748 1085 834" fill="none" stroke="#ee8b00" stroke-width="3" stroke-linecap="round" stroke-dasharray="8 10" marker-end="url(#arrow)"/>
+  <text x="1330" y="500" text-anchor="middle" class="hand orange" font-size="22" transform="rotate(4 1330 500)">
+    <tspan x="1330">not merely “smart” —</tspan>
+    <tspan x="1330" dy="28">a specific shape</tspan>
+  </text>
+  <text x="750" y="990" text-anchor="middle" class="hand ink" font-size="27">the rare thing was not Stanford. it was the intersection.</text>
+</svg>

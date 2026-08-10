@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>what do people misunderstand about palantir? · ethan ding</title>
+  <meta name="description" content="the three things that actually make palantir special—and the three conditions that made them possible.">
+  <link rel="canonical" href="https://ethanding.com/what-people-misunderstand-about-palantir">
+  <link rel="icon" type="image/png" href="/images/profile.png">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="what do people misunderstand about palantir?">
+  <meta property="og:description" content="the three things that actually make palantir special—and the three conditions that made them possible.">
+  <meta property="og:url" content="https://ethanding.com/what-people-misunderstand-about-palantir">
+  <meta property="og:image" content="https://ethanding.com/assets/palantir/blind-men-palantir-elephant.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="what do people misunderstand about palantir?">
+  <meta name="twitter:description" content="the three things that actually make palantir special—and the three conditions that made them possible.">
+  <meta name="twitter:image" content="https://ethanding.com/assets/palantir/blind-men-palantir-elephant.png">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8KB6YWZ4KS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8KB6YWZ4KS');
+  </script>
+  <style>
+    :root {
+      --paper: #ffffff;
+      --ink: #22211f;
+      --muted: #706d67;
+      --hairline: #e7e4de;
+      --orange: #ed8b00;
+      --note: #fff9f0;
+      --measure: 760px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      background: var(--paper);
+      color: var(--ink);
+      scroll-behavior: smooth;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      font-family: ui-sans-serif, -apple-system, blinkmacsystemfont, "segoe ui", sans-serif;
+    }
+
+    main {
+      width: min(calc(100% - 40px), var(--measure));
+      margin: 0 auto;
+      padding: 88px 0 112px;
+      text-transform: lowercase;
+    }
+
+    .site-home {
+      display: inline-block;
+      margin-bottom: 56px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 650;
+      letter-spacing: 0.015em;
+      text-decoration: none;
+    }
+
+    .site-home:hover { color: var(--ink); }
+
+    h1, h2, p, figure { margin-left: 0; margin-right: 0; }
+
+    h1 {
+      max-width: 720px;
+      margin-top: 0;
+      margin-bottom: 22px;
+      font-size: clamp(46px, 7.4vw, 68px);
+      line-height: 0.98;
+      letter-spacing: -0.052em;
+      font-weight: 820;
+    }
+
+    h1::after {
+      content: "";
+      display: block;
+      width: 72px;
+      height: 4px;
+      margin-top: 30px;
+      background: var(--orange);
+      border-radius: 999px;
+    }
+
+    h2 {
+      margin-top: 94px;
+      margin-bottom: 27px;
+      padding-top: 1px;
+      font-size: clamp(29px, 4.2vw, 39px);
+      line-height: 1.08;
+      letter-spacing: -0.036em;
+      font-weight: 790;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: 22px;
+      font-size: 19px;
+      line-height: 1.68;
+      letter-spacing: -0.009em;
+    }
+
+    .dek {
+      max-width: 700px;
+      margin-bottom: 72px;
+      color: var(--muted);
+      font-family: ui-serif, georgia, "times new roman", serif;
+      font-size: 24px;
+      line-height: 1.42;
+      letter-spacing: -0.019em;
+    }
+
+    .source-note {
+      margin: 30px 0 34px;
+      padding: 2px 0 2px 20px;
+      border-left: 3px solid var(--orange);
+      color: #5f5b54;
+      font-size: 16.5px;
+      line-height: 1.62;
+    }
+
+    .bridge {
+      margin-top: 39px;
+      color: #34322e;
+      font-weight: 680;
+    }
+
+    figure {
+      width: 100%;
+      margin-top: 48px;
+      margin-bottom: 54px;
+    }
+
+    figure a {
+      display: block;
+      width: 100%;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    figure img {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      background: #fff;
+    }
+
+    figcaption {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      letter-spacing: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration-color: color-mix(in srgb, var(--orange) 65%, transparent);
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+    }
+
+    a:hover { text-decoration-color: var(--orange); }
+
+    .closing-line {
+      margin-top: 27px;
+      margin-bottom: 0;
+      padding-top: 29px;
+      border-top: 1px solid var(--hairline);
+      font-size: clamp(27px, 4.2vw, 39px);
+      line-height: 1.13;
+      letter-spacing: -0.035em;
+      font-weight: 820;
+    }
+
+    ::selection {
+      background: #ffe1ad;
+      color: #1f1e1b;
+    }
+
+    @media (max-width: 620px) {
+      main {
+        width: min(calc(100% - 30px), var(--measure));
+        padding-top: 48px;
+        padding-bottom: 72px;
+      }
+
+      .site-home { margin-bottom: 42px; }
+
+      h1 {
+        font-size: clamp(42px, 13.5vw, 59px);
+        line-height: 0.99;
+      }
+
+      h2 {
+        margin-top: 70px;
+        font-size: 30px;
+      }
+
+      p {
+        font-size: 17.5px;
+        line-height: 1.66;
+      }
+
+      .dek {
+        margin-bottom: 56px;
+        font-size: 21px;
+      }
+
+      .source-note { font-size: 15.5px; }
+
+      figure {
+        margin-top: 38px;
+        margin-bottom: 42px;
+      }
+    }
+
+    @media print {
+      main {
+        width: 100%;
+        max-width: 720px;
+        padding: 0;
+      }
+
+      h2, figure { break-inside: avoid; }
+      a { text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+<a class="site-home" href="/">← ethan ding</a>
+<h1>what do people misunderstand about palantir?</h1>
+<p class="dek">the three things that actually make the company special—and the three conditions that made them possible.</p>
+<h2 id="everyone-has-palantir-wrong">everyone has palantir wrong</h2>
+<p>everybody has a palantir take, but almost all of them are descriptions of the visible output. vcs think it is a services company. data engineers think it is an overpriced, closed-source data platform. consultants think it is consulting with better branding. twitter thinks it is evil government spyware. some customers describe it as “the thing that fixed the factory.” all of those takes describe something visible. none explains the company that produced it.</p>
+<p>none of these explanations capture why palantir can repeatedly produce outcomes that conventional combinations of software and services often struggle to reproduce. the interesting question is not, “what software category is palantir?” it is, “what kind of company could have produced palantir?”</p>
+<p>this essay is for everyone trying to understand what palantir does, what makes it distinct, or what the deployco wave is actually copying. you do not need to reproduce every one of palantir’s tenets. but if you violate one, you need to know what advantage replaces it.</p>
+<p class="bridge">before getting into those tenets, here is why i think i can make that claim.</p>
+<h2 id="i-am-very-credible">i am very credible</h2>
+<p>i have spent roughly four years studying the company. i have read basically every public page of foundry documentation i could find. i have talked to more than three dozen former fdes, tech leads, and managers, several of whom were unusually senior or promoted unusually quickly.</p>
+<p class="source-note">those sources will stay anonymous. anonymous-source anecdotes are labeled; some details have been omitted or combined to protect identities, and recollected language may be paraphrased. i have not independently verified every individual hiring or customer-account story. treat this as informed synthesis—and occasionally parody—not sworn testimony.</p>
+<p>the point is not “palantir good” or “palantir evil.” it is that the critics do not understand the company they are criticizing, the imitators do not understand the company they are copying, and the fans—especially in the retail markets—often do not understand which parts of palantir actually make it strong.</p>
+<p class="bridge">start with the market palantir entered.</p>
+<h2 id="this-is-what-the-landscape-looks-like-today">this is what the landscape looks like today</h2>
+<p>when a cio wants to implement a new technology, they usually buy software from one company and implementation or transformation services from another. the software might be horizontal infrastructure from databricks, snowflake, or aws. or it might be operational or transactional software from oracle, sap, workday, salesforce, servicenow, uipath, or retool. then accenture, deloitte, capgemini, mckinsey, or another systems integrator connects it to the actual company through implementation, integration, requirements gathering, change management, and process redesign.</p>
+<p>so the cio ecosystem lives on two axes: how much software the vendor owns, and how much implementation or services responsibility the vendor owns.</p>
+<p>most companies sit on one side of the software/services divide. yes, consulting firms market accelerators, platforms, and proprietary software. but deloitte is rarely selected as the horizontal software substrate, however much the marketing site wants you to believe otherwise. yes, databricks, aws, and snowflake have internal professional-services and delivery teams. but customers still rely heavily on external systems integrators and partners for much of the actual implementation.</p>
+<p>these are not just strategic preferences. they fall out of the financial model. a services firm monetizes labor, so it has less economic incentive to sustain software-vendor-scale r&amp;d and infrastructure-engineering compensation. a software company is valued on high gross margins and scalable product revenue, so a large internal implementation team looks like low-margin services and gets pushed toward partners. deloitte is a private partnership, so the precise pressure differs by firm, but the underlying financial-model incentive remains.</p>
+<p>the result is a mostly empty top-right of the market. deloitte tech is high-services and comparatively software-light. oracle, sap, workday, and salesforce own a lot of software but still rely heavily on external implementation. databricks and snowflake are even more software-heavy and services-light.</p>
+<p>then there is palantir. it has actual horizontal software infrastructure through foundry, actual operational interfaces and workflows through ontology and its applications, and actual implementation and transformation responsibility through fdes. it is unusually software-heavy and unusually services-heavy at the same time.</p>
+<figure>
+<a href="/assets/palantir/01-enterprise-landscape.svg" target="_blank" aria-label="open full-size figure: the enterprise software and services landscape, before and after palantir"><img src="/assets/palantir/01-enterprise-landscape.svg" alt="the enterprise software and services landscape, before and after palantir" decoding="async"></a>
+<figcaption>illustrative positioning based on each company’s primary business model, not audited software/services shares.</figcaption>
+</figure>
+<p>people compare palantir to each category because it contains a recognizable piece of each. a data engineer sees a closed databricks or snowflake competitor. an operator sees workflow, erp, or application software. a vc sees a consulting or systems-integration firm. each comparison is directionally correct and still misses the company.</p>
+<p>the normal ecosystem is also much more polyamorous. pwc, deloitte, accenture, and the other integrators each work with snowflake, databricks, oracle, sap, salesforce, and whatever other package the customer already owns. palantir’s services organization and palantir’s software are far more tightly coupled than the partner ecosystems above, although palantir has begun expanding partnerships at the edges.</p>
+<figure>
+<a href="/assets/palantir/blind-men-palantir-elephant.png" target="_blank" aria-label="open full-size figure: the blind men and the palantir elephant"><img src="/assets/palantir/blind-men-palantir-elephant.png" alt="the blind men and the palantir elephant" decoding="async"></a>
+</figure>
+<p class="bridge">that explains where palantir sits. the next question is what made that position possible.</p>
+<h2 id="the-three-things-that-make-palantir-specialand-the-three-inputs-that-made-them-possible">the three things that make palantir special—and the three inputs that made them possible</h2>
+<p>palantir can occupy this position because three unusual historical inputs reinforced one another. it spent roughly twelve years wandering through the commercial product-market-fit desert—meaning a long period before broad, legible, repeatable commercial product-market fit, not twelve years without customers or revenue. it had access to patient capital, including peter thiel and the founders fund network. and it worked in government environments that often lacked the modern cloud primitives snowflake could assume were already present.</p>
+<figure>
+<a href="/assets/palantir/02-inputs-to-outputs.svg" target="_blank" aria-label="open full-size figure: three historical inputs produced three compounding outputs"><img src="/assets/palantir/02-inputs-to-outputs.svg" alt="three historical inputs produced three compounding outputs" decoding="async"></a>
+</figure>
+<p>those inputs produced three things.</p>
+<p>first, palantir could hire differentiated talent: software-engineering-quality people doing implementation work, selected by a brutal and unusually orthogonal talent filter while the company was still messy, ugly, and not particularly hot. because the company had so much time to gestate, it could also promote much of its leadership from inside.</p>
+<p>second, it could build an outcome-driven, project-like business model and culture. palantir’s s-1 described pricing as generally fixed, multi-year, and based primarily on anticipated customer value. combined with account expansion, that structure can let the team work backward from the problem instead of only working forward from consumption or billable hours. it makes certain edge cases economically possible when they would not fit an hours- or consumption-driven model, and can support a longer bet on a customer than a conventional consultancy can make when each project has to stand on its own.</p>
+<p>third, it could build an unusually broad product relative to this comparison set. many early government environments lacked a usable modern stack. software-engineering-quality people spent their time inside the customer and fed what they learned back into product design. the resulting platform touches petabyte-scale analytical workflows, transactional and operational guardrails, and on-premises environments at the same time.</p>
+<p class="bridge">the rest of the essay is those three outputs, starting with the people.</p>
+<h2 id="the-talent-filter">the talent filter</h2>
+<p>the cliché is that palantir hires stanford and mit kids. that is true-ish, but analytically weak, because every technology company claims it hires smart people. the actual insight is that palantir stacked a series of mostly independent filters on the same person.</p>
+<p>the fde archetype in my interviews had to pass a real software-engineering interview. they had to have a school or background that gave them very good outside options. they had to be willing to travel and live inside the customer’s mess. they had to want operational work instead of a comfortable consumer-software job. they had to join when palantir was neither cool nor especially legible. and they had to be mission-driven, contrarian, or patient enough to stay.</p>
+<figure>
+<a href="/assets/palantir/03-talent-filter.svg" target="_blank" aria-label="open full-size figure: palantir stacked several independent filters on one candidate"><img src="/assets/palantir/03-talent-filter.svg" alt="palantir stacked several independent filters on one candidate" decoding="async"></a>
+</figure>
+<p>every filter removes a different kind of applicant. what survives is not merely a smarter consultant. it is a very specific kind of engineer.</p>
+<p>former employees described palantir as recruiting fdes from substantially the same pool as its core software engineers. the company applied a computer-science, coding, and systems bar, then forward-deployed those people into airlines, factories, armies, insurers, and other operational environments. that is very different from hiring an operator and teaching them to configure software. mckinsey does not interview its average consultant for production-engineering skill. generalist consulting, implementation, and solutions roles usually apply a different interview and selection process from infrastructure-engineering roles.</p>
+<p>palantir more often began with engineering talent and taught them operations. traditional systems integrators more often begin with implementation or domain talent and add technical training. because palantir’s fde pool could also build infrastructure, a deployment could produce both an immediate customer result and a reusable software primitive that helped the next customer.</p>
+<p>the elite-school background matters to this argument as a proxy for optionality, not as proof of “better humans.” someone with stanford, mit, cmu, or berkeley credentials had credible alternatives in big tech, finance, consulting, and startups. taking the weird palantir offer therefore revealed a real preference: mission, risk tolerance, contrarianism, or an appetite for hard and unglamorous work.</p>
+<p>travel was another important selector, not merely an annoying part of the job. travel does not itself select for infrastructure skill, and infrastructure skill does not itself select for field tolerance. an fde had to do both. that filters for discomfort tolerance, agency, and risk appetite, and filters against someone optimizing for the most comfortable possible software job.</p>
+<p>operational work selected for a rare kind of computer-science graduate. most stanford cs students do not dream about reconciling erp data, fixing factory scheduling, or tracing food waste. the ones who choose that work care about outcomes outside the codebase and tolerate messy human systems. they can move between a database, a user interface, a stakeholder meeting, and a warehouse floor.</p>
+<p>palantir was not the consensus prestige destination for most of the period when this culture formed. the obvious high-status choice moved from google and facebook, to uber, airbnb, and doordash, then to crypto, and now to the ai labs. palantir was the weird government company you had to explain at parties. people with strong options who joined anyway were actively choosing the less-legible offer. that may have selected for people who actually wanted the mission or the work. staying through years of travel, government work, long deployments, and unclear commercial product-market fit was a second selection event.</p>
+<p>one former tech-lead manager described palantir’s hiring bar as orthogonal to market consensus, not simply higher. they had seen palantir hire candidates rejected by other prestige employers and reject candidates holding offers from them; i could not independently verify the individual cases. in their telling, palantir cared about a separate internal shape: independent thought, high agency, and the ability to cross technical and human systems.</p>
+<p class="bridge">those engineers did not only deliver projects. they also shaped the product those deployments left behind.</p>
+<h2 id="the-twelve-ish-years-in-the-desert-produced-a-differentiated-product">the twelve-ish years in the desert produced a differentiated product</h2>
+<p>the product thesis is that foundry combines three capabilities that normally live in different products.</p>
+<p>the first is analytical infrastructure at real data scale and latency: large-volume and streaming data, pipelines, models, and analytics. this is the part of the market associated with databricks, snowflake, and bigquery.</p>
+<p>the second is operational and transactional systems: applications, workflows, decisions, guardrails, actions, and writeback. this is the part associated with sap, salesforce, servicenow, uipath, and retool.</p>
+<p>the third is the ability to run the whole thing on-premises, air-gapped, or at the edge. foundry is not a thin application sitting on top of an assumed public-cloud stack.</p>
+<p>ontology is the connective tissue between all three. it maps the underlying data and models into objects, relationships, permissions, and business logic. it lets analytical results become governed operational actions, then lets the actions and decisions write back and become new analytical data. “ontology” itself is not new. the differentiation, in my view, is using an object-first semantic layer as the read-write operational layer for the entire company.</p>
+<figure>
+<a href="/assets/palantir/04-product-positioning.svg" target="_blank" aria-label="open full-size figure: foundry combines analytical scale with operational capability"><img src="/assets/palantir/04-product-positioning.svg" alt="foundry combines analytical scale with operational capability" decoding="async"></a>
+</figure>
+<p>the product accreted over time. palantir was founded in 2003 to build software for counterterrorism operations, and gotham was released for intelligence customers in 2008. the early product centered on investigative and fraud, waste, and abuse workflows: integrate many messy sources, then represent people, places, and events as objects and relationships in an investigative interface. my interpretation is that this is why “ontology” entered palantir’s vocabulary through object-first investigative roots rather than through the modern-analytics idea of a semantic layer.</p>
+<p>early government deployments pushed palantir to build far below the user interface. customers often had no public cloud, clean apis, standard schemas, modern identity, or even a connected network. these environments pushed palantir to build connectors, synchronization, lineage, permissions, deployment, and upgrades for on-premises, classified, and air-gapped environments. the government was not merely an early vertical. it was an architectural constraint generator.</p>
+<p>the first commercial translations were still analysis-heavy. finance and fraud problems looked familiar because they also involved joining fragmented evidence and tracing relationships. but an investigator’s workstation was not yet a company operating system. commercial customers needed large analytical scans, aggregations, streaming, and petabyte-scale pipelines, while their operators needed applications that could turn the answer into a governed action.</p>
+<p>in 2016, palantir officially released foundry as its second platform for the recurring problems it saw at large commercial customers. foundry consolidated data integration, analytical infrastructure, object semantics, end-user applications, and operational writeback. my reading is that it was not simply gotham renamed. it was the commercial platform that accumulated from the same deployment and object-first lineage.</p>
+<p>the current product puts ontology between a multimodal data plane and operational applications. its “semantic” elements include objects, properties, and links. its “kinetic” elements include actions, functions, dynamic security, and writeback. analytical tools and operational applications use the same representation of the company. aip adds models and agents into the same data-to-logic-to-action loop rather than replacing foundry with a separate architecture. gotham, foundry, and aip are different products, but they are also palantir finding three increasingly fashionable names for the same basic worldview: model reality, govern who can touch it, and make the answer operational.</p>
+<figure>
+<a href="/assets/palantir/05-product-timeline.svg" target="_blank" aria-label="open full-size figure: a rough timeline of how the product accreted"><img src="/assets/palantir/05-product-timeline.svg" alt="a rough timeline of how the product accreted" decoding="async"></a>
+</figure>
+<p>this is why the government plus the desert mattered. most startups have to find a narrow wedge, show arr, control burn, and deepen the point solution that already sells. palantir spent roughly twelve or thirteen years between its founding and the official release of foundry. “desert” does not mean no customers or no value. it means no broad, clean, legible commercial product-market fit.</p>
+<p>patient backing and paying government deployments gave palantir time to keep the ugly shared infrastructure instead of cutting it. software-engineering-quality people inside the customer meant that deployment work could feed back into real platform design. repeated deployments could leave behind a connector, permission model, object abstraction, workflow primitive, security capability, or deployment tool. enough reusable debris across enough hard environments eventually became foundry.</p>
+<p>the government constraint forced full-stack ownership while the time horizon allowed the full stack to compound. a hard environment without capital produces a bankrupt integrator. capital without a hard environment produces a bloated platform looking for a problem. both together, over more than a decade, produced a product that spans analytics, operations, and deployment.</p>
+<figure>
+<a href="/assets/palantir/foundry-docs-map.png" target="_blank" aria-label="open full-size figure: a map of the public foundry documentation"><img src="/assets/palantir/foundry-docs-map.png" alt="a map of the public foundry documentation" decoding="async"></a>
+</figure>
+<p>snowflake, databricks, retool, and uipath started from different assumptions. snowflake could assume public cloud, object storage, sql, and an existing warehouse-shaped problem. databricks could assume spark, a data or machine-learning team, and modern cloud primitives. retool and uipath could assume that the database or api already worked well enough to build an operational interface on top. palantir’s early deployments could rely on fewer of those assumptions, so it accepted responsibility from the raw source all the way to the operational result.</p>
+<p>those starting points became p&amp;l constraints. snowflake and databricks deepen usage-driven analytical primitives. retool and uipath deepen the operational surface. building the opposite half requires huge r&amp;d, deployment labor, and customer-specific workflows that would conflict with the economics and product focus those businesses currently optimize for.</p>
+<p>palantir’s differentiation is not “better etl,” “a graph database,” or “an ontology” in isolation. it is the connective tissue across analytical scale, operational action, and hostile deployment environments. foundry did not create the deployment model. more than a decade of deployments created foundry.</p>
+<p class="bridge">the deployment model shaped more than the product. it also shaped the economics of the account.</p>
+<h2 id="pricing-culture-and-leadership">pricing, culture, and leadership</h2>
+<p>the business model is genuinely different because the three comparison sets run three different meters.</p>
+<p>snowflake and databricks run a usage meter. revenue is generally tied to compute or consumption. solutions architects can be subsidized by the software margin, but their work still faces pressure to create enough future consumption to justify their salary. a project can create enormous customer p&amp;l value and still be unattractive if it barely moves consumption. helping the customer do the same work with fewer queries may reduce consumption revenue at the margin. the product company therefore has pressure to prioritize workload growth even when everyone involved genuinely wants the customer to succeed.</p>
+<p>accenture, deloitte, and normal consultancies run a labor meter. more hours, people, and scope mean more revenue. projects generally need to carry their own delivery margin. putting $20 million of people against a $10 million contract is not a long-term investment; it is a blown engagement. the consultant usually cannot capture the recurring value of the software or process that remains after the team leaves, so it has less ability to justify a giant current loss in exchange for the customer becoming much better five years from now.</p>
+<p>palantir runs something closer to an account or outcome meter. its contracts differ, and this is not literally pure outcome pricing. the important thing is that palantir can underwrite the future cash flows of software already embedded inside the customer. in a stylized illustration—not a reported palantir account—if a $10 million deployment plausibly creates $100 million of customer value and becomes a durable $10 million annual software relationship, palantir can rationally put $20 million of effort into year one. the initial deployment looks irrational on a project p&amp;l and can still be rational on the lifetime economics of the account.</p>
+<figure>
+<a href="/assets/palantir/06-three-meters.svg" target="_blank" aria-label="open full-size figure: snowflake, consultancies, and palantir run different meters"><img src="/assets/palantir/06-three-meters.svg" alt="snowflake, consultancies, and palantir run different meters" decoding="async"></a>
+<figcaption>illustrative comparison of the incentives created by each primary business model.</figcaption>
+</figure>
+<p>this feels more like taking principal risk than selling hours or consumption. palantir puts its own labor and capital at risk before the account has proven it will pay back. the initial overinvestment produces attractive lifetime economics only if the account becomes important enough to renew and expand.</p>
+<p>palantir described this directly in its <a href="https://www.sec.gov/archives/edgar/data/1321655/000119312520248369/d904406ds1a.htm" target="_blank" rel="noreferrer">2020 s-1</a> as acquire, expand, and scale. in acquire, pilots were offered at no or low cost, generally at palantir’s expense, with no guarantee of future returns; palantir explicitly said it operated those accounts at a loss. in expand, the company made another significant investment to understand the customer’s principal challenges and ensure the software created results; accounts in that phase were defined by negative contribution margin. the 2019 expand accounts had a negative 43 percent contribution margin, and the same customers reached positive 35 percent in the first half of 2020. in scale, the customer became more self-sufficient while the software spread across the operation, so palantir’s investment cost fell relative to account revenue. the 2019 scale accounts had a 55 percent contribution margin, and the top quartile reached 87 percent. contribution margin here is palantir’s non-gaap account-level measure, and these historical cohorts are evidence of the model—not a claim about every current account.</p>
+<p>one deployment therefore has a very different cash-flow shape from a conventional consulting project. in a stylized model, the customer might pay $10 million in year one while palantir spends $20 million and loses $10 million on the account. in year two, the customer might pay the same $10 million while delivery cost falls to $2 million. by years three through five, the customer might keep paying $10 million while delivery cost falls to roughly $1 million. the year-one loss bought an installed and configured asset that keeps producing revenue while requiring much less labor. a consultancy usually cannot underwrite this because the next year’s software cash flow does not belong to the consultancy.</p>
+<figure>
+<a href="/assets/palantir/07-single-deployment-cashflow.svg" target="_blank" aria-label="open full-size figure: illustrative cash flow for one durable deployment"><img src="/assets/palantir/07-single-deployment-cashflow.svg" alt="illustrative cash flow for one durable deployment" decoding="async"></a>
+<figcaption>illustrative model; not palantir-reported customer economics.</figcaption>
+</figure>
+<p>successful deployments also create account expansion. once the first project works, palantir can sell the next p&amp;l-moving workflow into the same institution. in the illustrative expansion case, the $10 million project is not merely renewed; it earns the right to launch several more $10 million projects. every new deployment has an expensive acquire or expand period, while older deployments mature into scale and subsidize the new ones. in the model, account revenue compounds while total delivery cost eventually flattens.</p>
+<p>this is why palantir can invest in a first small or stupid project far more aggressively than its apparent contract value justifies. the commercial model changes which kinds of projects the company can take. usage-priced software has weaker incentive to prioritize valuable workflows that create little consumption. a consultancy may avoid work whose current-year delivery cost exceeds the contract. palantir can sometimes justify an edge case with low immediate revenue and high implementation cost when it believes the workflow will become a durable software asset, the customer will renew it, and success will open several larger projects elsewhere in the institution. weird customer-specific requirements can become shared platform capability instead of being rejected as out of scope.</p>
+<p class="bridge">the business model buys the freedom. the culture determines what palantir does with it.</p>
+<p>a repeated interview theme is that the customer is the institution, not merely the buyer. doing exactly what the buyer says protects the deployment only until that buyer leaves. former employees described the goal as becoming known inside the institution as “the thing that reduced food waste,” “the thing that helped airbus ship airplanes faster,” or “the thing that increased conversion.” a p&amp;l result can survive an executive sponsor. a good relationship with the buyer often cannot.</p>
+<p>one friend who spent years at palantir characterized the culture—this was their phrase, not a directive i can attribute to karp—as “a secret mission from karp to save the company from itself.” in that person’s telling, buyer happiness still matters, but it is a constraint rather than the final objective. customer teams often optimize for local scope, political safety, and ordinary work constraints. palantir people are supposed to genuinely give a fuck about improving the institution anyway.</p>
+<p>the archetype described to me was an fde who entered through a dashboard, workflow, or shitty project that barely mattered, then wandered the hallways looking for the coo or operator who cared. they would find a sponsor for a much larger project attached to revenue, cost, throughput, waste, or readiness, and use the success of the first deployment to earn the next one. this can look arrogant because the fde is not simply taking requirements from the official buyer. they view themselves as having a second mandate to find the most important problem the company is failing to solve.</p>
+<p>this is the cultural opposite of conventional value engineering. consultancies are economically rewarded for stakeholder confidence and perceived value as well as delivery; storytelling, stakeholder management, slide decks, dinners, and political alignment are therefore rational parts of the service. palantir’s cultural claim is that it makes software rather than slide decks. karp publicly contrasts palantir with relationship-led sales, steak dinners, and conventional salesmanship. the ideal is to spend more time delivering the value than narrating the value. obviously palantir still sells, manages stakeholders, and markets itself. the distinction is what the institution culturally treats as the real work.</p>
+<p>my interpretation is that this mission survives only with the differentiated talent model and internal leadership compounding. you need people capable of finding and executing p&amp;l-moving projects, not merely delivering the scoped implementation. early fdes and leaders learned the model through years of deployment rather than from an external playbook. many leaders entered palantir relatively early and grew up inside the company. structurally, it looks closer to mckinsey’s internal partner pipeline than to a normal technology executive market. people who lived through the desert understand why the company is willing to lose money on apparently irrational deployments, and they are less likely to optimize those choices away as obvious inefficiencies.</p>
+<p>the trade-off is that coherence can become insularity. my concern is that prestige broadens the applicant pool and weakens the old self-selection: accepting the offer now reveals less contrarian preference. the “secret mission” can decay into ordinary account management.</p>
+<p class="bridge">put the talent, product, pricing, culture, and leadership together, and the loop becomes visible.</p>
+<h2 id="the-loop-the-risk">the loop / the risk</h2>
+<p>in my model, the palantir compounding loop is straightforward. a hard customer selects a high-agency technical operator. the fde solves the whole operational problem. repeated parts of the solution return to the platform. the platform makes the next deployment stronger. the stronger deployment wins an even harder customer. then the loop runs for more than a decade.</p>
+<p>palantir is cool now, which may break part of the original talent filter. the stock worked, ai made the category legible, and the weird government company became a prestige destination. more applicants now join because the market already agrees it is good. accepting the offer therefore reveals less of a genuinely contrarian preference than it once did.</p>
+<p>wealth and turnover may reduce retention of institutional memory. hiring volume makes orthogonal judgment harder. public markets reward repetition and legibility. the most serious threat may not be openai or snowflake. it may be palantir becoming a normal successful company.</p>
+<p>every critique sees one limb of the company. many imitators copy the visible layer: the fde title, onsite engineers, ai, and transformation language. far fewer copy the talent filter, time horizon, pricing, culture, or software compounding underneath it.</p>
+<figure>
+<a href="/assets/palantir/11-deployco-visible-vs-underneath.svg" target="_blank" aria-label="open full-size figure: what deploycos copy, and the system underneath it"><img src="/assets/palantir/11-deployco-visible-vs-underneath.svg" alt="what deploycos copy, and the system underneath it" decoding="async"></a>
+</figure>
+<p class="bridge">the visible layer is easy to copy. the system underneath it took more than a decade to compound.</p>
+<p class="closing-line">which is why almost every current deployco is going to fail.</p>
+  </main>
+</body>
+</html>

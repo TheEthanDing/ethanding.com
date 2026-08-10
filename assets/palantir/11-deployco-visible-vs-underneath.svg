@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+  <title id="title">What DeployCos copied and what they left underneath</title>
+  <desc id="desc">An iceberg-style comparison. Above the waterline are the visible Palantir traits copied by DeployCos: the FDE title, onsite engineers, AI demos, and transformation language. Below are the underlying system: the talent filter, patient capital and time, full-stack product, account economics, institutional culture, and deployment-to-software compounding loop.</desc>
+  <defs>
+    <style>
+      text { text-transform: lowercase !important; }
+      .title { font: 700 44px "Avenir Next", "Trebuchet MS", sans-serif; fill: #252525; }
+      .subtitle { font: 400 22px "Avenir Next", "Trebuchet MS", sans-serif; fill: #66635d; }
+      .label { font: 700 28px "Chalkboard SE", "Comic Sans MS", sans-serif; fill: #ed8b00; }
+      .head { font: 700 24px "Avenir Next", "Trebuchet MS", sans-serif; fill: #252525; }
+      .body { font: 500 20px "Avenir Next", "Trebuchet MS", sans-serif; fill: #363636; }
+      .small { font: 500 18px "Avenir Next", "Trebuchet MS", sans-serif; fill: #5f5c56; }
+      .water { fill: none; stroke: #ed8b00; stroke-width: 4; stroke-linecap: round; }
+      .ice { fill: #faf8f3; stroke: #2d2d2d; stroke-width: 2.2; stroke-linejoin: round; }
+      .tip { fill: #fff2df; stroke: #ed8b00; stroke-width: 3; stroke-linejoin: round; }
+      .divider { fill: none; stroke: #c9c4ba; stroke-width: 1.5; stroke-linecap: round; }
+      .dot { fill: #ed8b00; }
+    </style>
+  </defs>
+
+  <rect width="1440" height="900" fill="#ffffff"/>
+  <text x="70" y="73" class="title">every DeployCo copied the part above the waterline</text>
+  <path d="M70 94 C354 90, 644 100, 938 94" class="water"/>
+  <text x="70" y="131" class="subtitle">the visible job is easy to imitate; the system underneath took years to compound</text>
+
+  <!-- visible tip -->
+  <path class="tip" d="M489 177 L940 175 L1046 344 L382 344 Z"/>
+  <text x="547" y="220" class="label">WHAT EVERYONE COPIED</text>
+  <circle cx="524" cy="260" r="4.5" class="dot"/>
+  <text x="542" y="267" class="body">the FDE title</text>
+  <circle cx="714" cy="260" r="4.5" class="dot"/>
+  <text x="732" y="267" class="body">onsite engineers</text>
+  <circle cx="524" cy="308" r="4.5" class="dot"/>
+  <text x="542" y="315" class="body">the AI demo</text>
+  <circle cx="714" cy="308" r="4.5" class="dot"/>
+  <text x="732" y="315" class="body">“transformation” language</text>
+
+  <!-- waterline -->
+  <path d="M70 345 C255 337, 413 352, 590 344 C778 336, 949 351, 1113 344 C1210 340, 1291 346, 1368 342" class="water"/>
+  <text x="77" y="329" class="label">visible</text>
+  <text x="77" y="381" class="label">underneath</text>
+
+  <!-- iceberg body -->
+  <path class="ice" d="M382 346 L1046 346 L1231 817 L213 817 Z"/>
+  <text x="506" y="410" class="label">WHAT ACTUALLY MAKES IT WORK</text>
+  <path d="M714 435 C710 536, 718 654, 713 772" class="divider"/>
+
+  <!-- left column -->
+  <text x="310" y="485" class="head">a differentiated talent filter</text>
+  <text x="310" y="520" class="small">SWE-quality people doing implementation</text>
+  <text x="310" y="549" class="small">travel + ambiguity + mission</text>
+
+  <text x="310" y="613" class="head">patient capital + time</text>
+  <text x="310" y="648" class="small">twelve-ish years in the PMF desert</text>
+  <text x="310" y="677" class="small">room to keep the expensive infrastructure</text>
+
+  <text x="310" y="741" class="head">institution, not just buyer</text>
+  <text x="310" y="776" class="small">find the P&amp;L-moving problem that survives</text>
+
+  <!-- right column -->
+  <text x="762" y="485" class="head">a full-stack product</text>
+  <text x="762" y="520" class="small">analytics + operations + on-prem</text>
+  <text x="762" y="549" class="small">Ontology connects data to action</text>
+
+  <text x="762" y="613" class="head">account / project economics</text>
+  <text x="762" y="648" class="small">overinvest now; renew + expand later</text>
+  <text x="762" y="677" class="small">optimize for the outcome, not the meter</text>
+
+  <text x="762" y="741" class="head">deployment → reusable software</text>
+  <text x="762" y="776" class="small">every hard customer makes the platform stronger</text>
+
+  <text x="720" y="862" text-anchor="middle" class="label">copying the title does not recreate the machine</text>
+</svg>

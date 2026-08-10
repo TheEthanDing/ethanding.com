@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="800" viewBox="0 0 1400 800" role="img" aria-labelledby="title desc">
+  <title id="title">Illustrative cash flow for one Palantir deployment</title>
+  <desc id="desc">The customer pays ten million dollars each year. Palantir spends twenty million in year one, two million in year two, and one million in years three through five.</desc>
+  <defs>
+    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.08" numOctaves="1" seed="16" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1"/>
+    </filter>
+    <style>
+      text { text-transform: lowercase !important; }
+      .bg{fill:#fff}.ink{fill:#292929}.muted{fill:#737373}.orange{fill:#e88700}
+      .title{font:700 42px 'Comic Sans MS','Bradley Hand',Arial,sans-serif}.sub{font:18px Arial,Helvetica,sans-serif}
+      .legend{font:16px Arial,Helvetica,sans-serif;fill:#4c4c4c}.label{font:700 19px Arial,Helvetica,sans-serif}.value{font:700 20px Arial,Helvetica,sans-serif}
+      .net{font:700 24px 'Comic Sans MS','Bradley Hand',Arial,sans-serif;fill:#272727}.axis{stroke:#777;stroke-width:2;stroke-linecap:round;filter:url(#rough)}
+      .revenue{fill:#e6f3ef;stroke:#167762;stroke-width:2.5}.cost{fill:#fff0e8;stroke:#e06f2f;stroke-width:2.5}.foot{font:16px Arial,Helvetica,sans-serif;fill:#666}
+    </style>
+  </defs>
+  <rect class="bg" width="1400" height="800"/>
+  <text x="70" y="75" class="title ink">one deployment: lose money once, keep the installed asset</text>
+  <text x="72" y="110" class="sub muted">illustrative economics from the Notion model — not disclosed contract terms</text>
+
+  <g transform="translate(80 145)">
+    <rect x="0" y="0" width="22" height="22" rx="5" class="revenue"/>
+    <text x="34" y="18" class="legend">customer pays $10M / year</text>
+    <rect x="280" y="0" width="22" height="22" rx="5" class="cost"/>
+    <text x="314" y="18" class="legend">Palantir delivery cost</text>
+  </g>
+
+  <line x1="125" y1="420" x2="1290" y2="420" class="axis"/>
+
+  <g transform="translate(225 0)">
+    <text x="70" y="240" text-anchor="middle" class="net">−$10M</text>
+    <rect x="12" y="270" width="116" height="150" rx="11" class="revenue"/>
+    <text x="70" y="352" text-anchor="middle" class="value" fill="#126a58">$10M</text>
+    <rect x="12" y="420" width="116" height="242" rx="11" class="cost"/>
+    <text x="70" y="545" text-anchor="middle" class="value" fill="#a64b22">$20M</text>
+    <text x="70" y="711" text-anchor="middle" class="label ink">year 1</text>
+  </g>
+
+  <g transform="translate(445 0)">
+    <text x="70" y="240" text-anchor="middle" class="net">+$8M</text>
+    <rect x="12" y="270" width="116" height="150" rx="11" class="revenue"/>
+    <text x="70" y="352" text-anchor="middle" class="value" fill="#126a58">$10M</text>
+    <rect x="12" y="420" width="116" height="48" rx="9" class="cost"/>
+    <text x="70" y="500" text-anchor="middle" class="value" fill="#a64b22">$2M</text>
+    <text x="70" y="711" text-anchor="middle" class="label ink">year 2</text>
+  </g>
+
+  <g transform="translate(665 0)">
+    <text x="70" y="240" text-anchor="middle" class="net">+$9M</text>
+    <rect x="12" y="270" width="116" height="150" rx="11" class="revenue"/>
+    <text x="70" y="352" text-anchor="middle" class="value" fill="#126a58">$10M</text>
+    <rect x="12" y="420" width="116" height="24" rx="8" class="cost"/>
+    <text x="70" y="477" text-anchor="middle" class="value" fill="#a64b22">$1M</text>
+    <text x="70" y="711" text-anchor="middle" class="label ink">year 3</text>
+  </g>
+
+  <g transform="translate(885 0)">
+    <text x="70" y="240" text-anchor="middle" class="net">+$9M</text>
+    <rect x="12" y="270" width="116" height="150" rx="11" class="revenue"/>
+    <text x="70" y="352" text-anchor="middle" class="value" fill="#126a58">$10M</text>
+    <rect x="12" y="420" width="116" height="24" rx="8" class="cost"/>
+    <text x="70" y="477" text-anchor="middle" class="value" fill="#a64b22">$1M</text>
+    <text x="70" y="711" text-anchor="middle" class="label ink">year 4</text>
+  </g>
+
+  <g transform="translate(1105 0)">
+    <text x="70" y="240" text-anchor="middle" class="net">+$9M</text>
+    <rect x="12" y="270" width="116" height="150" rx="11" class="revenue"/>
+    <text x="70" y="352" text-anchor="middle" class="value" fill="#126a58">$10M</text>
+    <rect x="12" y="420" width="116" height="24" rx="8" class="cost"/>
+    <text x="70" y="477" text-anchor="middle" class="value" fill="#a64b22">$1M</text>
+    <text x="70" y="711" text-anchor="middle" class="label ink">year 5</text>
+  </g>
+
+  <text x="700" y="765" text-anchor="middle" class="foot">the year-one loss buys software that keeps renewing after the expensive delivery work collapses</text>
+</svg>

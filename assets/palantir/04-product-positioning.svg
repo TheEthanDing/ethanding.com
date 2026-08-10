@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">Most enterprise software either knows things or does things</title>
+  <desc id="desc">A conceptual chart maps enterprise products by analytical scale and operational capability. Palantir sits in the upper-right.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#ee8b00"/></marker>
+    <style>
+      text { text-transform: lowercase !important; }
+      .sans{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif}.hand{font-family:'Comic Sans MS','Marker Felt',cursive}.ink{fill:#282828}.muted{fill:#716e68}.orange{fill:#ee8b00}.axis{stroke:#ee8b00;stroke-width:3;stroke-linecap:round}.guide{stroke:#e9e3d9;stroke-width:2;stroke-dasharray:8 10}.name{font:700 27px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#303030}.small{font:600 21px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#77736d}.pal{font:800 40px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#ee8b00}
+    </style>
+  </defs>
+  <rect width="1600" height="980" fill="#fff"/>
+  <text x="72" y="73" class="sans ink" font-size="46" font-weight="800">most enterprise software either knows things or does things</text>
+  <text x="74" y="111" class="sans muted" font-size="21">Palantir tries to keep analytical scale and operational action on the same model</text>
+
+  <line x1="110" y1="850" x2="1510" y2="850" class="axis" marker-end="url(#arrow)"/>
+  <line x1="800" y1="900" x2="800" y2="155" class="axis" marker-end="url(#arrow)"/>
+  <line x1="110" y1="525" x2="1510" y2="525" class="guide"/>
+  <line x1="800" y1="850" x2="800" y2="155" class="guide"/>
+  <text x="1185" y="897" class="small">more analytical scale →</text>
+  <text x="818" y="174" class="small">more operational authority ↑</text>
+
+  <text x="155" y="250" class="name">Zapier</text>
+  <text x="275" y="343" class="name">UiPath</text>
+  <text x="468" y="398" class="name">Workato</text>
+  <text x="468" y="514" class="name">Retool</text>
+  <text x="130" y="630" class="name">Excel</text>
+  <text x="438" y="622" class="name">Airtable</text>
+
+  <text x="858" y="432" class="name">SAP</text>
+  <text x="1038" y="464" class="name">Oracle</text>
+  <text x="735" y="356" class="small">CRM</text>
+
+  <text x="1110" y="728" class="name">Snowflake</text>
+  <text x="1262" y="657" class="name">Databricks</text>
+  <text x="1322" y="804" class="name">ClickHouse</text>
+
+  <path d="M1180 302 C1242 217 1386 199 1451 263 C1419 336 1296 355 1207 320" fill="#fff7ea" stroke="#ee8b00" stroke-width="4" stroke-linecap="round"/>
+  <text x="1275" y="285" class="pal">Palantir</text>
+  <text x="1208" y="321" class="small">analytics + governed action</text>
+  <path d="M1285 638 C1268 543 1276 426 1314 341" fill="none" stroke="#ee8b00" stroke-width="5" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <text x="1341" y="477" class="hand orange" font-size="25" transform="rotate(-4 1341 477)">the connective tissue</text>
+
+  <rect x="515" y="885" width="570" height="58" rx="14" fill="#fff8ec" stroke="#ee8b00" stroke-width="2.5"/>
+  <text x="800" y="922" text-anchor="middle" class="hand ink" font-size="25">data → governed objects → actions → writeback → new data</text>
+</svg>

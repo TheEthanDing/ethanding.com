@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Enterprise technology is normally a group project</title>
+  <desc id="desc">Two conceptual maps show enterprise vendors by ownership of software and implementation risk. Before Palantir the upper-right is empty; Palantir appears there in the second map.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ee8b00"/>
+    </marker>
+    <style>
+      text { text-transform: lowercase !important; }
+      .ink{fill:#262626}.muted{fill:#74716c}.orange{fill:#ee8b00}.axis{fill:none;stroke:#ee8b00;stroke-width:3;stroke-linecap:round}.guide{fill:none;stroke:#e8e2d8;stroke-width:2;stroke-dasharray:7 10}.hand{font-family:'Comic Sans MS','Marker Felt',cursive}.sans{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif}.vendor{font:700 25px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#2b2b2b}.small{font:500 18px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#77736d}.panel{font:700 26px 'Comic Sans MS','Marker Felt',cursive;fill:#ee8b00}.axis-label{font:600 18px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#625f5a}.pal{font:800 34px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#ee8b00}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#fff"/>
+  <text x="80" y="78" class="sans ink" font-size="46" font-weight="800">enterprise technology is normally a group project</text>
+  <text x="82" y="116" class="sans muted" font-size="21">software and implementation usually live in different companies</text>
+
+  <text x="142" y="174" class="panel">before Palantir</text>
+  <line x1="142" y1="738" x2="746" y2="738" class="axis" marker-end="url(#arrow)"/>
+  <line x1="142" y1="738" x2="142" y2="206" class="axis" marker-end="url(#arrow)"/>
+  <line x1="444" y1="738" x2="444" y2="206" class="guide"/>
+  <line x1="142" y1="472" x2="746" y2="472" class="guide"/>
+  <text x="456" y="782" class="axis-label">owns the software substrate →</text>
+  <text x="153" y="225" class="axis-label">owns implementation / outcome risk ↑</text>
+
+  <text x="190" y="330" class="vendor">Deloitte · Accenture</text>
+  <text x="190" y="358" class="small">labor + implementation</text>
+  <text x="265" y="526" class="vendor">UiPath · Retool</text>
+  <text x="265" y="554" class="small">workflow surfaces</text>
+  <text x="486" y="592" class="vendor">SAP · Oracle</text>
+  <text x="486" y="620" class="small">operational systems</text>
+  <text x="500" y="684" class="vendor">Snowflake</text>
+  <text x="500" y="712" class="small">Databricks · AWS</text>
+  <path d="M532 286 C594 251 667 255 714 296 C682 346 605 355 548 329" fill="none" stroke="#ee8b00" stroke-width="3" stroke-linecap="round" stroke-dasharray="8 9"/>
+  <text x="555" y="298" class="hand orange" font-size="24">nobody lives here</text>
+
+  <text x="854" y="174" class="panel">then Palantir appears</text>
+  <line x1="854" y1="738" x2="1458" y2="738" class="axis" marker-end="url(#arrow)"/>
+  <line x1="854" y1="738" x2="854" y2="206" class="axis" marker-end="url(#arrow)"/>
+  <line x1="1156" y1="738" x2="1156" y2="206" class="guide"/>
+  <line x1="854" y1="472" x2="1458" y2="472" class="guide"/>
+  <text x="1168" y="782" class="axis-label">owns the software substrate →</text>
+  <text x="865" y="225" class="axis-label">owns implementation / outcome risk ↑</text>
+
+  <text x="902" y="330" class="vendor">Deloitte · Accenture</text>
+  <text x="902" y="358" class="small">labor + implementation</text>
+  <text x="977" y="526" class="vendor">UiPath · Retool</text>
+  <text x="977" y="554" class="small">workflow surfaces</text>
+  <text x="1198" y="592" class="vendor">SAP · Oracle</text>
+  <text x="1198" y="620" class="small">operational systems</text>
+  <text x="1212" y="684" class="vendor">Snowflake</text>
+  <text x="1212" y="712" class="small">Databricks · AWS</text>
+  <path d="M1264 285 C1318 238 1412 244 1441 308 C1402 360 1311 356 1266 318" fill="#fff7ea" stroke="#ee8b00" stroke-width="4" stroke-linecap="round"/>
+  <text x="1305" y="300" class="pal">Palantir</text>
+  <text x="1297" y="333" class="small">software + deployment</text>
+
+  <text x="800" y="850" text-anchor="middle" class="hand ink" font-size="27">Palantir insists on submitting the entire assignment itself.</text>
+</svg>
