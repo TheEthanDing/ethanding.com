@@ -1,70 +1,55 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="780" viewBox="0 0 1400 780" role="img" aria-labelledby="title desc">
-  <title id="title">Three companies, three meters</title>
-  <desc id="desc">Snowflake and Databricks optimize for usage, consultancies optimize for labor, and Palantir can optimize for account renewal and outcome-linked expansion.</desc>
-  <defs>
-    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.014 0.075" numOctaves="1" seed="8" result="noise"/>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.05"/>
-    </filter>
-    <style>
-      text { text-transform: lowercase !important; }
-      .bg{fill:#fff}.ink{fill:#292929}.muted{fill:#717171}.orange{fill:#e88700}
-      .title{font:700 44px 'Comic Sans MS','Bradley Hand',Arial,sans-serif}.sub{font:18px Arial,Helvetica,sans-serif}
-      .card{fill:#fff;stroke:#d8d8d8;stroke-width:2.5}.card.hot{fill:#fff8ed;stroke:#e88700;stroke-width:3.5;filter:url(#rough)}
-      .brand{font:700 24px 'Comic Sans MS','Bradley Hand',Arial,sans-serif}.meterlabel{font:700 20px Arial,Helvetica,sans-serif}.body{font:17px Arial,Helvetica,sans-serif;fill:#454545}.tag{font:700 15px Arial,Helvetica,sans-serif;letter-spacing:.8px;text-transform:uppercase}
-      .arc{fill:none;stroke:#d1d1d1;stroke-width:18;stroke-linecap:round}.arc.hot{stroke:#f4c47e}.tick{stroke:#777;stroke-width:2;stroke-linecap:round}.needle{stroke:#e88700;stroke-width:6;stroke-linecap:round;filter:url(#rough)}
-      .bottom{fill:#fff4e3;stroke:#efb35a;stroke-width:2}
-    </style>
-  </defs>
-  <rect class="bg" width="1400" height="780"/>
-  <text x="70" y="80" class="title ink">everyone says “customer success.” the meter says what they mean.</text>
-  <text x="72" y="116" class="sub muted">three business models reward three different kinds of motion</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title06 desc06">
+  <title id="title06">three companies, three meters</title>
+  <desc id="desc06">snowflake and databricks optimize usage, consultancies optimize labor, and palantir can optimize renewal and outcome-linked expansion.</desc>
+  <style>
+    text{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;fill:#202124}.muted{fill:#5f6368}.tiny{font-size:12px}.small{font-size:14px}.label{font-size:15px;font-weight:700}.head{font-size:26px;font-weight:700}.panel{fill:#fff;stroke:#dadce0}.track{fill:#f6f7f8;stroke:#dadce0}.blue{fill:#2f80ed}.green{fill:#0f9d75}.orange{fill:#e88200}.red{fill:#d64545}.purple{fill:#7b56d8}
+  </style>
+  <rect x="1" y="1" width="1198" height="758" rx="8" fill="#fff" stroke="#c9ced3"/>
+  <rect x="1" y="1" width="1198" height="53" rx="8" fill="#f4f5f6"/><rect x="1" y="45" width="1198" height="9" fill="#f4f5f6"/><line x1="1" y1="54" x2="1199" y2="54" stroke="#c9ced3"/>
+  <circle cx="28" cy="27" r="6" fill="#ff5f57"/><circle cx="50" cy="27" r="6" fill="#febc2e"/><circle cx="72" cy="27" r="6" fill="#28c840"/>
+  <text x="94" y="32" class="small muted">customer-success-meters.log</text>
 
-  <g transform="translate(70 165)">
-    <rect width="390" height="480" rx="20" class="card"/>
-    <text x="30" y="48" class="brand ink">Snowflake / Databricks</text>
-    <text x="30" y="79" class="tag muted">usage meter</text>
-    <path d="M98 218 A98 98 0 0 1 292 218" class="arc"/>
-    <line x1="195" y1="218" x2="272" y2="151" class="needle"/>
-    <circle cx="195" cy="218" r="9" fill="#e88700"/>
-    <text x="195" y="258" text-anchor="middle" class="meterlabel ink">bytes / compute</text>
-    <text x="30" y="318" class="body">more consumption</text>
-    <text x="30" y="344" class="body">→ more revenue</text>
-    <line x1="30" y1="373" x2="360" y2="373" stroke="#e6e6e6"/>
-    <text x="30" y="408" class="body">hard to justify valuable work</text>
-    <text x="30" y="434" class="body">that barely moves consumption</text>
+  <text x="38" y="88" class="small"><tspan fill="#0f9d75">$</tspan> inspect incentives --business-model all</text>
+  <text x="38" y="132" class="head">everyone says “customer success.” the meter says what they mean.</text>
+  <text x="38" y="159" class="small muted">three business models reward three different kinds of motion.</text>
+
+  <g transform="translate(38 200)">
+    <rect x="0" y="0" width="350" height="438" class="panel"/><rect x="0" y="0" width="350" height="5" class="blue"/>
+    <text x="22" y="39" class="label">snowflake / databricks</text><text x="22" y="65" class="tiny blue">meter = usage</text>
+    <text x="22" y="112" class="tiny muted">bytes / compute</text>
+    <rect x="22" y="128" width="306" height="24" class="track"/><rect x="22" y="128" width="252" height="24" class="blue"/>
+    <text x="22" y="191" class="small">more consumption</text><text x="22" y="216" class="small blue">→ more revenue</text>
+    <line x1="22" y1="246" x2="328" y2="246" stroke="#dadce0"/>
+    <text x="22" y="283" class="tiny muted">constraint:</text>
+    <text x="22" y="313" class="small">hard to justify valuable work</text><text x="22" y="337" class="small">that barely moves consumption.</text>
+    <text x="22" y="398" class="tiny muted">status: optimize the query meter</text>
   </g>
 
-  <g transform="translate(505 165)">
-    <rect width="390" height="480" rx="20" class="card"/>
-    <text x="30" y="48" class="brand ink">SI / consultancy</text>
-    <text x="30" y="79" class="tag muted">labor meter</text>
-    <path d="M98 218 A98 98 0 0 1 292 218" class="arc"/>
-    <line x1="195" y1="218" x2="259" y2="139" class="needle"/>
-    <circle cx="195" cy="218" r="9" fill="#e88700"/>
-    <text x="195" y="258" text-anchor="middle" class="meterlabel ink">hours / scope</text>
-    <text x="30" y="318" class="body">more billed labor</text>
-    <text x="30" y="344" class="body">→ more revenue</text>
-    <line x1="30" y1="373" x2="360" y2="373" stroke="#e6e6e6"/>
-    <text x="30" y="408" class="body">each project has to carry</text>
-    <text x="30" y="434" class="body">its own delivery margin</text>
+  <g transform="translate(425 200)">
+    <rect x="0" y="0" width="350" height="438" class="panel"/><rect x="0" y="0" width="350" height="5" class="red"/>
+    <text x="22" y="39" class="label">si / consultancy</text><text x="22" y="65" class="tiny red">meter = labor</text>
+    <text x="22" y="112" class="tiny muted">hours / scope</text>
+    <rect x="22" y="128" width="306" height="24" class="track"/><rect x="22" y="128" width="272" height="24" class="red"/>
+    <text x="22" y="191" class="small">more billed labor</text><text x="22" y="216" class="small red">→ more revenue</text>
+    <line x1="22" y1="246" x2="328" y2="246" stroke="#dadce0"/>
+    <text x="22" y="283" class="tiny muted">constraint:</text>
+    <text x="22" y="313" class="small">each project has to carry</text><text x="22" y="337" class="small">its own delivery margin.</text>
+    <text x="22" y="398" class="tiny muted">status: the fx desk says fee</text>
   </g>
 
-  <g transform="translate(940 165)">
-    <rect width="390" height="480" rx="20" class="card hot"/>
-    <text x="30" y="48" class="brand ink">Palantir</text>
-    <text x="30" y="79" class="tag orange">account / outcome meter</text>
-    <path d="M98 218 A98 98 0 0 1 292 218" class="arc hot"/>
-    <line x1="195" y1="218" x2="278" y2="160" class="needle"/>
-    <circle cx="195" cy="218" r="9" fill="#e88700"/>
-    <text x="195" y="258" text-anchor="middle" class="meterlabel ink">renew + expand</text>
-    <text x="30" y="318" class="body">move a P&amp;L number</text>
-    <text x="30" y="344" class="body">→ earn the next project</text>
-    <line x1="30" y1="373" x2="360" y2="373" stroke="#efcf9d"/>
-    <text x="30" y="408" class="body">can overinvest now if the</text>
-    <text x="30" y="434" class="body">software becomes durable</text>
+  <g transform="translate(812 200)">
+    <rect x="0" y="0" width="350" height="438" fill="#fff8ed" stroke="#e88200" stroke-width="2"/><rect x="0" y="0" width="350" height="5" class="orange"/>
+    <text x="22" y="39" class="label">palantir</text><text x="22" y="65" class="tiny orange">meter = account / outcome</text>
+    <text x="22" y="112" class="tiny muted">renew + expand</text>
+    <rect x="22" y="128" width="306" height="24" class="track"/><rect x="22" y="128" width="285" height="24" class="orange"/>
+    <text x="22" y="191" class="small">move a p&amp;l number</text><text x="22" y="216" class="small orange">→ earn the next project</text>
+    <line x1="22" y1="246" x2="328" y2="246" stroke="#efc992"/>
+    <text x="22" y="283" class="tiny muted">option:</text>
+    <text x="22" y="313" class="small">overinvest now if the software</text><text x="22" y="337" class="small">becomes durable.</text>
+    <text x="22" y="398" class="tiny muted">status: the fix is the renewal</text>
   </g>
 
-  <rect x="255" y="683" width="890" height="58" rx="16" class="bottom"/>
-  <text x="700" y="719" text-anchor="middle" class="meterlabel ink">not pure outcome pricing — a different account-level incentive</text>
+  <rect x="176" y="668" width="848" height="48" fill="#f6f7f8" stroke="#dadce0"/>
+  <text x="600" y="698" text-anchor="middle" class="small">not pure outcome pricing — a different account-level incentive.</text>
+  <text x="38" y="740" class="tiny muted">three meters · one phrase · materially different optimization functions</text>
 </svg>

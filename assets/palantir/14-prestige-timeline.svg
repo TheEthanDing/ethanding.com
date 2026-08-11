@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="910" viewBox="0 0 1200 910" role="img" aria-labelledby="title desc">
+  <title id="title">the mass-market prestige magnet moved while palantir built a narrow private market</title>
+  <desc id="desc">a 2010 to 2025 timeline contrasts broad engineering prestige with palantir's concentrated recruiting microclimates at stanford and imperial before palantir became broadly legible.</desc>
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="120%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity=".06"/></filter>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#377dff" stroke-width="1.7"/></marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#149f67" stroke-width="1.7"/></marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#db8400" stroke-width="1.7"/></marker>
+    <style>
+      text { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; fill: #252a31; }
+      .title { font-size: 31px; font-weight: 800; letter-spacing: -.7px; }
+      .subtitle { font-size: 16px; fill: #68717c; }
+      .prompt { font-size: 16px; fill: #252a31; }
+      .section { font-size: 19px; font-weight: 800; }
+      .head { font-size: 17px; font-weight: 800; }
+      .body { font-size: 16px; }
+      .small { font-size: 14px; fill: #68717c; }
+      .micro { font-size: 12px; fill: #68717c; }
+      .blue { fill: #377dff; } .green { fill: #149f67; } .orange { fill: #db8400; } .red { fill: #dd5050; } .purple { fill: #8058cf; }
+      .panel { fill: #ffffff; stroke: #c9cdd2; stroke-width: 1.2; }
+      .soft { fill: #f7f8fa; stroke: #dfe3e7; stroke-width: 1; }
+      .rule { stroke: #dfe3e7; stroke-width: 1; }
+      .dash { stroke-dasharray: 6 6; }
+    </style>
+  </defs>
+  <rect width="1200" height="910" fill="#f7f7f5"/>
+  <rect x="1" y="1" width="1198" height="908" rx="8" fill="#ffffff" stroke="#c9cdd2" filter="url(#shadow)"/>
+  <path d="M9 1 H1191 Q1199 1 1199 9 V55 H1 V9 Q1 1 9 1 Z" fill="#f1f2f4"/>
+  <line x1="1" y1="55" x2="1199" y2="55" stroke="#c9cdd2"/>
+  <circle cx="28" cy="28" r="7" fill="#ff5f57"/><circle cx="50" cy="28" r="7" fill="#febc2e"/><circle cx="72" cy="28" r="7" fill="#28c840"/>
+  <text x="94" y="34" class="small">talent-market-2010-2025.log</text>
+  <text x="42" y="98" class="prompt"><tspan class="green">$</tspan> cat talent-market.log --years 2010:2025 --lanes broad,palantir</text>
+  <text x="42" y="147" class="title">the prestige market moved. palantir built its own.</text>
+  <text x="42" y="177" class="subtitle">broad employer consensus on top; palantir’s concentrated recruiting microclimates underneath.</text>
+  <text x="42" y="225" class="section orange">lane 01 / the broad prestige magnet</text>
+  <rect x="42" y="247" width="1116" height="220" class="panel"/>
+  <line x1="82.0" y1="277" x2="82.0" y2="438" class="rule"/>
+  <text x="82.0" y="456" text-anchor="middle" class="micro">2010</text>
+  <line x1="151.6" y1="277" x2="151.6" y2="438" class="rule"/>
+  <text x="151.6" y="456" text-anchor="middle" class="micro">11</text>
+  <line x1="221.2" y1="277" x2="221.2" y2="438" class="rule"/>
+  <text x="221.2" y="456" text-anchor="middle" class="micro">12</text>
+  <line x1="290.8" y1="277" x2="290.8" y2="438" class="rule"/>
+  <text x="290.8" y="456" text-anchor="middle" class="micro">13</text>
+  <line x1="360.4" y1="277" x2="360.4" y2="438" class="rule"/>
+  <text x="360.4" y="456" text-anchor="middle" class="micro">14</text>
+  <line x1="430.0" y1="277" x2="430.0" y2="438" class="rule"/>
+  <text x="430.0" y="456" text-anchor="middle" class="micro">2015</text>
+  <line x1="499.6" y1="277" x2="499.6" y2="438" class="rule"/>
+  <text x="499.6" y="456" text-anchor="middle" class="micro">16</text>
+  <line x1="569.2" y1="277" x2="569.2" y2="438" class="rule"/>
+  <text x="569.2" y="456" text-anchor="middle" class="micro">17</text>
+  <line x1="638.8" y1="277" x2="638.8" y2="438" class="rule"/>
+  <text x="638.8" y="456" text-anchor="middle" class="micro">18</text>
+  <line x1="708.4" y1="277" x2="708.4" y2="438" class="rule"/>
+  <text x="708.4" y="456" text-anchor="middle" class="micro">19</text>
+  <line x1="778.0" y1="277" x2="778.0" y2="438" class="rule"/>
+  <text x="778.0" y="456" text-anchor="middle" class="micro">2020</text>
+  <line x1="847.6" y1="277" x2="847.6" y2="438" class="rule"/>
+  <text x="847.6" y="456" text-anchor="middle" class="micro">21</text>
+  <line x1="917.2" y1="277" x2="917.2" y2="438" class="rule"/>
+  <text x="917.2" y="456" text-anchor="middle" class="micro">22</text>
+  <line x1="986.8" y1="277" x2="986.8" y2="438" class="rule"/>
+  <text x="986.8" y="456" text-anchor="middle" class="micro">23</text>
+  <line x1="1056.4" y1="277" x2="1056.4" y2="438" class="rule"/>
+  <text x="1056.4" y="456" text-anchor="middle" class="micro">24</text>
+  <line x1="1126.0" y1="277" x2="1126.0" y2="438" class="rule"/>
+  <text x="1126.0" y="456" text-anchor="middle" class="micro">2025</text>
+  <rect x="82.0" y="290" width="292.3" height="58" fill="#ffffff" stroke="#db8400" stroke-width="2"/>
+  <text x="92.0" y="315" class="head" fill="#db8400">google · microsoft · ibm / apple</text>
+  <text x="92.0" y="337" class="micro">2010–14 · surveyed engineering consensus</text>
+  <rect x="391.7" y="359" width="233.2" height="58" fill="#ffffff" stroke="#377dff" stroke-width="2"/>
+  <text x="401.7" y="384" class="head" fill="#377dff">google · facebook · uber · airbnb</text>
+  <text x="401.7" y="406" class="micro">2015–17 · consumer-scale heat</text>
+  <rect x="638.8" y="290" width="187.9" height="58" fill="#ffffff" stroke="#149f67" stroke-width="2"/>
+  <text x="648.8" y="315" class="head" fill="#149f67">stripe · airbnb · doordash</text>
+  <text x="648.8" y="337" class="micro">2018–20</text>
+  <rect x="840.6" y="359" width="111.4" height="58" fill="#ffffff" stroke="#8058cf" stroke-width="2"/>
+  <text x="850.6" y="384" class="head" fill="#8058cf">crypto</text>
+  <text x="850.6" y="406" class="micro">2021–22</text>
+  <rect x="965.9" y="290" width="160.1" height="58" fill="#ffffff" stroke="#dd5050" stroke-width="2"/>
+  <text x="975.9" y="315" class="head" fill="#dd5050">openai · anthropic</text>
+  <text x="975.9" y="337" class="micro">2023–25</text>
+  <text x="42" y="516" class="section green">lane 02 / palantir’s private prestige market</text>
+  <rect x="42" y="538" width="1116" height="271" class="panel"/>
+  <line x1="82" y1="677" x2="1126" y2="677" stroke="#c9cdd2" stroke-width="2"/>
+  <path d="M82 716 C260 711 365 701 491 678 C655 647 775 667 902 624 C998 592 1062 557 1126 554" fill="none" stroke="#149f67" stroke-width="3"/>
+  <circle cx="94" cy="714" r="6" fill="#149f67"/><text x="82" y="760" class="head">obscure to the market</text><text x="82" y="783" class="micro">the weird government company · already recruiting narrowly</text>
+  <circle cx="362" cy="696" r="6" fill="#149f67"/><text x="255" y="577" class="head green">stanford cs microclimate</text><text x="255" y="601" class="small">ta gatherings · friend networks</text><text x="255" y="625" class="small">contemporary observer called it “elite”</text><text x="255" y="648" class="micro">documented anecdote · 2013</text><line x1="362" y1="656" x2="362" y2="688" stroke="#149f67"/>
+  <circle cx="618" cy="658" r="6" fill="#149f67"/><text x="520" y="706" class="head green">imperial cluster</text><text x="520" y="730" class="small">intern → full-time → campus talk</text><text x="520" y="753" class="micro">public markers · 2015–18</text>
+  <circle cx="891" cy="628" r="6" fill="#149f67"/><text x="730" y="577" class="head green">2020 ipo</text><text x="730" y="601" class="small">still hard to explain</text><line x1="891" y1="610" x2="891" y2="620" stroke="#149f67"/>
+  <circle cx="1117" cy="558" r="7" fill="#149f67"/><text x="1138" y="590" text-anchor="end" class="head green">palantir becomes hot</text><text x="1138" y="614" text-anchor="end" class="small">ai + stock + legibility</text><text x="1138" y="637" text-anchor="end" class="micro">accepting reveals less</text>
+  <text x="42" y="835" class="prompt"><tspan class="green">$</tspan> result</text>
+  <text x="42" y="866" class="section orange">this was not mass recruiting. it was capturing dense little networks.</text>
+  <text x="42" y="892" class="micro">macro lane: survey anchors + cultural shorthand · micro lane: contemporary anecdotes + public campus markers</text>
+</svg>

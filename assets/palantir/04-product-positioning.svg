@@ -1,45 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
-  <title id="title">Most enterprise software either knows things or does things</title>
-  <desc id="desc">A conceptual chart maps enterprise products by analytical scale and operational capability. Palantir sits in the upper-right.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title04 desc04">
+  <title id="title04">most enterprise software either knows things or does things</title>
+  <desc id="desc04">a map places enterprise products by analytical scale and operational authority. hex remains far to the right on analytical scale but sits just below the operational-systems threshold; palantir occupies the upper right.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#ee8b00"/></marker>
+    <marker id="arrow04" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6368"/></marker>
     <style>
-      text { text-transform: lowercase !important; }
-      .sans{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif}.hand{font-family:'Comic Sans MS','Marker Felt',cursive}.ink{fill:#282828}.muted{fill:#716e68}.orange{fill:#ee8b00}.axis{stroke:#ee8b00;stroke-width:3;stroke-linecap:round}.guide{stroke:#e9e3d9;stroke-width:2;stroke-dasharray:8 10}.name{font:700 27px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#303030}.small{font:600 21px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#77736d}.pal{font:800 40px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#ee8b00}
+      text{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;fill:#202124}.muted{fill:#5f6368}.tiny{font-size:12px}.small{font-size:14px}.label{font-size:15px;font-weight:700}.head{font-size:26px;font-weight:700}.plot{fill:#fff;stroke:#dadce0}.axis{stroke:#5f6368;stroke-width:1.4}.grid{stroke:#dadce0;stroke-width:1;stroke-dasharray:4 5}.blue{fill:#2f80ed}.green{fill:#0f9d75}.orange{fill:#e88200}.red{fill:#d64545}.purple{fill:#7b56d8}
     </style>
   </defs>
-  <rect width="1600" height="980" fill="#fff"/>
-  <text x="72" y="73" class="sans ink" font-size="46" font-weight="800">most enterprise software either knows things or does things</text>
-  <text x="74" y="111" class="sans muted" font-size="21">Palantir tries to keep analytical scale and operational action on the same model</text>
-
-  <line x1="110" y1="850" x2="1510" y2="850" class="axis" marker-end="url(#arrow)"/>
-  <line x1="800" y1="900" x2="800" y2="155" class="axis" marker-end="url(#arrow)"/>
-  <line x1="110" y1="525" x2="1510" y2="525" class="guide"/>
-  <line x1="800" y1="850" x2="800" y2="155" class="guide"/>
-  <text x="1185" y="897" class="small">more analytical scale →</text>
-  <text x="818" y="174" class="small">more operational authority ↑</text>
-
-  <text x="155" y="250" class="name">Zapier</text>
-  <text x="275" y="343" class="name">UiPath</text>
-  <text x="468" y="398" class="name">Workato</text>
-  <text x="468" y="514" class="name">Retool</text>
-  <text x="130" y="630" class="name">Excel</text>
-  <text x="438" y="622" class="name">Airtable</text>
-
-  <text x="858" y="432" class="name">SAP</text>
-  <text x="1038" y="464" class="name">Oracle</text>
-  <text x="735" y="356" class="small">CRM</text>
-
-  <text x="1110" y="728" class="name">Snowflake</text>
-  <text x="1262" y="657" class="name">Databricks</text>
-  <text x="1322" y="804" class="name">ClickHouse</text>
-
-  <path d="M1180 302 C1242 217 1386 199 1451 263 C1419 336 1296 355 1207 320" fill="#fff7ea" stroke="#ee8b00" stroke-width="4" stroke-linecap="round"/>
-  <text x="1275" y="285" class="pal">Palantir</text>
-  <text x="1208" y="321" class="small">analytics + governed action</text>
-  <path d="M1285 638 C1268 543 1276 426 1314 341" fill="none" stroke="#ee8b00" stroke-width="5" stroke-linecap="round" marker-end="url(#arrow)"/>
-  <text x="1341" y="477" class="hand orange" font-size="25" transform="rotate(-4 1341 477)">the connective tissue</text>
-
-  <rect x="515" y="885" width="570" height="58" rx="14" fill="#fff8ec" stroke="#ee8b00" stroke-width="2.5"/>
-  <text x="800" y="922" text-anchor="middle" class="hand ink" font-size="25">data → governed objects → actions → writeback → new data</text>
+  <rect x="1" y="1" width="1198" height="758" rx="8" fill="#fff" stroke="#c9ced3"/>
+  <rect x="1" y="1" width="1198" height="53" rx="8" fill="#f4f5f6"/><rect x="1" y="45" width="1198" height="9" fill="#f4f5f6"/><line x1="1" y1="54" x2="1199" y2="54" stroke="#c9ced3"/>
+  <circle cx="28" cy="27" r="6" fill="#ff5f57"/><circle cx="50" cy="27" r="6" fill="#febc2e"/><circle cx="72" cy="27" r="6" fill="#28c840"/>
+  <text x="94" y="32" class="small muted">analytics-vs-action.map</text>
+  <text x="38" y="88" class="small"><tspan fill="#0f9d75">$</tspan> plot vendors --x petabyte-scale --y operational-systems</text>
+  <text x="38" y="132" class="head">most enterprise software either knows things or does things</text>
+  <text x="38" y="159" class="small muted">palantir tries to keep petabyte-scale analytics and operational action on the same model.</text>
+  <rect x="68" y="195" width="1064" height="446" class="plot"/>
+  <line x1="605" y1="606" x2="605" y2="227" class="axis" marker-end="url(#arrow04)"/>
+  <line x1="122" y1="410" x2="1087" y2="410" class="axis" marker-end="url(#arrow04)"/>
+  <text x="620" y="248" class="tiny muted">operational systems / authority ↑</text>
+  <text x="840" y="397" class="tiny muted">analytical scale / petabyte scale →</text>
+  <circle cx="185" cy="278" r="5" class="purple"/><text x="198" y="283" class="small">zapier</text>
+  <circle cx="270" cy="333" r="5" class="purple"/><text x="283" y="338" class="small">uipath</text>
+  <circle cx="410" cy="340" r="5" class="purple"/><text x="423" y="345" class="small">workato</text>
+  <circle cx="470" cy="374" r="5" class="purple"/><text x="483" y="379" class="small">retool</text>
+  <circle cx="360" cy="399" r="5" class="red"/><text x="373" y="404" class="small">airtable</text>
+  <circle cx="178" cy="388" r="5" class="red"/><text x="191" y="393" class="small">excel</text>
+  <circle cx="245" cy="568" r="5" class="muted"/><text x="258" y="573" class="small">squarespace</text>
+  <circle cx="154" cy="585" r="5" class="muted"/><text x="167" y="590" class="small">html</text>
+  <circle cx="664" cy="330" r="5" class="orange"/><text x="677" y="335" class="small">salesforce</text>
+  <circle cx="746" cy="350" r="5" class="orange"/><text x="759" y="355" class="small">sap</text>
+  <circle cx="848" cy="372" r="5" class="orange"/><text x="861" y="377" class="small">oracle</text>
+  <circle cx="886" cy="432" r="5" class="purple"/><text x="899" y="437" class="small">hex</text>
+  <circle cx="875" cy="522" r="5" class="blue"/><text x="888" y="527" class="small">databricks</text>
+  <circle cx="800" cy="560" r="5" class="blue"/><text x="813" y="565" class="small">snowflake</text>
+  <circle cx="993" cy="578" r="5" class="blue"/><text x="1006" y="583" class="small">clickhouse</text>
+  <circle cx="1007" cy="246" r="16" fill="#0f9d75"/><circle cx="1007" cy="246" r="28" fill="none" stroke="#0f9d75" stroke-width="2"/>
+  <text x="1043" y="242" class="label green">palantir</text><text x="1007" y="290" text-anchor="middle" class="tiny muted">analytics + action</text>
+  <rect x="68" y="666" width="1064" height="49" fill="#f6f7f8" stroke="#dadce0"/>
+  <text x="88" y="696" class="small"><tspan fill="#0f9d75">connective_tissue:</tspan> data → governed objects → actions → writeback → new data</text>
+  <text x="38" y="739" class="tiny muted">the categories are directional. the missing combination is the point.</text>
 </svg>

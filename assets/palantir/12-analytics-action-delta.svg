@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="1120" viewBox="0 0 1200 1120" role="img" aria-labelledby="title desc">
+  <title id="title">the enterprise data and operations delta</title>
+  <desc id="desc">the analytical stack stops at insight, bounded operational tools lack shared analytical semantics, and palantir ontology bridges both in a governed read-write loop.</desc>
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="120%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity=".06"/></filter>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#377dff" stroke-width="1.7"/></marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#149f67" stroke-width="1.7"/></marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#db8400" stroke-width="1.7"/></marker>
+    <style>
+      text { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; fill: #252a31; }
+      .title { font-size: 31px; font-weight: 800; letter-spacing: -.7px; }
+      .subtitle { font-size: 16px; fill: #68717c; }
+      .prompt { font-size: 16px; fill: #252a31; }
+      .section { font-size: 19px; font-weight: 800; }
+      .head { font-size: 17px; font-weight: 800; }
+      .body { font-size: 16px; }
+      .small { font-size: 14px; fill: #68717c; }
+      .micro { font-size: 12px; fill: #68717c; }
+      .blue { fill: #377dff; } .green { fill: #149f67; } .orange { fill: #db8400; } .red { fill: #dd5050; } .purple { fill: #8058cf; }
+      .panel { fill: #ffffff; stroke: #c9cdd2; stroke-width: 1.2; }
+      .soft { fill: #f7f8fa; stroke: #dfe3e7; stroke-width: 1; }
+      .rule { stroke: #dfe3e7; stroke-width: 1; }
+      .dash { stroke-dasharray: 6 6; }
+    </style>
+  </defs>
+  <rect width="1200" height="1120" fill="#f7f7f5"/>
+  <rect x="1" y="1" width="1198" height="1118" rx="8" fill="#ffffff" stroke="#c9cdd2" filter="url(#shadow)"/>
+  <path d="M9 1 H1191 Q1199 1 1199 9 V55 H1 V9 Q1 1 9 1 Z" fill="#f1f2f4"/>
+  <line x1="1" y1="55" x2="1199" y2="55" stroke="#c9cdd2"/>
+  <circle cx="28" cy="28" r="7" fill="#ff5f57"/><circle cx="50" cy="28" r="7" fill="#febc2e"/><circle cx="72" cy="28" r="7" fill="#28c840"/>
+  <text x="94" y="34" class="small">enterprise-data-operations-delta.sh</text>
+  <text x="42" y="98" class="prompt"><tspan class="green">$</tspan> trace enterprise-stack --from data --to action --include writeback</text>
+  <text x="42" y="147" class="title">the enterprise data / operations delta</text>
+  <text x="42" y="177" class="subtitle">one stack knows what happened. another changes a bounded system. the hard part is closing the loop.</text>
+  <rect x="42" y="208" width="1116" height="226" class="panel"/>
+  <rect x="42" y="208" width="7" height="226" fill="#377dff"/>
+  <text x="67" y="241" class="section blue">[01] olap / analytical stack</text>
+  <text x="1132" y="241" text-anchor="end" class="small">broad scale · mostly read-heavy</text>
+  <line x1="68" y1="257" x2="1132" y2="257" class="rule"/>
+  <g class="body" text-anchor="middle">
+    <rect x="69" y="284" width="148" height="72" class="soft"/><text x="143" y="316" class="head">fivetran</text><text x="143" y="341" class="small">ingest</text>
+    <rect x="260" y="284" width="198" height="72" class="soft"/><text x="359" y="313" class="head">snowflake / databricks</text><text x="359" y="341" class="small">warehouse + compute</text>
+    <rect x="501" y="284" width="118" height="72" class="soft"/><text x="560" y="316" class="head">dbt</text><text x="560" y="341" class="small">model</text>
+    <rect x="662" y="284" width="180" height="72" class="soft"/><text x="752" y="313" class="head">looker / dashboard</text><text x="752" y="341" class="small">present</text>
+    <rect x="885" y="284" width="130" height="72" class="soft"/><text x="950" y="326" class="head">insight</text>
+  </g>
+  <g fill="none" stroke="#377dff" stroke-width="2" marker-end="url(#arrow-blue)"><path d="M219 320 H254"/><path d="M460 320 H495"/><path d="M621 320 H656"/><path d="M844 320 H879"/></g>
+  <line x1="1044" y1="278" x2="1044" y2="362" stroke="#dd5050" stroke-width="4"/>
+  <text x="1060" y="311" class="head red">stop</text>
+  <text x="1060" y="337" class="small">open a ticket</text>
+  <text x="68" y="402" class="body">excellent at producing trusted answers across enormous datasets.</text>
+  <rect x="42" y="469" width="1116" height="356" fill="#ffffff" stroke="#149f67" stroke-width="2.5"/>
+  <rect x="42" y="469" width="7" height="356" fill="#149f67"/>
+  <text x="67" y="501" class="section green">[bridge] palantir ontology</text>
+  <text x="67" y="529" class="subtitle">one governed read / write model of the company</text>
+  <line x1="68" y1="545" x2="1132" y2="545" class="rule"/>
+  <rect x="83" y="571" width="218" height="86" class="soft" stroke="#377dff"/><text x="192" y="605" text-anchor="middle" class="head">data</text><text x="192" y="633" text-anchor="middle" class="small">objects + relationships</text>
+  <rect x="354" y="571" width="218" height="86" class="soft"/><text x="463" y="605" text-anchor="middle" class="head">logic</text><text x="463" y="633" text-anchor="middle" class="small">functions + guardrails</text>
+  <rect x="625" y="571" width="218" height="86" fill="#fff8ed" stroke="#db8400"/><text x="734" y="605" text-anchor="middle" class="head">action</text><text x="734" y="633" text-anchor="middle" class="small">workflow + writeback</text>
+  <rect x="896" y="571" width="218" height="86" class="soft"/><text x="1005" y="605" text-anchor="middle" class="head">security</text><text x="1005" y="633" text-anchor="middle" class="small">dynamic + granular</text>
+  <g fill="none" stroke-width="2" marker-end="url(#arrow-green)"><path d="M303 614 H346" stroke="#149f67"/><path d="M574 614 H617" stroke="#149f67"/><path d="M845 614 H888" stroke="#db8400" marker-end="url(#arrow-orange)"/></g>
+  <path d="M1005 693 C1005 774 891 801 601 801 C311 801 191 774 191 693" fill="none" stroke="#149f67" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+  <text x="600" y="722" text-anchor="middle" class="section">observe → decide → act → write back → observe</text>
+  <text x="600" y="752" text-anchor="middle" class="subtitle">the action becomes new data; the model changes with the company.</text>
+  <path d="M359 435 V461" fill="none" stroke="#377dff" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <rect x="42" y="861" width="1116" height="187" class="panel"/>
+  <rect x="42" y="861" width="7" height="187" fill="#db8400"/>
+  <text x="67" y="895" class="section orange">[02] transactional systems + bounded automation</text>
+  <text x="1132" y="895" text-anchor="end" class="small">local scope · mostly write-heavy</text>
+  <line x1="68" y1="911" x2="1132" y2="911" class="rule"/>
+  <text x="70" y="946" class="small">systems of record</text>
+  <text x="415" y="946" class="small">bounded workflow tools</text>
+  <g text-anchor="middle" class="head">
+    <rect x="70" y="965" width="134" height="48" class="soft"/><text x="137" y="996">sap</text>
+    <rect x="220" y="965" width="170" height="48" class="soft"/><text x="305" y="996">salesforce</text>
+    <rect x="415" y="965" width="126" height="48" class="soft"/><text x="478" y="996">retool</text>
+    <rect x="557" y="965" width="126" height="48" class="soft"/><text x="620" y="996">uipath</text>
+    <rect x="699" y="965" width="126" height="48" class="soft"/><text x="762" y="996">zapier</text>
+    <rect x="841" y="965" width="126" height="48" class="soft"/><text x="904" y="996">n8n</text>
+  </g>
+  <text x="70" y="1037" class="small">good at updating one system or path</text>
+  <text x="1130" y="1037" text-anchor="end" class="small red">no warehouse-scale shared semantics</text>
+  <path d="M734 827 V853" fill="none" stroke="#db8400" stroke-width="2.5" marker-end="url(#arrow-orange)"/>
+  <text x="42" y="1085" class="prompt"><tspan class="green">$</tspan> result</text>
+  <text x="134" y="1085" class="section green">data + logic + action + security, on one governed model</text>
+</svg>

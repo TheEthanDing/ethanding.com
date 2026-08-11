@@ -1,57 +1,51 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1050" viewBox="0 0 1500 1050" role="img" aria-labelledby="title desc">
-  <title id="title">Palantir stacked independent talent filters</title>
-  <desc id="desc">A narrowing stack shows the independent filters that selected Palantir forward-deployed engineers.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title03 desc03">
+  <title id="title03">palantir stacked independent filters on the same person</title>
+  <desc id="desc03">a narrowing funnel shows six filters selecting forward-deployed engineers from a software engineering talent pool.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#ee8b00"/></marker>
+    <marker id="arrow03" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5f6368"/></marker>
     <style>
-      text { text-transform: lowercase !important; }
-      .sans{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif}.hand{font-family:'Comic Sans MS','Marker Felt',cursive}.ink{fill:#282828}.muted{fill:#706d68}.orange{fill:#ee8b00}.filter{fill:#fff;stroke:#ee8b00;stroke-width:3}.arrow{stroke:#ee8b00;stroke-width:3;stroke-linecap:round}.label{font:700 23px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#2c2c2c}.out{fill:#ee8b00;stroke:#ee8b00;stroke-width:3}.out-text{font:800 30px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#fff}
+      text{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;fill:#202124}.muted{fill:#5f6368}.tiny{font-size:12px}.small{font-size:14px}.label{font-size:15px;font-weight:700}.head{font-size:26px;font-weight:700}.row{fill:#fff;stroke:#dadce0}.connector{stroke:#5f6368;stroke-width:1.3}.blue{fill:#2f80ed}.green{fill:#0f9d75}.orange{fill:#e88200}.red{fill:#d64545}.purple{fill:#7b56d8}
     </style>
   </defs>
-  <rect width="1500" height="1050" fill="#fff"/>
-  <text x="750" y="70" text-anchor="middle" class="sans ink" font-size="45" font-weight="800">Palantir stacked independent filters on the same person</text>
-  <text x="750" y="108" text-anchor="middle" class="sans muted" font-size="21">each filter removed a different kind of applicant</text>
+  <rect x="1" y="1" width="1198" height="898" rx="8" fill="#fff" stroke="#c9ced3"/>
+  <rect x="1" y="1" width="1198" height="53" rx="8" fill="#f4f5f6"/><rect x="1" y="45" width="1198" height="9" fill="#f4f5f6"/><line x1="1" y1="54" x2="1199" y2="54" stroke="#c9ced3"/>
+  <circle cx="28" cy="27" r="6" fill="#ff5f57"/><circle cx="50" cy="27" r="6" fill="#febc2e"/><circle cx="72" cy="27" r="6" fill="#28c840"/>
+  <text x="94" y="32" class="small muted">fde-selection-pipeline.log</text>
 
-  <rect x="120" y="155" width="1260" height="76" rx="16" class="filter"/>
-  <text x="750" y="203" text-anchor="middle" class="label">could clear a real production software-engineering interview</text>
-  <line x1="750" y1="232" x2="750" y2="257" class="arrow" marker-end="url(#arrow)"/>
+  <text x="38" y="88" class="small"><tspan fill="#0f9d75">$</tspan> run talent_filter --candidate same_person --show-intersection</text>
+  <text x="38" y="132" class="head">palantir stacked independent filters on the same person</text>
+  <text x="38" y="159" class="small muted">each stage removed a different kind of applicant. “smart” was only the first gate.</text>
 
-  <rect x="175" y="266" width="1150" height="76" rx="16" class="filter"/>
-  <text x="750" y="314" text-anchor="middle" class="label">had credentials and a background that created unusually good outside options</text>
-  <line x1="750" y1="343" x2="750" y2="368" class="arrow" marker-end="url(#arrow)"/>
+  <g>
+    <rect x="90" y="198" width="1020" height="74" class="row"/><rect x="90" y="198" width="7" height="74" class="blue"/>
+    <text x="116" y="225" class="tiny blue">gate_01 / engineering bar</text><text x="116" y="251" class="label">could clear a real production software-engineering interview</text>
+    <line x1="600" y1="272" x2="600" y2="289" class="connector" marker-end="url(#arrow03)"/>
 
-  <rect x="230" y="377" width="1040" height="76" rx="16" class="filter"/>
-  <text x="750" y="425" text-anchor="middle" class="label">was willing to travel and live inside the customer’s operational mess</text>
-  <line x1="750" y1="454" x2="750" y2="479" class="arrow" marker-end="url(#arrow)"/>
+    <rect x="140" y="294" width="920" height="74" class="row"/><rect x="140" y="294" width="7" height="74" class="purple"/>
+    <text x="166" y="321" class="tiny purple">gate_02 / outside options</text><text x="166" y="347" class="label">credentials and a background that created unusually good alternatives</text>
+    <line x1="600" y1="368" x2="600" y2="385" class="connector" marker-end="url(#arrow03)"/>
 
-  <rect x="285" y="488" width="930" height="76" rx="16" class="filter"/>
-  <text x="750" y="520" text-anchor="middle" class="label">
-    <tspan x="750">wanted factory, airline, army, and supply-chain problems</tspan>
-    <tspan x="750" dy="30">instead of clean product work</tspan>
-  </text>
-  <line x1="750" y1="565" x2="750" y2="590" class="arrow" marker-end="url(#arrow)"/>
+    <rect x="190" y="390" width="820" height="74" class="row"/><rect x="190" y="390" width="7" height="74" class="green"/>
+    <text x="216" y="417" class="tiny green">gate_03 / travel</text><text x="216" y="443" class="label">willing to live inside the customer’s operational mess</text>
+    <line x1="600" y1="464" x2="600" y2="481" class="connector" marker-end="url(#arrow03)"/>
 
-  <rect x="340" y="599" width="820" height="76" rx="16" class="filter"/>
-  <text x="750" y="631" text-anchor="middle" class="label">
-    <tspan x="750">joined when Palantir was weird and government-shaped</tspan>
-    <tspan x="750" dy="30">and hard to explain at parties</tspan>
-  </text>
-  <line x1="750" y1="676" x2="750" y2="701" class="arrow" marker-end="url(#arrow)"/>
+    <rect x="240" y="486" width="720" height="84" class="row"/><rect x="240" y="486" width="7" height="84" class="orange"/>
+    <text x="266" y="513" class="tiny orange">gate_04 / problem taste</text><text x="266" y="539" class="label">wanted factory, airline, army, and supply-chain problems</text><text x="266" y="559" class="tiny muted">instead of clean product work</text>
+    <line x1="600" y1="570" x2="600" y2="587" class="connector" marker-end="url(#arrow03)"/>
 
-  <rect x="395" y="710" width="710" height="76" rx="16" class="filter"/>
-  <text x="750" y="742" text-anchor="middle" class="label">
-    <tspan x="750">was mission-driven, contrarian, patient,</tspan>
-    <tspan x="750" dy="30">or uncomfortable enough to stay</tspan>
-  </text>
-  <line x1="750" y1="787" x2="750" y2="817" class="arrow" marker-end="url(#arrow)"/>
+    <rect x="290" y="592" width="620" height="84" class="row"/><rect x="290" y="592" width="7" height="84" class="red"/>
+    <text x="316" y="619" class="tiny red">gate_05 / non-consensus choice</text><text x="316" y="645" class="label">joined when palantir was weird and government-shaped</text><text x="316" y="665" class="tiny muted">and hard to explain at parties</text>
+    <line x1="600" y1="676" x2="600" y2="693" class="connector" marker-end="url(#arrow03)"/>
 
-  <rect x="460" y="828" width="580" height="92" rx="20" class="out"/>
-  <text x="750" y="884" text-anchor="middle" class="out-text">forward-deployed engineer</text>
+    <rect x="340" y="698" width="520" height="84" class="row"/><rect x="340" y="698" width="7" height="84" class="purple"/>
+    <text x="366" y="725" class="tiny purple">gate_06 / retention</text><text x="366" y="751" class="label">mission-driven, contrarian, patient,</text><text x="366" y="771" class="tiny muted">or uncomfortable enough to stay</text>
 
-  <path d="M1215 273 C1385 336 1388 748 1085 834" fill="none" stroke="#ee8b00" stroke-width="3" stroke-linecap="round" stroke-dasharray="8 10" marker-end="url(#arrow)"/>
-  <text x="1330" y="500" text-anchor="middle" class="hand orange" font-size="22" transform="rotate(4 1330 500)">
-    <tspan x="1330">not merely “smart” —</tspan>
-    <tspan x="1330" dy="28">a specific shape</tspan>
-  </text>
-  <text x="750" y="990" text-anchor="middle" class="hand ink" font-size="27">the rare thing was not Stanford. it was the intersection.</text>
+    <line x1="600" y1="782" x2="600" y2="801" class="connector" marker-end="url(#arrow03)"/>
+    <rect x="420" y="806" width="360" height="52" fill="#202124"/>
+    <text x="600" y="838" text-anchor="middle" class="label" style="fill:#fff">forward-deployed engineer</text>
+  </g>
+
+  <path d="M1085 267C1150 365 1146 685 876 818" fill="none" stroke="#e88200" stroke-width="1.5" stroke-dasharray="5 5" marker-end="url(#arrow03)"/>
+  <text x="1078" y="494" text-anchor="middle" class="tiny orange">not merely “smart”</text><text x="1078" y="513" text-anchor="middle" class="tiny orange">a specific shape</text>
+  <text x="38" y="878" class="tiny muted">result: the rare thing was not stanford. it was the intersection.</text>
 </svg>

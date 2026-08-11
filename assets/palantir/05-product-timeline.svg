@@ -1,94 +1,59 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-labelledby="title desc">
-  <title id="title">How Palantir's product accumulated</title>
-  <desc id="desc">A six-stage timeline from Palantir's foundation and Gotham through government constraints, commercial scaling, Foundry, and AIP.</desc>
-  <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#e88700"/>
-    </marker>
-    <filter id="rough" x="-4%" y="-8%" width="108%" height="116%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.015 0.09" numOctaves="1" seed="12" result="noise"/>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.1" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-    <style>
-      text { text-transform: lowercase !important; }
-      .bg{fill:#fff}.ink{fill:#272727}.muted{fill:#707070}.orange{fill:#e88700}
-      .title{font:700 42px 'Comic Sans MS','Bradley Hand',Arial,sans-serif;letter-spacing:-1px}
-      .sub{font:18px Arial,Helvetica,sans-serif}.year{font:700 18px Arial,Helvetica,sans-serif;fill:#e88700;letter-spacing:.5px}
-      .head{font:700 23px 'Comic Sans MS','Bradley Hand',Arial,sans-serif;fill:#272727}
-      .body{font:17px Arial,Helvetica,sans-serif;fill:#454545}.tiny{font:15px Arial,Helvetica,sans-serif;fill:#777}
-      .line{fill:none;stroke:#e88700;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:url(#rough)}
-      .branch{fill:none;stroke:#e88700;stroke-width:2.5;stroke-linecap:round;filter:url(#rough)}
-      .node{fill:#fff;stroke:#e88700;stroke-width:3;filter:url(#rough)}
-      .soft{fill:#fff5e6;stroke:#efaa45;stroke-width:2}
-    </style>
-  </defs>
-  <rect class="bg" width="1400" height="820"/>
-  <text x="70" y="76" class="title ink">the product accumulated; it was not designed all at once</text>
-  <text x="72" y="112" class="sub muted">each era forced Palantir to keep another layer of the stack</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="920" viewBox="0 0 1200 920" role="img" aria-labelledby="title05 desc05">
+  <title id="title05">the product accumulated; it was not designed all at once</title>
+  <desc id="desc05">a timeline traces palantir from its 2003 foundation through gotham, government deployments, commercial scaling, foundry, and aip.</desc>
+  <style>
+    text{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;fill:#202124}.muted{fill:#5f6368}.tiny{font-size:12px}.small{font-size:14px}.label{font-size:15px;font-weight:700}.head{font-size:26px;font-weight:700}.event{font-size:15px;font-weight:700}.line{stroke:#c9ced3;stroke-width:1.5}.blue{fill:#2f80ed}.green{fill:#0f9d75}.orange{fill:#e88200}.red{fill:#d64545}.purple{fill:#7b56d8}
+  </style>
+  <rect x="1" y="1" width="1198" height="918" rx="8" fill="#fff" stroke="#c9ced3"/>
+  <rect x="1" y="1" width="1198" height="53" rx="8" fill="#f4f5f6"/><rect x="1" y="45" width="1198" height="9" fill="#f4f5f6"/><line x1="1" y1="54" x2="1199" y2="54" stroke="#c9ced3"/>
+  <circle cx="28" cy="27" r="6" fill="#ff5f57"/><circle cx="50" cy="27" r="6" fill="#febc2e"/><circle cx="72" cy="27" r="6" fill="#28c840"/>
+  <text x="94" y="32" class="small muted">palantir-product-history.log</text>
 
-  <path class="line" marker-end="url(#arrow)" d="M105 390 C280 383 430 398 603 389 C780 381 982 398 1298 386"/>
+  <text x="38" y="88" class="small"><tspan fill="#0f9d75">$</tspan> cat product-history.log --show-forced-layers</text>
+  <text x="38" y="132" class="head">the product accumulated; it was not designed all at once</text>
+  <text x="38" y="159" class="small muted">each era forced palantir to keep another layer of the stack.</text>
 
-  <g transform="translate(120 390)">
-    <circle r="13" class="node"/>
-    <path class="branch" d="M0 -14 C-4 -70 -2 -125 0 -174"/>
-    <text x="-48" y="-204" class="year">2003</text>
-    <text x="-48" y="-170" class="head">foundation</text>
-    <text x="-48" y="-138" class="body">counterterrorism</text>
-    <text x="-48" y="-113" class="body">objects + relationships</text>
-    <text x="-48" y="-88" class="body">built to support action</text>
+  <line x1="80" y1="204" x2="80" y2="802" class="line"/>
+
+  <g transform="translate(0 206)">
+    <circle cx="80" cy="16" r="6" class="red"/><text x="110" y="20" class="tiny muted">2003</text>
+    <text x="235" y="20" class="event">foundation</text>
+    <text x="235" y="45" class="small">counterterrorism · objects + relationships · built to support action</text>
   </g>
 
-  <g transform="translate(340 390)">
-    <circle r="13" class="node"/>
-    <path class="branch" d="M0 14 C2 74 -1 120 0 170"/>
-    <text x="-63" y="205" class="year">2008</text>
-    <text x="-63" y="239" class="head">Gotham</text>
-    <text x="-63" y="271" class="body">integrate messy sources</text>
-    <text x="-63" y="296" class="body">investigate the graph</text>
-    <text x="-63" y="321" class="body">hand decisions to operators</text>
+  <g transform="translate(0 298)">
+    <circle cx="80" cy="16" r="6" class="blue"/><text x="110" y="20" class="tiny muted">2008</text>
+    <text x="235" y="20" class="event">gotham</text>
+    <text x="235" y="45" class="small">integrate messy sources · investigate the graph · hand decisions to operators</text>
   </g>
 
-  <g transform="translate(565 390)">
-    <circle r="13" class="node"/>
-    <path class="branch" d="M0 -14 C-4 -68 2 -122 0 -174"/>
-    <text x="-90" y="-204" class="year">government deployments</text>
-    <text x="-90" y="-170" class="head">no modern stack to assume</text>
-    <text x="-90" y="-138" class="body">on-prem + classified</text>
-    <text x="-90" y="-113" class="body">connectors + permissions</text>
-    <text x="-90" y="-88" class="body">deployment + upgrades</text>
+  <g transform="translate(0 390)">
+    <circle cx="80" cy="16" r="6" class="orange"/><text x="110" y="20" class="tiny muted">government era</text>
+    <text x="235" y="20" class="event">no modern stack to assume</text>
+    <text x="235" y="45" class="small">on-prem + classified · connectors + permissions · deployment + upgrades</text>
   </g>
 
-  <g transform="translate(800 390)">
-    <circle r="13" class="node"/>
-    <path class="branch" d="M0 14 C1 74 -2 120 0 170"/>
-    <text x="-92" y="205" class="year">commercial scaling</text>
-    <text x="-92" y="239" class="head">the graph was not enough</text>
-    <text x="-92" y="271" class="body">petabyte analytics</text>
-    <text x="-92" y="296" class="body">streaming + applications</text>
-    <text x="-92" y="321" class="body">same object-first model</text>
+  <g transform="translate(0 482)">
+    <circle cx="80" cy="16" r="6" class="purple"/><text x="110" y="20" class="tiny muted">commercial</text>
+    <text x="235" y="20" class="event">the graph was not enough</text>
+    <text x="235" y="45" class="small">petabyte analytics · streaming + applications · same object-first model</text>
   </g>
 
-  <g transform="translate(1035 390)">
-    <circle r="13" class="node"/>
-    <path class="branch" d="M0 -14 C-3 -70 1 -124 0 -174"/>
-    <text x="-76" y="-204" class="year">2016</text>
-    <text x="-76" y="-170" class="head">Foundry</text>
-    <text x="-76" y="-138" class="body">integration + analytics</text>
-    <text x="-76" y="-113" class="body">Ontology + applications</text>
-    <text x="-76" y="-88" class="body">action + writeback</text>
+  <g transform="translate(0 574)">
+    <circle cx="80" cy="16" r="6" class="green"/><text x="110" y="20" class="tiny muted">2016</text>
+    <text x="235" y="20" class="event">foundry</text>
+    <text x="235" y="45" class="small">integration + analytics · ontology + applications · action + writeback</text>
   </g>
 
-  <g transform="translate(1260 390)">
-    <circle r="13" class="node"/>
-    <path class="branch" d="M0 14 C2 74 -1 120 0 170"/>
-    <text x="-68" y="205" class="year">now</text>
-    <text x="-68" y="239" class="head">AIP</text>
-    <text x="-68" y="271" class="body">models + agents enter</text>
-    <text x="-68" y="296" class="body">the same governed loop:</text>
-    <text x="-68" y="321" class="body">data → logic → action</text>
+  <g transform="translate(0 666)">
+    <circle cx="80" cy="16" r="6" class="green"/><text x="110" y="20" class="tiny muted">now</text>
+    <text x="235" y="20" class="event">aip</text>
+    <text x="235" y="45" class="small">models + agents enter the same governed loop: data → logic → action</text>
   </g>
 
-  <rect x="198" y="699" width="1005" height="76" rx="18" class="soft"/>
-  <text x="700" y="731" text-anchor="middle" class="head orange">not literally the same product</text>
-  <text x="700" y="758" text-anchor="middle" class="tiny">spiritually: messy data → governed objects → action, with an increasingly zeitgeisty name</text>
+  <rect x="38" y="774" width="1124" height="82" fill="#fff8ed" stroke="#e88200"/>
+  <text x="58" y="806" class="label orange">not literally the same product.</text>
+  <text x="58" y="834" class="small">spiritually: messy data → governed objects → action, with an increasingly zeitgeisty name.</text>
+  <line x1="38" y1="878" x2="1162" y2="878" stroke="#dadce0"/>
+  <text x="38" y="902" class="tiny muted">eof · six eras · one increasingly branded operating loop</text>
 </svg>

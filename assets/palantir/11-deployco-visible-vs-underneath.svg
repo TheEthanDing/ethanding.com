@@ -1,73 +1,72 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
-  <title id="title">What DeployCos copied and what they left underneath</title>
-  <desc id="desc">An iceberg-style comparison. Above the waterline are the visible Palantir traits copied by DeployCos: the FDE title, onsite engineers, AI demos, and transformation language. Below are the underlying system: the talent filter, patient capital and time, full-stack product, account economics, institutional culture, and deployment-to-software compounding loop.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">what deploycos copied and what they left underneath</title>
+  <desc id="desc">a terminal-style layer inspection contrasting visible palantir traits with the system beneath them.</desc>
   <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="120%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity=".06"/></filter>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#377dff" stroke-width="1.7"/></marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#149f67" stroke-width="1.7"/></marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#db8400" stroke-width="1.7"/></marker>
     <style>
-      text { text-transform: lowercase !important; }
-      .title { font: 700 44px "Avenir Next", "Trebuchet MS", sans-serif; fill: #252525; }
-      .subtitle { font: 400 22px "Avenir Next", "Trebuchet MS", sans-serif; fill: #66635d; }
-      .label { font: 700 28px "Chalkboard SE", "Comic Sans MS", sans-serif; fill: #ed8b00; }
-      .head { font: 700 24px "Avenir Next", "Trebuchet MS", sans-serif; fill: #252525; }
-      .body { font: 500 20px "Avenir Next", "Trebuchet MS", sans-serif; fill: #363636; }
-      .small { font: 500 18px "Avenir Next", "Trebuchet MS", sans-serif; fill: #5f5c56; }
-      .water { fill: none; stroke: #ed8b00; stroke-width: 4; stroke-linecap: round; }
-      .ice { fill: #faf8f3; stroke: #2d2d2d; stroke-width: 2.2; stroke-linejoin: round; }
-      .tip { fill: #fff2df; stroke: #ed8b00; stroke-width: 3; stroke-linejoin: round; }
-      .divider { fill: none; stroke: #c9c4ba; stroke-width: 1.5; stroke-linecap: round; }
-      .dot { fill: #ed8b00; }
+      text { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; fill: #252a31; }
+      .title { font-size: 31px; font-weight: 800; letter-spacing: -.7px; }
+      .subtitle { font-size: 16px; fill: #68717c; }
+      .prompt { font-size: 16px; fill: #252a31; }
+      .section { font-size: 19px; font-weight: 800; }
+      .head { font-size: 17px; font-weight: 800; }
+      .body { font-size: 16px; }
+      .small { font-size: 14px; fill: #68717c; }
+      .micro { font-size: 12px; fill: #68717c; }
+      .blue { fill: #377dff; } .green { fill: #149f67; } .orange { fill: #db8400; } .red { fill: #dd5050; } .purple { fill: #8058cf; }
+      .panel { fill: #ffffff; stroke: #c9cdd2; stroke-width: 1.2; }
+      .soft { fill: #f7f8fa; stroke: #dfe3e7; stroke-width: 1; }
+      .rule { stroke: #dfe3e7; stroke-width: 1; }
+      .dash { stroke-dasharray: 6 6; }
     </style>
   </defs>
-
-  <rect width="1440" height="900" fill="#ffffff"/>
-  <text x="70" y="73" class="title">every DeployCo copied the part above the waterline</text>
-  <path d="M70 94 C354 90, 644 100, 938 94" class="water"/>
-  <text x="70" y="131" class="subtitle">the visible job is easy to imitate; the system underneath took years to compound</text>
-
-  <!-- visible tip -->
-  <path class="tip" d="M489 177 L940 175 L1046 344 L382 344 Z"/>
-  <text x="547" y="220" class="label">WHAT EVERYONE COPIED</text>
-  <circle cx="524" cy="260" r="4.5" class="dot"/>
-  <text x="542" y="267" class="body">the FDE title</text>
-  <circle cx="714" cy="260" r="4.5" class="dot"/>
-  <text x="732" y="267" class="body">onsite engineers</text>
-  <circle cx="524" cy="308" r="4.5" class="dot"/>
-  <text x="542" y="315" class="body">the AI demo</text>
-  <circle cx="714" cy="308" r="4.5" class="dot"/>
-  <text x="732" y="315" class="body">“transformation” language</text>
-
-  <!-- waterline -->
-  <path d="M70 345 C255 337, 413 352, 590 344 C778 336, 949 351, 1113 344 C1210 340, 1291 346, 1368 342" class="water"/>
-  <text x="77" y="329" class="label">visible</text>
-  <text x="77" y="381" class="label">underneath</text>
-
-  <!-- iceberg body -->
-  <path class="ice" d="M382 346 L1046 346 L1231 817 L213 817 Z"/>
-  <text x="506" y="410" class="label">WHAT ACTUALLY MAKES IT WORK</text>
-  <path d="M714 435 C710 536, 718 654, 713 772" class="divider"/>
-
-  <!-- left column -->
-  <text x="310" y="485" class="head">a differentiated talent filter</text>
-  <text x="310" y="520" class="small">SWE-quality people doing implementation</text>
-  <text x="310" y="549" class="small">travel + ambiguity + mission</text>
-
-  <text x="310" y="613" class="head">patient capital + time</text>
-  <text x="310" y="648" class="small">twelve-ish years in the PMF desert</text>
-  <text x="310" y="677" class="small">room to keep the expensive infrastructure</text>
-
-  <text x="310" y="741" class="head">institution, not just buyer</text>
-  <text x="310" y="776" class="small">find the P&amp;L-moving problem that survives</text>
-
-  <!-- right column -->
-  <text x="762" y="485" class="head">a full-stack product</text>
-  <text x="762" y="520" class="small">analytics + operations + on-prem</text>
-  <text x="762" y="549" class="small">Ontology connects data to action</text>
-
-  <text x="762" y="613" class="head">account / project economics</text>
-  <text x="762" y="648" class="small">overinvest now; renew + expand later</text>
-  <text x="762" y="677" class="small">optimize for the outcome, not the meter</text>
-
-  <text x="762" y="741" class="head">deployment → reusable software</text>
-  <text x="762" y="776" class="small">every hard customer makes the platform stronger</text>
-
-  <text x="720" y="862" text-anchor="middle" class="label">copying the title does not recreate the machine</text>
+  <rect width="1200" height="900" fill="#f7f7f5"/>
+  <rect x="1" y="1" width="1198" height="898" rx="8" fill="#ffffff" stroke="#c9cdd2" filter="url(#shadow)"/>
+  <path d="M9 1 H1191 Q1199 1 1199 9 V55 H1 V9 Q1 1 9 1 Z" fill="#f1f2f4"/>
+  <line x1="1" y1="55" x2="1199" y2="55" stroke="#c9cdd2"/>
+  <circle cx="28" cy="28" r="7" fill="#ff5f57"/><circle cx="50" cy="28" r="7" fill="#febc2e"/><circle cx="72" cy="28" r="7" fill="#28c840"/>
+  <text x="94" y="34" class="small">deployco-layer-inspection.log</text>
+  <text x="42" y="98" class="prompt"><tspan class="green">$</tspan> inspect deployco --layers --compare palantir</text>
+  <text x="42" y="147" class="title">every deployco copied the part above the waterline</text>
+  <text x="42" y="177" class="subtitle">the visible job is easy to imitate; the system underneath took years to compound.</text>
+  <rect x="42" y="211" width="1116" height="166" class="panel"/>
+  <rect x="42" y="211" width="7" height="166" fill="#377dff"/>
+  <text x="69" y="244" class="section blue">stdout / copied / visible</text>
+  <line x1="69" y1="259" x2="1131" y2="259" class="rule"/>
+  <text x="76" y="301" class="head"><tspan class="blue">01</tspan>  the fde title</text>
+  <text x="332" y="301" class="head"><tspan class="blue">02</tspan>  onsite engineers</text>
+  <text x="626" y="301" class="head"><tspan class="blue">03</tspan>  the ai demo</text>
+  <text x="846" y="301" class="head"><tspan class="blue">04</tspan>  “transformation” language</text>
+  <text x="76" y="339" class="small">easy to rename</text>
+  <text x="332" y="339" class="small">easy to colocate</text>
+  <text x="626" y="339" class="small">easy to stage</text>
+  <text x="846" y="339" class="small">easy to repeat</text>
+  <line x1="42" y1="405" x2="1158" y2="405" stroke="#db8400" stroke-width="3"/>
+  <text x="42" y="398" class="small orange">visible</text>
+  <text x="42" y="431" class="small orange">underneath</text>
+  <rect x="42" y="450" width="1116" height="351" class="panel"/>
+  <rect x="42" y="450" width="7" height="351" fill="#db8400"/>
+  <text x="69" y="484" class="section orange">machine/  # what actually makes it work</text>
+  <line x1="600" y1="507" x2="600" y2="765" class="rule dash"/>
+  <text x="76" y="533" class="head">├── talent-filter</text>
+  <text x="76" y="560" class="body">│   └── swe-quality people doing implementation</text>
+  <text x="76" y="584" class="small">│       travel + ambiguity + mission</text>
+  <text x="76" y="626" class="head">├── patient-capital-and-time</text>
+  <text x="76" y="653" class="body">│   └── twelve-ish years in the pmf desert</text>
+  <text x="76" y="677" class="small">│       room to keep the expensive infrastructure</text>
+  <text x="76" y="719" class="head">└── institutional-mission</text>
+  <text x="76" y="746" class="body">    └── find the p&amp;l problem that survives the buyer</text>
+  <text x="627" y="533" class="head">├── full-stack-product</text>
+  <text x="627" y="560" class="body">│   └── analytics + operations + on-prem</text>
+  <text x="627" y="584" class="small">│       ontology connects data to action</text>
+  <text x="627" y="626" class="head">├── account-and-project-economics</text>
+  <text x="627" y="653" class="body">│   └── overinvest now; renew + expand later</text>
+  <text x="627" y="677" class="small">│       optimize for the outcome, not the meter</text>
+  <text x="627" y="719" class="head">└── deployment-to-software</text>
+  <text x="627" y="746" class="body">    └── every hard customer strengthens the platform</text>
+  <text x="42" y="846" class="prompt"><tspan class="green">$</tspan> result</text>
+  <text x="150" y="846" class="section orange">copying the title does not recreate the machine</text>
 </svg>

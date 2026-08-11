@@ -1,57 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
-  <title id="title">Enterprise technology is normally a group project</title>
-  <desc id="desc">Two conceptual maps show enterprise vendors by ownership of software and implementation risk. Before Palantir the upper-right is empty; Palantir appears there in the second map.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title01 desc01">
+  <title id="title01">enterprise technology is normally a group project</title>
+  <desc id="desc01">two maps compare enterprise vendors by ownership of software and implementation risk; palantir uniquely occupies the top right.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ee8b00"/>
-    </marker>
+    <marker id="arrow01" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6368"/></marker>
     <style>
-      text { text-transform: lowercase !important; }
-      .ink{fill:#262626}.muted{fill:#74716c}.orange{fill:#ee8b00}.axis{fill:none;stroke:#ee8b00;stroke-width:3;stroke-linecap:round}.guide{fill:none;stroke:#e8e2d8;stroke-width:2;stroke-dasharray:7 10}.hand{font-family:'Comic Sans MS','Marker Felt',cursive}.sans{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif}.vendor{font:700 25px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#2b2b2b}.small{font:500 18px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#77736d}.panel{font:700 26px 'Comic Sans MS','Marker Felt',cursive;fill:#ee8b00}.axis-label{font:600 18px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#625f5a}.pal{font:800 34px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;fill:#ee8b00}
+      text{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;fill:#202124}.muted{fill:#5f6368}.tiny{font-size:12px}.small{font-size:14px}.label{font-size:15px;font-weight:700}.head{font-size:26px;font-weight:700}.axis{stroke:#5f6368;stroke-width:1.5}.grid{stroke:#dadce0;stroke-width:1;stroke-dasharray:4 5}.plot{fill:#fff;stroke:#dadce0}.blue{fill:#2f80ed}.green{fill:#0f9d75}.orange{fill:#e88200}.red{fill:#d64545}.purple{fill:#7b56d8}
     </style>
   </defs>
-  <rect width="1600" height="900" fill="#fff"/>
-  <text x="80" y="78" class="sans ink" font-size="46" font-weight="800">enterprise technology is normally a group project</text>
-  <text x="82" y="116" class="sans muted" font-size="21">software and implementation usually live in different companies</text>
+  <rect x="1" y="1" width="1198" height="758" rx="8" fill="#fff" stroke="#c9ced3"/>
+  <rect x="1" y="1" width="1198" height="53" rx="8" fill="#f4f5f6"/><rect x="1" y="45" width="1198" height="9" fill="#f4f5f6"/><line x1="1" y1="54" x2="1199" y2="54" stroke="#c9ced3"/>
+  <circle cx="28" cy="27" r="6" fill="#ff5f57"/><circle cx="50" cy="27" r="6" fill="#febc2e"/><circle cx="72" cy="27" r="6" fill="#28c840"/>
+  <text x="94" y="32" class="small muted">enterprise-stack-map.fig</text>
 
-  <text x="142" y="174" class="panel">before Palantir</text>
-  <line x1="142" y1="738" x2="746" y2="738" class="axis" marker-end="url(#arrow)"/>
-  <line x1="142" y1="738" x2="142" y2="206" class="axis" marker-end="url(#arrow)"/>
-  <line x1="444" y1="738" x2="444" y2="206" class="guide"/>
-  <line x1="142" y1="472" x2="746" y2="472" class="guide"/>
-  <text x="456" y="782" class="axis-label">owns the software substrate →</text>
-  <text x="153" y="225" class="axis-label">owns implementation / outcome risk ↑</text>
+  <text x="38" y="82" class="small"><tspan fill="#0f9d75">$</tspan> render landscape --x software --y implementation-risk</text>
+  <text x="38" y="126" class="head">enterprise technology is normally a group project</text>
+  <text x="38" y="153" class="small muted">software and implementation usually live in different companies.</text>
 
-  <text x="190" y="330" class="vendor">Deloitte · Accenture</text>
-  <text x="190" y="358" class="small">labor + implementation</text>
-  <text x="265" y="526" class="vendor">UiPath · Retool</text>
-  <text x="265" y="554" class="small">workflow surfaces</text>
-  <text x="486" y="592" class="vendor">SAP · Oracle</text>
-  <text x="486" y="620" class="small">operational systems</text>
-  <text x="500" y="684" class="vendor">Snowflake</text>
-  <text x="500" y="712" class="small">Databricks · AWS</text>
-  <path d="M532 286 C594 251 667 255 714 296 C682 346 605 355 548 329" fill="none" stroke="#ee8b00" stroke-width="3" stroke-linecap="round" stroke-dasharray="8 9"/>
-  <text x="555" y="298" class="hand orange" font-size="24">nobody lives here</text>
+  <g transform="translate(38 190)">
+    <text x="0" y="0" class="label"><tspan fill="#d64545">before:</tspan> two different businesses</text>
+    <rect x="0" y="22" width="535" height="458" class="plot"/>
+    <line x1="46" y1="430" x2="505" y2="430" class="axis" marker-end="url(#arrow01)"/>
+    <line x1="46" y1="430" x2="46" y2="54" class="axis" marker-end="url(#arrow01)"/>
+    <line x1="275" y1="54" x2="275" y2="430" class="grid"/><line x1="46" y1="242" x2="505" y2="242" class="grid"/>
+    <text x="246" y="463" class="tiny muted">more software ownership →</text>
+    <text x="59" y="78" class="tiny muted">more implementation / outcome risk ↑</text>
 
-  <text x="854" y="174" class="panel">then Palantir appears</text>
-  <line x1="854" y1="738" x2="1458" y2="738" class="axis" marker-end="url(#arrow)"/>
-  <line x1="854" y1="738" x2="854" y2="206" class="axis" marker-end="url(#arrow)"/>
-  <line x1="1156" y1="738" x2="1156" y2="206" class="guide"/>
-  <line x1="854" y1="472" x2="1458" y2="472" class="guide"/>
-  <text x="1168" y="782" class="axis-label">owns the software substrate →</text>
-  <text x="865" y="225" class="axis-label">owns implementation / outcome risk ↑</text>
+    <circle cx="90" cy="105" r="8" class="red"/><text x="108" y="110" class="label">deloitte · accenture</text>
+    <circle cx="345" cy="335" r="7" class="purple"/><text x="361" y="340" class="small">uipath · retool</text>
+    <circle cx="378" cy="372" r="7" class="orange"/><text x="394" y="377" class="small">sap · oracle</text>
+    <circle cx="320" cy="409" r="7" class="blue"/><text x="336" y="413" class="tiny">snowflake · databricks · aws</text>
+  </g>
 
-  <text x="902" y="330" class="vendor">Deloitte · Accenture</text>
-  <text x="902" y="358" class="small">labor + implementation</text>
-  <text x="977" y="526" class="vendor">UiPath · Retool</text>
-  <text x="977" y="554" class="small">workflow surfaces</text>
-  <text x="1198" y="592" class="vendor">SAP · Oracle</text>
-  <text x="1198" y="620" class="small">operational systems</text>
-  <text x="1212" y="684" class="vendor">Snowflake</text>
-  <text x="1212" y="712" class="small">Databricks · AWS</text>
-  <path d="M1264 285 C1318 238 1412 244 1441 308 C1402 360 1311 356 1266 318" fill="#fff7ea" stroke="#ee8b00" stroke-width="4" stroke-linecap="round"/>
-  <text x="1305" y="300" class="pal">Palantir</text>
-  <text x="1297" y="333" class="small">software + deployment</text>
+  <g transform="translate(627 190)">
+    <text x="0" y="0" class="label"><tspan fill="#0f9d75">after:</tspan> palantir crosses the boundary</text>
+    <rect x="0" y="22" width="535" height="458" class="plot"/>
+    <line x1="46" y1="430" x2="505" y2="430" class="axis" marker-end="url(#arrow01)"/>
+    <line x1="46" y1="430" x2="46" y2="54" class="axis" marker-end="url(#arrow01)"/>
+    <line x1="275" y1="54" x2="275" y2="430" class="grid"/><line x1="46" y1="242" x2="505" y2="242" class="grid"/>
+    <text x="246" y="463" class="tiny muted">more software ownership →</text>
+    <text x="59" y="78" class="tiny muted">more implementation / outcome risk ↑</text>
 
-  <text x="800" y="850" text-anchor="middle" class="hand ink" font-size="27">Palantir insists on submitting the entire assignment itself.</text>
+    <circle cx="90" cy="105" r="8" class="red"/><text x="108" y="110" class="label">deloitte · accenture</text>
+    <circle cx="345" cy="335" r="7" class="purple"/><text x="361" y="340" class="small">uipath · retool</text>
+    <circle cx="378" cy="372" r="7" class="orange"/><text x="394" y="377" class="small">sap · oracle</text>
+    <circle cx="485" cy="409" r="7" class="blue"/><text x="470" y="413" text-anchor="end" class="tiny">snowflake · databricks · aws</text>
+    <circle cx="405" cy="105" r="18" fill="#0f9d75"/><circle cx="405" cy="105" r="31" fill="none" stroke="#0f9d75" stroke-width="2"/>
+    <text x="445" y="101" class="label green">palantir</text><text x="405" y="151" text-anchor="middle" class="tiny muted">software + deployment</text>
+  </g>
+
+  <line x1="38" y1="705" x2="1162" y2="705" stroke="#dadce0"/>
+  <text x="38" y="733" class="tiny muted">the point is the separation: services live high-left, software lives low-right, and palantir claims both axes.</text>
 </svg>
