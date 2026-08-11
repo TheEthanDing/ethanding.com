@@ -1,59 +1,79 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="920" viewBox="0 0 1200 920" role="img" aria-labelledby="title05 desc05">
-  <title id="title05">the product accumulated; it was not designed all at once</title>
-  <desc id="desc05">a timeline traces palantir from its 2003 foundation through gotham, government deployments, commercial scaling, foundry, and aip.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1040" viewBox="0 0 1200 1040" role="img" aria-labelledby="title05 desc05">
+  <title id="title05">palantir keeps rebuilding the same worldview for a new decade</title>
+  <desc id="desc05">a seven-step timeline traces palantir from its counterterrorism object graph through gotham, metropolis, a cautious commercial rebuild, foundry, covid deployments, and aip.</desc>
+  <!-- source: bloomberg, april 19 2018, "palantir knows everything about you": https://www.bloomberg.com/news/features/2018-04-19/palantir-knows-everything-about-you -->
+  <!-- source: palantir form s-1, filed 2020: https://www.sec.gov/Archives/edgar/data/1321655/000119312520230013/d904406ds1.htm -->
+  <!-- source: palantir ceo letter announcing aip, april 7 2023: https://www.palantir.com/newsroom/letters/our-new-platform/ -->
   <style>
-    text{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;fill:#202124}.muted{fill:#5f6368}.tiny{font-size:12px}.small{font-size:14px}.label{font-size:15px;font-weight:700}.head{font-size:26px;font-weight:700}.event{font-size:15px;font-weight:700}.line{stroke:#c9ced3;stroke-width:1.5}.blue{fill:#2f80ed}.green{fill:#0f9d75}.orange{fill:#e88200}.red{fill:#d64545}.purple{fill:#7b56d8}
+    text{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;fill:#202124}
+    .muted{fill:#5f6368}.tiny{font-size:12px}.small{font-size:14px}.head{font-size:26px;font-weight:700}.event{font-size:15px;font-weight:700}
+    .red{fill:#d64545}.green{fill:#0f9d75}.orange{fill:#e88200}.purple{fill:#7b56d8}
   </style>
-  <rect x="1" y="1" width="1198" height="918" rx="8" fill="#fff" stroke="#c9ced3"/>
+  <rect x="1" y="1" width="1198" height="1038" rx="8" fill="#fff" stroke="#c9ced3"/>
   <rect x="1" y="1" width="1198" height="53" rx="8" fill="#f4f5f6"/><rect x="1" y="45" width="1198" height="9" fill="#f4f5f6"/><line x1="1" y1="54" x2="1199" y2="54" stroke="#c9ced3"/>
   <circle cx="28" cy="27" r="6" fill="#ff5f57"/><circle cx="50" cy="27" r="6" fill="#febc2e"/><circle cx="72" cy="27" r="6" fill="#28c840"/>
   <text x="94" y="32" class="small muted">palantir-product-history.log</text>
 
-  <text x="38" y="88" class="small"><tspan fill="#0f9d75">$</tspan> cat product-history.log --show-forced-layers</text>
-  <text x="38" y="132" class="head">the product accumulated; it was not designed all at once</text>
-  <text x="38" y="159" class="small muted">each era forced palantir to keep another layer of the stack.</text>
+  <text x="38" y="88" class="small"><tspan fill="#0f9d75">$</tspan> git log --product --all --follow --format=uncomfortable</text>
+  <text x="38" y="132" class="head">palantir keeps rebuilding the same worldview for a new decade</text>
+  <text x="38" y="159" class="small muted">messy data → governed objects → operational action; the nouns and scandal count change.</text>
 
-  <line x1="80" y1="204" x2="80" y2="802" class="line"/>
+  <line x1="80" y1="199" x2="80" y2="822" stroke="#c9ced3" stroke-width="1.5"/>
 
-  <g transform="translate(0 206)">
-    <circle cx="80" cy="16" r="6" class="red"/><text x="110" y="20" class="tiny muted">2003</text>
-    <text x="235" y="20" class="event">foundation</text>
-    <text x="235" y="45" class="small">counterterrorism · objects + relationships · built to support action</text>
+  <g data-event="2003">
+    <circle cx="80" cy="215" r="6" fill="#d64545"/>
+    <text x="110" y="220" class="tiny muted">2003</text>
+    <text x="245" y="220" class="event">counterterrorism / object graph</text>
+    <text x="245" y="258" class="small">model people, places, events, and links so an operator can act.</text>
+  </g>
+  <g data-event="2008">
+    <circle cx="80" cy="300" r="6" fill="#2f80ed"/>
+    <text x="110" y="305" class="tiny muted">2008</text>
+    <text x="245" y="305" class="event">gotham</text>
+    <text x="245" y="343" class="small">integrate messy sources · investigate the graph · hand decisions to operators.</text>
+  </g>
+  <g data-event="2009–13">
+    <circle cx="80" cy="385" r="6" fill="#e88200"/>
+    <text x="110" y="390" class="tiny muted">2009–13</text>
+    <text x="245" y="390" class="event">metropolis at jpmorgan</text>
+    <text x="245" y="428" class="small">bloomberg later reported: email · browser history · gps · calls · files.</text>
+    <text x="245" y="450" class="small red">2013: employee-surveillance scandal; jpmorgan later drastically curtailed use.</text>
   </g>
 
-  <g transform="translate(0 298)">
-    <circle cx="80" cy="16" r="6" class="blue"/><text x="110" y="20" class="tiny muted">2008</text>
-    <text x="235" y="20" class="event">gotham</text>
-    <text x="235" y="45" class="small">integrate messy sources · investigate the graph · hand decisions to operators</text>
+  <g data-event="2013–16">
+    <circle cx="80" cy="500" r="6" fill="#7b56d8"/>
+    <text x="110" y="505" class="tiny muted">2013–16</text>
+    <text x="245" y="505" class="event">commercial rebuild</text>
+    <rect x="230" y="523" width="902" height="77" fill="#f6f7f8" stroke="#dadce0"/>
+    <text x="245" y="548" class="small"><tspan class="purple">oral_history&gt;</tspan><tspan dx="12">the scandal poisoned the metropolis brand.</tspan></text>
+    <text x="245" y="573" class="small"><tspan class="green">public_record&gt;</tspan><tspan dx="12">jpmorgan curtailed use; metropolis remained active.</tspan></text>
+    <text x="245" y="594" class="tiny muted">the causal arrow between those facts is not established.</text>
   </g>
 
-  <g transform="translate(0 390)">
-    <circle cx="80" cy="16" r="6" class="orange"/><text x="110" y="20" class="tiny muted">government era</text>
-    <text x="235" y="20" class="event">no modern stack to assume</text>
-    <text x="235" y="45" class="small">on-prem + classified · connectors + permissions · deployment + upgrades</text>
+  <g data-event="2016">
+    <circle cx="80" cy="640" r="6" fill="#0f9d75"/>
+    <text x="110" y="645" class="tiny muted">2016</text>
+    <text x="245" y="645" class="event">foundry officially released</text>
+    <text x="245" y="683" class="small">integration + analytics + ontology + applications + action / writeback.</text>
+  </g>
+  <g data-event="2020–21">
+    <circle cx="80" cy="725" r="6" fill="#7b56d8"/>
+    <text x="110" y="730" class="tiny muted">2020–21</text>
+    <text x="245" y="730" class="event">covid / public-health deployments</text>
+    <text x="245" y="768" class="small">supply chains · hospitals · vaccine logistics · the loop meets a global emergency.</text>
+  </g>
+  <g data-event="2023">
+    <circle cx="80" cy="810" r="6" fill="#0f9d75"/>
+    <text x="110" y="815" class="tiny muted">2023</text>
+    <text x="245" y="815" class="event">aip</text>
+    <text x="245" y="853" class="small">same governed loop; models and agents added between enterprise data and action.</text>
   </g>
 
-  <g transform="translate(0 482)">
-    <circle cx="80" cy="16" r="6" class="purple"/><text x="110" y="20" class="tiny muted">commercial</text>
-    <text x="235" y="20" class="event">the graph was not enough</text>
-    <text x="235" y="45" class="small">petabyte analytics · streaming + applications · same object-first model</text>
-  </g>
+  <rect x="38" y="880" width="1124" height="91" fill="#fff8ed" stroke="#e88200"/>
+  <text x="58" y="913" class="event orange">many product names · one recurring worldview</text>
+  <text x="58" y="939" class="small">gotham → metropolis → foundry (+ apollo underneath) → aip</text>
+  <text x="58" y="963" class="small muted">product naming = a tolkien-themed witness-protection program.</text>
 
-  <g transform="translate(0 574)">
-    <circle cx="80" cy="16" r="6" class="green"/><text x="110" y="20" class="tiny muted">2016</text>
-    <text x="235" y="20" class="event">foundry</text>
-    <text x="235" y="45" class="small">integration + analytics · ontology + applications · action + writeback</text>
-  </g>
-
-  <g transform="translate(0 666)">
-    <circle cx="80" cy="16" r="6" class="green"/><text x="110" y="20" class="tiny muted">now</text>
-    <text x="235" y="20" class="event">aip</text>
-    <text x="235" y="45" class="small">models + agents enter the same governed loop: data → logic → action</text>
-  </g>
-
-  <rect x="38" y="774" width="1124" height="82" fill="#fff8ed" stroke="#e88200"/>
-  <text x="58" y="806" class="label orange">not literally the same product.</text>
-  <text x="58" y="834" class="small">spiritually: messy data → governed objects → action, with an increasingly zeitgeisty name.</text>
-  <line x1="38" y1="878" x2="1162" y2="878" stroke="#dadce0"/>
-  <text x="38" y="902" class="tiny muted">eof · six eras · one increasingly branded operating loop</text>
+  <line x1="38" y1="997" x2="1162" y2="997" stroke="#dadce0"/>
+  <text x="38" y="1023" class="tiny muted">eof · seven eras · causality claims kept on a short leash</text>
 </svg>
