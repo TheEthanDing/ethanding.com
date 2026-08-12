@@ -30,7 +30,6 @@ test('serves the homepage and health check', async () => {
   const homepage = await fetch(base).then((response) => response.text());
   assert.match(homepage, /Ethan Ding/);
   assert.match(homepage, /href="\/foundry-viz\/"/);
-  assert.match(homepage, /href="\/what-people-misunderstand-about-palantir"/);
   assert.match(homepage, /carousel\.style\.scrollBehavior = 'auto'/);
   assert.match(homepage, /carousel\.scrollLeft = carousel\.scrollWidth/);
   assert.match(homepage, /href="\/healthcare-map"/);
@@ -46,24 +45,7 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /href="\/bell-wars"/);
 });
 
-test('serves the palantir essay, its figures, and the short redirect', async () => {
-  const redirect = await fetch(`${base}/palantir`, { redirect: 'manual' });
-  assert.equal(redirect.status, 308);
-  assert.equal(redirect.headers.get('location'), '/what-people-misunderstand-about-palantir');
-
-  const response = await fetch(`${base}/what-people-misunderstand-about-palantir`);
-  assert.equal(response.status, 200);
-  const page = await response.text();
-  assert.match(page, /what do people misunderstand about palantir\?/);
-  assert.match(page, /which is why almost every current deployco is going to fail\./);
-  assert.match(page, /\/assets\/palantir\/01-enterprise-landscape\.svg/);
-
-  const figure = await fetch(`${base}/assets/palantir/01-enterprise-landscape.svg`);
-  assert.equal(figure.status, 200);
-  assert.match(figure.headers.get('content-type'), /image\/svg\+xml/);
-});
-
-test('serves the Foundry docs complexity map and its datasets', async () => {
+test('serves the Foundry docs complexity map and its dataset', async () => {
   const redirect = await fetch(`${base}/foundry-viz`, { redirect: 'manual' });
   assert.equal(redirect.status, 308);
   assert.equal(redirect.headers.get('location'), '/foundry-viz/');
@@ -72,13 +54,17 @@ test('serves the Foundry docs complexity map and its datasets', async () => {
   assert.equal(response.status, 200);
   const page = await response.text();
   assert.match(page, /Palantir Foundry/);
-  assert.match(page, /Braintrust/);
   assert.match(page, /data\.json/);
 
   const foundry = await fetch(`${base}/foundry-viz/data.json`).then((result) => result.json());
-  const braintrust = await fetch(`${base}/foundry-viz/braintrust.json`).then((result) => result.json());
   assert.ok(foundry.length > 4000);
-  assert.ok(braintrust.length > 100);
+});
+
+test('does not serve the Palantir essay from personal-site slugs', async () => {
+  for (const slug of ['palantir', 'what-people-misunderstand-about-palantir', 'what-do-people-misunderstand-about-palantir']) {
+    const response = await fetch(`${base}/${slug}`);
+    assert.equal(response.status, 404);
+  }
 });
 
 test('serves the interactive Bell wars visualization', async () => {

@@ -107,20 +107,6 @@ const DATASETS={
     "App Building":"#52d6e2","Security & Governance":"#a3e635","Monitoring & DevOps":"#f9a03f",
     "Getting Started & Guides":"#9aa7ff","Other":"#7b8794"},
  },
- braintrust:{
-   label:"Braintrust", root:"braintrust", data:"braintrust.json", accent:"#f25d3b", dot:"#f25d3b",
-   groups:{
-    "API & SDK Reference":["api-reference","reference"],
-    "Evaluation":["evaluate","evaluation-quickstart"],
-    "Observability & Review":["observe","instrument","tracing-quickstart","annotate"],
-    "Integrations":["integrations"],
-    "Guides & Cookbook":["kb","cookbook","best-practices","workflow","loop"],
-    "Admin & Platform":["admin","deploy","security","plans-and-limits","changelog","data-plane-changelog"],
-   },
-   palette:{
-    "API & SDK Reference":"#4ea1ff","Evaluation":"#ef5da8","Observability & Review":"#5ad19a",
-    "Integrations":"#ffd166","Guides & Cookbook":"#c792ea","Admin & Platform":"#f9a03f","Other":"#7b8794"},
- },
 };
 
 // ============================ STATE ============================
@@ -166,7 +152,7 @@ function buildGraph(raw){
     const n=ensure(p);
     n.page=true; if(n.kind==="struct") n.kind="page";
     n.words=Math.max(0,r.words||0); n.chars=r.chars||0;
-    if(r.title) n.title=r.title.replace(/\s*[•|·|—]\s*(Palantir|Braintrust).*$/,"").trim();
+    if(r.title) n.title=r.title.replace(/\s*[•|·|—]\s*Palantir.*$/,"").trim();
     n.url=r.url.replace("palantir.com","www.palantir.com").replace("www.www.","www.");
   }
   return {nodes:Object.values(nodes),links};
