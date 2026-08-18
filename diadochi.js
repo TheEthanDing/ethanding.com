@@ -452,6 +452,7 @@
   let mapWidth;
   let mapHeight;
   let currentIndex = 0;
+  let transitionSequence = 0;
   let playback;
   let zoomBehavior;
   let currentZoomTransform = d3.zoomIdentity;
@@ -668,23 +669,39 @@
     renderSnapshot(YEAR_STATES[currentIndex]);
   }
 
-  function renderSnapshot(snapshot) {
+  function renderSnapshot(snapshot, direction = 0) {
     if (!mapLayer) return;
     const activeScene = mapLayer.select('.snapshot-layer.current');
     if (!activeScene.empty() && activeScene.attr('data-year') === String(snapshot.year)) return;
+    mapLayer.selectAll('.snapshot-layer').attr('clip-path', null);
+    svg.select('defs').selectAll('[id^="state-reveal-"]').remove();
     const outgoingScenes = mapLayer.selectAll('.snapshot-layer');
+    const transitionId = ++transitionSequence;
+    const isAnimatedChange = !outgoingScenes.empty() && !reducedMotion && direction !== 0;
     outgoingScenes.classed('current', false).style('pointer-events', 'none').attr('aria-hidden', 'true');
     const scene = mapLayer.append('g')
       .attr('class', 'snapshot-layer current')
       .attr('data-year', snapshot.year)
-      .style('opacity', outgoingScenes.empty() || reducedMotion ? 1 : 0);
+      .style('opacity', 1);
+
+    let revealClip;
+    if (isAnimatedChange) {
+      const clipId = `state-reveal-${transitionId}`;
+      revealClip = svg.select('defs').append('clipPath').attr('id', clipId);
+      revealClip.append('rect')
+        .attr('x', direction > 0 ? 0 : mapWidth)
+        .attr('y', 0)
+        .attr('width', 0)
+        .attr('height', mapHeight);
+      scene.attr('clip-path', `url(#${clipId})`);
+    }
 
     const resolvedTerritories = snapshot.territories.flatMap(item =>
       (REGION_GROUPS[item.region] || [item.region]).map(cell => ({ ...item, cell }))
     );
     const mergedTerritories = mergeFactionCells(resolvedTerritories);
     const territories = scene.append('g').attr('clip-path', 'url(#land-clip)').append('g').attr('clip-path', 'url(#empire-extent-clip)');
-    territories.selectAll('path')
+    const territoryPaths = territories.selectAll('path')
       .data(mergedTerritories)
       .join('path')
       .attr('class', 'territory')
@@ -693,6 +710,15 @@
       .attr('fill-opacity', .88)
       .on('pointermove', (event, d) => showTooltip(event, FACTIONS[d.faction].name, `Approximate control · ${snapshot.year} BCE`))
       .on('pointerleave', hideTooltip);
+
+    if (isAnimatedChange) {
+      territoryPaths
+        .attr('fill-opacity', .42)
+        .attr('stroke-opacity', .35)
+        .transition().delay(120).duration(720).ease(d3.easeCubicOut)
+        .attr('fill-opacity', .88)
+        .attr('stroke-opacity', 1);
+    }
 
     if (snapshot.year >= 316) {
       const satrapies = scene.append('g').attr('clip-path', 'url(#land-clip)').append('g').attr('clip-path', 'url(#empire-extent-clip)');
@@ -713,7 +739,12 @@
       .attr('y', d => projection(d.p)[1])
       .style('font-size', d => `${d.size || 12}px`)
       .text(d => d.name);
-    labels.attr('opacity', 0).transition().duration(reducedMotion ? 0 : 360).attr('opacity', 1);
+    labels
+      .attr('opacity', isAnimatedChange ? 0 : 1)
+      .attr('transform', isAnimatedChange ? 'translate(0 7)' : null)
+      .transition().delay(isAnimatedChange ? 430 : 0).duration(reducedMotion ? 0 : 420).ease(d3.easeCubicOut)
+      .attr('opacity', 1)
+      .attr('transform', 'translate(0 0)');
 
     const routes = scene.append('g').attr('class', 'routes').selectAll('g')
       .data(snapshot.routes).join('g');
@@ -750,6 +781,14 @@
     battles.append('circle').attr('class', 'battle-ring').attr('r', 9);
     battles.append('path').attr('class', 'battle-cross').attr('d', 'M-4,-4L4,4M4,-4L-4,4');
     battles.append('text').attr('class', 'battle-label').attr('x', 13).attr('y', 3).text(d => d.name);
+    if (isAnimatedChange) {
+      battles
+        .attr('opacity', 0)
+        .attr('transform', d => `translate(${projection(d.p).join(' ')}) scale(.35)`)
+        .transition().delay(610).duration(390).ease(d3.easeBackOut.overshoot(1.25))
+        .attr('opacity', 1)
+        .attr('transform', d => `translate(${projection(d.p).join(' ')}) scale(1)`);
+    }
 
     const availableCities = CITIES.filter(city => cityIsAvailable(city, snapshot.year));
     cityGroups = scene.append('g').attr('class', 'cities').selectAll('g')
@@ -775,9 +814,27 @@
       .text(city => city.name);
     updateCityScale();
 
-    if (!outgoingScenes.empty() && !reducedMotion) {
-      outgoingScenes.interrupt().transition().duration(900).ease(d3.easeCubicInOut).style('opacity', 0).remove();
-      scene.interrupt().transition().duration(900).ease(d3.easeCubicInOut).style('opacity', 1);
+    if (isAnimatedChange) {
+      cityGroups.attr('opacity', 0)
+        .transition().delay((city, index) => 500 + Math.min(index, 20) * 12).duration(300)
+        .attr('opacity', 1);
+    }
+
+    if (isAnimatedChange) {
+      const revealRect = revealClip.select('rect');
+      revealRect.transition().duration(980).ease(d3.easeCubicInOut)
+        .attr('x', 0)
+        .attr('width', mapWidth)
+        .on('end', () => {
+          revealClip.remove();
+          if (transitionId === transitionSequence) scene.attr('clip-path', null);
+        });
+      window.setTimeout(() => {
+        revealClip.remove();
+        if (transitionId === transitionSequence) scene.attr('clip-path', null);
+      }, 1040);
+      outgoingScenes.interrupt().transition().delay(560).duration(420).ease(d3.easeCubicIn)
+        .style('opacity', .12).remove();
     } else {
       outgoingScenes.remove();
     }
@@ -792,7 +849,7 @@
       + '<span class="key-item"><i class="key-route"></i>Army</span><span class="key-item"><i class="key-route naval"></i>Fleet</span>';
   }
 
-  function updateNarrative(snapshot) {
+  function updateNarrative(snapshot, direction = 0) {
     closeCityProfile();
     document.getElementById('date-year').textContent = snapshot.year;
     document.getElementById('war-label').textContent = snapshot.war;
@@ -804,15 +861,22 @@
         <div><strong>${title}</strong>${copy}</div>
       </div>`).join('');
     if (!reducedMotion) {
+      const travel = direction < 0 ? -12 : 12;
       document.getElementById('campaign-profile').animate([
-        { opacity: .25, transform: 'translateY(6px)' },
-        { opacity: 1, transform: 'translateY(0)' },
-      ], { duration: 560, easing: 'cubic-bezier(.22,.75,.25,1)' });
+        { opacity: .18, transform: `translateX(${travel}px)`, filter: 'blur(3px)' },
+        { opacity: 1, transform: 'translateX(0)', filter: 'blur(0)' },
+      ], { duration: 620, easing: 'cubic-bezier(.22,.75,.25,1)' });
+      document.getElementById('date-year').animate([
+        { opacity: .2, transform: `translateY(${direction < 0 ? -10 : 10}px) scale(.92)` },
+        { opacity: 1, transform: 'translateY(0) scale(1)' },
+      ], { duration: 520, easing: 'cubic-bezier(.16,.8,.25,1)' });
     }
   }
 
   function setYear(index, centerButton = false) {
-    currentIndex = Math.max(0, Math.min(YEAR_STATES.length - 1, index));
+    const targetIndex = Math.max(0, Math.min(YEAR_STATES.length - 1, index));
+    const direction = Math.sign(targetIndex - currentIndex);
+    currentIndex = targetIndex;
     const snapshot = YEAR_STATES[currentIndex];
     eventEls.forEach((button, buttonIndex) => {
       const active = buttonIndex === currentIndex;
@@ -822,8 +886,24 @@
     if (centerButton) eventEls[currentIndex].scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'nearest', inline: 'center' });
     previousButton.disabled = currentIndex === 0;
     nextButton.disabled = currentIndex === YEAR_STATES.length - 1;
-    updateNarrative(snapshot);
-    renderSnapshot(snapshot);
+    if (!reducedMotion && direction !== 0) {
+      mapPanel.classList.remove('state-forward', 'state-backward', 'state-changing');
+      document.querySelector('.chronology').classList.remove('state-changing');
+      document.querySelector('.detail-panel').classList.remove('state-changing');
+      void mapPanel.offsetWidth;
+      mapPanel.classList.add(direction > 0 ? 'state-forward' : 'state-backward', 'state-changing');
+      document.querySelector('.chronology').classList.add('state-changing');
+      document.querySelector('.detail-panel').classList.add('state-changing');
+      const motionId = transitionSequence + 1;
+      window.setTimeout(() => {
+        if (motionId !== transitionSequence) return;
+        mapPanel.classList.remove('state-forward', 'state-backward', 'state-changing');
+        document.querySelector('.chronology').classList.remove('state-changing');
+        document.querySelector('.detail-panel').classList.remove('state-changing');
+      }, 1050);
+    }
+    updateNarrative(snapshot, direction);
+    renderSnapshot(snapshot, direction);
   }
 
   function stopPlayback() {
