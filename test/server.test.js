@@ -36,6 +36,7 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /href="\/bi-pricing"/);
   assert.match(homepage, /href="\/data-agent-stack"/);
   assert.match(homepage, /href="\/analytics-token-tam"/);
+  assert.match(homepage, /href="\/diadochi"/);
   assert.match(homepage, /href="\/sengoku-clans"/);
   assert.match(homepage, /href="\/semiconductor-wars"/);
   assert.match(homepage, /href="\/airline-wars"/);
@@ -79,6 +80,40 @@ test('serves the interactive Bell wars visualization', async () => {
   assert.match(page, /pinArtifact/);
   assert.match(page, /data-event-detail="chart"/);
   assert.match(page, /timeline-shell\.js/);
+});
+
+test('serves the interactive Diadochi campaign map and geography', async () => {
+  const response = await fetch(`${base}/diadochi`);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('cache-control'), 'no-cache');
+  const page = await response.text();
+  assert.match(page, /The Diadochi/);
+  assert.match(page, /Annual chronology/);
+  assert.match(page, /Play every year/);
+  assert.doesNotMatch(page, /The empire was a road network wearing a crown/);
+  assert.match(page, /City dossier/);
+  assert.match(page, /Pleiades ancient-world gazetteer/);
+  assert.match(page, /\/diadochi\.js/);
+
+  const script = await fetch(`${base}/diadochi.js`).then((result) => result.text());
+  assert.match(script, /Corupedium/);
+  assert.match(script, /Alexandria Eschate/);
+  assert.match(script, /selectCity/);
+  assert.match(script, /snapshot-layer current/);
+  assert.match(script, /duration\(900\)/);
+  assert.match(script, /BACKGROUND_LABELS/);
+  assert.match(script, /THRACE/);
+  assert.match(script, /YEAR_STATES/);
+  assert.match(script, /d3\.range\(323, 275, -1\)/);
+  assert.match(script, /countries-50m\.json/);
+
+  const geography = await fetch(`${base}/assets/diadochi/countries-50m.json`).then((result) => result.json());
+  assert.ok(geography.objects.land);
+  assert.ok(geography.objects.countries);
+  assert.ok(geography.arcs.length > 1500);
+
+  const offlineGeography = await fetch(`${base}/assets/diadochi/countries-50m.js`).then((result) => result.text());
+  assert.match(offlineGeography, /^window\.DIADOCHI_WORLD = /);
 });
 
 test('serves the researched railroad empires visualization', async () => {
