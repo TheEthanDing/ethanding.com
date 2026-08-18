@@ -204,7 +204,11 @@ async function serveStatic(res, relativePath) {
   try {
     const body = await fs.readFile(absolute);
     const extension = path.extname(absolute).toLowerCase();
-    const cache = relativePath.startsWith('/data/') ? 'no-cache' : relativePath.startsWith('/images/books/') ? 'public, max-age=31536000, immutable' : 'public, max-age=3600';
+    const cache = relativePath === '/diadochi.html' || relativePath.startsWith('/data/')
+      ? 'no-cache'
+      : relativePath.startsWith('/images/books/')
+        ? 'public, max-age=31536000, immutable'
+        : 'public, max-age=3600';
     send(res, 200, body, { 'Content-Type': mimeTypes[extension] || 'application/octet-stream', 'Cache-Control': cache });
   } catch (error) {
     send(res, error.code === 'ENOENT' ? 404 : 500, error.code === 'ENOENT' ? 'Not found' : 'Server error');
@@ -305,6 +309,7 @@ async function handle(req, res) {
   if (pathname === '/bi-pricing' || pathname === '/bi-pricing/') return serveStatic(res, '/bi-pricing.html');
   if (pathname === '/data-agent-stack' || pathname === '/data-agent-stack/') return serveStatic(res, '/data-agent-stack.html');
   if (pathname === '/analytics-token-tam' || pathname === '/analytics-token-tam/') return serveStatic(res, '/analytics-token-tam.html');
+  if (pathname === '/diadochi' || pathname === '/diadochi/') return serveStatic(res, '/diadochi.html');
   if (pathname === '/sengoku-clans' || pathname === '/sengoku-clans/') return serveStatic(res, '/sengoku-clans.html');
   if (pathname === '/semiconductor-wars' || pathname === '/semiconductor-wars/') return serveStatic(res, '/semiconductor-wars.html');
   if (pathname === '/airline-wars' || pathname === '/airline-wars/') return serveStatic(res, '/airline-wars.html');
@@ -312,7 +317,7 @@ async function handle(req, res) {
   if (pathname === '/railroad-empires' || pathname === '/railroad-empires/') return serveStatic(res, '/railroad-empires.html');
   if (pathname === '/oil-wars' || pathname === '/oil-wars/') return serveStatic(res, '/oil-wars.html');
   if (pathname === '/bell-wars' || pathname === '/bell-wars/') return serveStatic(res, '/bell-wars.html');
-  if (/^\/(assets|images|data|foundry-viz)\//.test(pathname) || ['/admin.js', '/healthcare-map.js', '/bi-pricing.js', '/data-agent-stack.js', '/analytics-token-tam.js', '/timeline-shell.js', '/timeline-shell.css'].includes(pathname)) return serveStatic(res, pathname);
+  if (/^\/(assets|images|data|foundry-viz)\//.test(pathname) || ['/admin.js', '/healthcare-map.js', '/bi-pricing.js', '/data-agent-stack.js', '/analytics-token-tam.js', '/diadochi.js', '/timeline-shell.js', '/timeline-shell.css'].includes(pathname)) return serveStatic(res, pathname);
   if (HIDDEN_ARTICLE_SLUGS.has(pathname.replace(/^\/|\/$/g, ''))) return send(res, 404, 'Not found');
   if (/^\/[a-z0-9-]+\/?$/.test(pathname)) return renderArticlePreview(res, req, pathname.replace(/^\/|\/$/g, ''));
   return send(res, 404, 'Not found');
