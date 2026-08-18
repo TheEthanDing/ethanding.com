@@ -90,6 +90,8 @@ test('serves the interactive Diadochi campaign map and geography', async () => {
   assert.match(page, /The Diadochi/);
   assert.match(page, /Annual chronology/);
   assert.match(page, /Play every year/);
+  assert.match(page, /Full-screen campaign table/);
+  assert.match(page, /<details class="sources">/);
   assert.doesNotMatch(page, /The empire was a road network wearing a crown/);
   assert.match(page, /City dossier/);
   assert.match(page, /Pleiades ancient-world gazetteer/);
@@ -100,7 +102,10 @@ test('serves the interactive Diadochi campaign map and geography', async () => {
   assert.match(script, /Alexandria Eschate/);
   assert.match(script, /selectCity/);
   assert.match(script, /snapshot-layer current/);
-  assert.match(script, /duration\(900\)/);
+  assert.match(script, /duration\(980\)/);
+  assert.match(script, /state-reveal-/);
+  assert.match(script, /easeBackOut/);
+  assert.match(page, /campaign-sweep-forward/);
   assert.match(script, /BACKGROUND_LABELS/);
   assert.match(script, /THRACE/);
   assert.match(script, /YEAR_STATES/);
