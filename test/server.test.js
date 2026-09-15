@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 const path = require('node:path');
+const { calculateDaysTaken, validateBooks } = require('../server');
 
 const root = path.resolve(__dirname, '..');
 let child;
@@ -24,26 +25,56 @@ test.before(async () => {
 
 test.after(() => child?.kill());
 
+test('calculates inclusive reading days from the start and finish dates', () => {
+  assert.equal(calculateDaysTaken('2026-07-10', '2026-07-12'), 3);
+  assert.equal(calculateDaysTaken('2026-07-10', '2026-07-10'), 1);
+  assert.equal(calculateDaysTaken('2026-07-12', '2026-07-10'), null);
+  assert.equal(calculateDaysTaken('', '2026-07-10'), null);
+  assert.equal(calculateDaysTaken('2026-02-30', '2026-03-02'), null);
+});
+
+test('recalculates reading days when book data is saved', () => {
+  const [book] = validateBooks([{ id: 'book-1', title: 'Test book', authors: ['Test Author'], dateStarted: '2026-07-10', dateFinished: '2026-07-12', daysTaken: 99 }]);
+  assert.equal(book.daysTaken, 3);
+});
+
 test('serves the homepage and health check', async () => {
   const health = await fetch(`${base}/healthz`).then((response) => response.json());
   assert.equal(health.ok, true);
-  const homepage = await fetch(base).then((response) => response.text());
+  const homepageResponse = await fetch(base);
+  assert.equal(homepageResponse.headers.get('x-frame-options'), 'SAMEORIGIN');
+  assert.equal(homepageResponse.headers.get('cache-control'), 'no-cache');
+  const homepage = await homepageResponse.text();
   assert.match(homepage, /Ethan Ding/);
-  assert.match(homepage, /href="\/foundry-viz\/"/);
-  assert.match(homepage, /carousel\.style\.scrollBehavior = 'auto'/);
-  assert.match(homepage, /carousel\.scrollLeft = carousel\.scrollWidth/);
-  assert.match(homepage, /href="\/healthcare-map"/);
-  assert.match(homepage, /href="\/bi-pricing"/);
-  assert.match(homepage, /href="\/data-agent-stack"/);
-  assert.match(homepage, /href="\/analytics-token-tam"/);
+  assert.match(homepage, /class="project-showcase"/);
+  assert.match(homepage, /Interactive work/);
+  assert.match(homepage, /window\.setTimeout\(\(\) => showProject\(current \+ 1\), 5000\)/);
+  assert.match(homepage, /Foundry docs complexity map/);
+  assert.match(homepage, /id="bookshelf"/);
+  assert.match(homepage, /id="shelf-search"/);
+  assert.match(homepage, /id="book-dialog"/);
+  assert.match(homepage, /Healthcare ecosystem map/);
+  assert.match(homepage, /BI tool per-seat pricing/);
+  assert.match(homepage, /One agent, your whole stack/);
+  assert.match(homepage, /Analytics token TAM model/);
   assert.match(homepage, /href="\/diadochi"/);
-  assert.match(homepage, /href="\/sengoku-clans"/);
-  assert.match(homepage, /href="\/semiconductor-wars"/);
-  assert.match(homepage, /href="\/airline-wars"/);
-  assert.match(homepage, /href="\/wall-street-houses"/);
-  assert.match(homepage, /href="\/railroad-empires"/);
-  assert.match(homepage, /href="\/oil-wars"/);
-  assert.match(homepage, /href="\/bell-wars"/);
+  assert.match(homepage, /Power of the Sengoku clans/);
+  assert.match(homepage, /Wars of the semis/);
+  assert.match(homepage, /Wars of the airlines/);
+  assert.match(homepage, /The houses of Wall Street/);
+  assert.match(homepage, /The iron railroad empires/);
+  assert.match(homepage, /The oil wars/);
+  assert.match(homepage, /The Bell wars/);
+  assert.match(homepage, /aspect-ratio: 2 \/ 1/);
+  assert.match(homepage, /images\/project-previews\/foundry\.png/);
+  assert.doesNotMatch(homepage, /<iframe class="showcase-frame/);
+  assert.doesNotMatch(homepage, /class="interactive-links"/);
+
+  for (const preview of ['ancient-world', 'foundry', 'healthcare', 'data-agent', 'bi-pricing', 'analytics-token', 'sengoku', 'semiconductor', 'airlines', 'wall-street', 'railroads', 'oil', 'bell']) {
+    const image = await fetch(`${base}/images/project-previews/${preview}.png`);
+    assert.equal(image.status, 200, `${preview} preview should be available`);
+    assert.match(image.headers.get('content-type'), /^image\/png/);
+  }
 });
 
 test('serves the Foundry docs complexity map and its dataset', async () => {
@@ -82,14 +113,16 @@ test('serves the interactive Bell wars visualization', async () => {
   assert.match(page, /timeline-shell\.js/);
 });
 
-test('serves the interactive Diadochi campaign map and geography', async () => {
+test('serves the interactive ancient-world campaign map and geography', async () => {
   const response = await fetch(`${base}/diadochi`);
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('cache-control'), 'no-cache');
   const page = await response.text();
-  assert.match(page, /The Diadochi/);
-  assert.match(page, /Annual chronology/);
-  assert.match(page, /Play every year/);
+  assert.match(page, /The Ancient World/);
+  assert.match(page, /Milestone chronology/);
+  assert.match(page, /499 BCE–476 CE/);
+  assert.match(page, /Play the timeline/);
+  assert.match(page, /Jump to an era/);
   assert.match(page, /Full-screen campaign table/);
   assert.match(page, /<details class="sources">/);
   assert.doesNotMatch(page, /The empire was a road network wearing a crown/);
@@ -105,20 +138,55 @@ test('serves the interactive Diadochi campaign map and geography', async () => {
   assert.match(script, /duration\(980\)/);
   assert.match(script, /state-reveal-/);
   assert.match(script, /easeBackOut/);
+  assert.match(script, /battle-icon-swords/);
+  assert.match(script, /city-icon-capital/);
+  assert.match(script, /naval-unit/);
+  assert.match(page, /city-dossier-icon/);
+  assert.match(page, /The active cast/);
+  assert.match(page, /Character dossier/);
+  assert.match(page, /Army in the field/);
+  assert.match(page, /Battle dossier/);
+  assert.match(page, /Natural Earth vector data/);
+  assert.match(page, /Current objective/);
   assert.match(page, /campaign-sweep-forward/);
   assert.match(script, /BACKGROUND_LABELS/);
+  assert.match(script, /peopleForYear/);
+  assert.match(script, /Dies this year/);
+  assert.match(script, /Antigonus Gonatas/);
+  assert.match(script, /const ARMIES/);
+  assert.match(script, /army-camp-hit/);
+  assert.match(script, /BATTLE_DETAILS/);
+  assert.match(script, /MOUNTAIN_RANGES/);
+  assert.match(script, /armyMovement/);
+  assert.match(script, /Gabiene winter camp/);
   assert.match(script, /THRACE/);
   assert.match(script, /YEAR_STATES/);
   assert.match(script, /d3\.range\(323, 275, -1\)/);
   assert.match(script, /countries-50m\.json/);
+
+  const expansion = await fetch(`${base}/assets/diadochi/ancient-world-data.js`).then((result) => result.text());
+  assert.match(expansion, /The Persian Wars/);
+  assert.match(expansion, /Hannibal/);
+  assert.match(expansion, /Maximum extent/);
+  assert.match(expansion, /The western court ends/);
+  assert.match(expansion, /window\.DIADOCHI_EXPANSION/);
 
   const geography = await fetch(`${base}/assets/diadochi/countries-50m.json`).then((result) => result.json());
   assert.ok(geography.objects.land);
   assert.ok(geography.objects.countries);
   assert.ok(geography.arcs.length > 1500);
 
+  const rivers = await fetch(`${base}/assets/diadochi/rivers-50m.geojson`).then((result) => result.json());
+  const lakes = await fetch(`${base}/assets/diadochi/lakes-50m.geojson`).then((result) => result.json());
+  assert.ok(rivers.features.length > 400);
+  assert.ok(lakes.features.length > 400);
+
   const offlineGeography = await fetch(`${base}/assets/diadochi/countries-50m.js`).then((result) => result.text());
   assert.match(offlineGeography, /^window\.DIADOCHI_WORLD = /);
+
+  const portrait = await fetch(`${base}/images/diadochi/people/ptolemy.jpg`);
+  assert.equal(portrait.status, 200);
+  assert.match(portrait.headers.get('content-type'), /^image\/jpeg/);
 });
 
 test('serves the researched railroad empires visualization', async () => {
@@ -227,6 +295,15 @@ test('serves the healthcare ecosystem map and its script', async () => {
   const script = await fetch(`${base}/healthcare-map.js`);
   assert.equal(script.status, 200);
   assert.match(await script.text(), /const SEGMENTS/);
+});
+
+test('serves bookshelf assets and cached public enrichment', async () => {
+  for (const [file, type] of [['/assets/bookshelf.js', /javascript/], ['/assets/bookshelf.css', /text\/css/], ['/data/book-metadata.json', /json/], ['/data/book-appearance.json', /json/]]) {
+    const response = await fetch(`${base}${file}`);
+    assert.equal(response.status, 200, file);
+    assert.match(response.headers.get('content-type'), type, file);
+    if (file.startsWith('/data/')) assert.equal(response.headers.get('cache-control'), 'no-cache');
+  }
 });
 
 test('serves the repository-owned reading data', async () => {

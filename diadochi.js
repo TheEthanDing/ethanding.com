@@ -1,4 +1,5 @@
 (() => {
+  const EXPANSION = window.DIADOCHI_EXPANSION || { factions:{}, regions:{}, regionGroups:{}, cities:[], people:[], armies:[], snapshots:[], battles:{} };
   const FACTIONS = {
     argead: { name: 'Argead regency', color: '#315f9d', light: '#6d92c7' },
     antipater: { name: 'Antipater / Cassander', color: '#466c9f', light: '#83a2ca' },
@@ -12,6 +13,7 @@
     maurya: { name: 'Mauryan Empire', color: '#a27c2b', light: '#cfad57' },
     independent: { name: 'Independent / local rulers', color: '#6d7468', light: '#9ba093' },
   };
+  Object.assign(FACTIONS, EXPANSION.factions);
 
   // Shared satrapy-scale cells. Adjacent snapshots reassign these cells instead of
   // drawing unrelated macro-polygons, so borders remain stable and legible over time.
@@ -45,6 +47,7 @@
     cyprusCell: [[32.25,34.35],[32.6,34.15],[33.05,34.05],[33.55,34.05],[34.05,34.15],[34.45,34.35],[34.75,34.65],[34.9,35.0],[34.85,35.35],[34.6,35.6],[34.2,35.75],[33.7,35.8],[33.2,35.75],[32.75,35.6],[32.4,35.35],[32.2,35.0],[32.15,34.65]],
     levantStrip: [[33.45,29.5],[33.55,30.3],[33.65,31.1],[33.75,31.9],[33.9,32.7],[34.1,33.45],[34.35,34.1],[34.65,34.65],[35.05,35.05],[35.5,35.35],[36.0,35.5],[36.1,34.85],[35.65,34.2],[35.25,33.55],[34.55,33.05],[34.15,32.45],[33.95,31.75],[33.8,31.0],[33.7,30.2],[33.55,29.4]],
   };
+  Object.assign(REGIONS, EXPANSION.regions);
 
   const REGION_GROUPS = {
     macedon: ['macedonia'],
@@ -64,6 +67,7 @@
     cyprus: ['cyprusCell'],
     levantCoast: ['levantStrip'],
   };
+  Object.assign(REGION_GROUPS, EXPANSION.regionGroups);
 
   const EMPIRE_EXTENTS = {
     europe: [[18.3,35.0],[18.4,36.1],[18.7,37.2],[18.5,38.2],[18.7,39.2],[19.1,40.2],[19.8,41.0],[20.8,41.6],[22.0,42.0],[23.3,42.2],[24.5,42.1],[25.5,41.8],[26.4,42.2],[27.7,42.7],[29.1,43.0],[30.6,42.8],[31.8,42.3],[32.5,41.5],[32.4,40.7],[31.5,40.0],[30.3,39.6],[29.0,39.3],[27.7,39.2],[26.5,39.4],[25.4,39.7],[25.0,39.0],[25.2,38.1],[24.9,37.2],[24.4,36.3],[23.5,35.5],[22.4,34.9],[21.1,34.7],[19.8,34.8]],
@@ -71,6 +75,7 @@
     egypt: [[24.0,20.3],[25.3,19.9],[27.0,19.8],[28.7,20.0],[30.2,20.5],[31.5,21.3],[32.4,22.5],[33.0,24.0],[33.3,25.7],[33.5,27.4],[34.0,29.0],[34.3,30.5],[34.1,31.6],[32.5,31.8],[30.8,31.8],[29.1,31.5],[27.5,31.1],[26.0,30.4],[24.9,29.4],[24.2,28.0],[23.9,26.4],[23.8,24.7],[23.8,22.9],[23.9,21.4]],
     cyrenaica: [[17.8,27.0],[19.1,26.6],[20.6,26.5],[22.1,26.8],[23.5,27.2],[24.8,27.8],[25.8,28.7],[26.1,29.8],[26.0,30.9],[25.5,31.8],[24.5,32.3],[23.1,32.5],[21.6,32.4],[20.2,32.0],[19.0,31.3],[18.3,30.3],[17.9,29.1]],
   };
+  const BROAD_STORY_EXTENT = [[-11.5,28],[-9.5,36],[-4,44],[2,51],[11,56],[22,57],[33,54],[42,48],[50,42],[58,39],[67,40],[77,36],[80,26],[73,18],[58,16],[45,18],[33,20],[22,24],[12,27],[2,29]];
 
   const SATRAPY_LINES = [
     [[29.7,35.0],[29.5,36.4],[29.8,37.8],[30.2,39.3],[30.4,40.8]],
@@ -95,6 +100,10 @@
   ];
 
   const BACKGROUND_LABELS = [
+    { name:'HISPANIA', p:[-3.5,40.2], rotate:-5 },
+    { name:'GAUL', p:[2.0,46.5], rotate:-4 },
+    { name:'GERMANIA', p:[11.5,52.5], rotate:2 },
+    { name:'ITALIA', p:[12.0,43.0], rotate:-18 },
     { name:'ILLYRIA', p:[17.8,42.3], rotate:-13, mobile:false },
     { name:'THRACE', p:[27.2,43.25], rotate:-4 },
     { name:'SCYTHIA', p:[54.5,44.5], rotate:2 },
@@ -109,6 +118,38 @@
     { name:'PERSIAN GULF', p:[51.7,25.8], rotate:-10, water:true, mobile:false },
     { name:'ARABIAN SEA', p:[64.5,19.3], rotate:0, water:true, mobile:false },
   ];
+
+  // These are generalized editorial ridgelines, included to explain why armies
+  // repeatedly funnel through Cilicia, Syria, the Iranian plateau, and the Hindu Kush.
+  const MOUNTAIN_RANGES = [
+    { name:'PYRENEES', points:[[-1.8,43.0],[0.2,42.7],[2.7,42.6]], label:[.5,43.15], rotate:-4 },
+    { name:'ALPS', points:[[5.8,45.2],[8.0,46.0],[10.5,46.6],[13.3,46.5],[15.6,46.2]], label:[10.5,47.0], rotate:1 },
+    { name:'APENNINES', points:[[8.5,44.4],[10.7,43.0],[12.5,41.5],[14.5,40.0],[16.2,38.7]], label:[13.2,41.3], rotate:-48 },
+    { name:'ATLAS', points:[[-5.0,32.5],[0.0,34.2],[5.0,35.0],[10.0,35.7]], label:[2.7,34.0], rotate:8 },
+    { name:'CARPATHIANS', points:[[17.0,48.4],[20.5,49.2],[24.0,48.7],[26.2,46.3]], label:[22.0,49.5], rotate:-5 },
+    { name:'PINDUS', points:[[20.45,42.0],[20.65,40.8],[20.8,39.6],[21.15,38.45]], label:[20.15,40.15], rotate:-77 },
+    { name:'TAURUS', points:[[27.2,37.15],[30.1,37.35],[33.0,37.6],[36.0,37.8],[38.4,38.25]], label:[32.8,37.15], rotate:3 },
+    { name:'PONTIC MTS.', points:[[28.3,40.65],[31.5,40.8],[35.0,40.8],[38.2,40.65],[41.2,40.25]], label:[35.3,41.1], rotate:-2 },
+    { name:'CAUCASUS', points:[[39.4,42.05],[42.2,42.55],[45.1,42.65],[48.4,42.2]], label:[44.3,43.0], rotate:-1 },
+    { name:'ZAGROS', points:[[44.0,37.0],[46.3,35.1],[48.0,33.0],[50.1,30.8],[52.2,28.8],[54.6,27.1]], label:[49.15,32.05], rotate:-38 },
+    { name:'HINDU KUSH', points:[[61.6,35.0],[64.3,35.65],[67.2,35.85],[70.2,35.45],[73.2,34.4]], label:[67.6,36.25], rotate:-2 },
+    { name:'LEBANON', points:[[35.45,34.55],[35.7,33.75],[35.9,32.9],[36.15,32.05]], label:[36.35,33.2], rotate:-73, mobile:false },
+  ];
+
+  const BATTLE_DETAILS = {
+    Lamia: { type:'Siege', belligerents:'Greek coalition vs. Antipater', commanders:'Leosthenes · Antipater', result:'Antipater contained, but not destroyed', forces:'A Macedonian field army holds the fortress while coalition forces control the approaches.', stakes:'The first test of Macedonian authority after Alexander’s death.', aftermath:'Leosthenes is killed during the siege. Reinforcements from Asia eventually reverse the Greek advantage.' },
+    Crannon: { type:'Field battle', belligerents:'Macedon vs. Greek coalition', commanders:'Antipater & Craterus · Antiphilus', result:'Macedonian strategic victory', forces:'Both sides field Macedonian-style infantry; cavalry superiority proves decisive.', stakes:'Whether the Lamian War can continue after Macedonian reinforcements arrive.', aftermath:'The coalition fragments and Athens is forced to accept a Macedonian settlement.' },
+    Pelusium: { type:'River campaign', belligerents:'Royal army vs. Ptolemy', commanders:'Perdiccas · Ptolemy', result:'Failed invasion of Egypt', forces:'The royal army attempts multiple Nile crossings against prepared defenders.', stakes:'Control of Egypt and the credibility of Perdiccas’ regency.', aftermath:'Heavy losses and failed crossings trigger a mutiny; Perdiccas is murdered by his officers.' },
+    Orkynia: { type:'Field battle', belligerents:'Antigonus vs. Eumenes', commanders:'Antigonus · Eumenes', result:'Antigonid victory', forces:'A mobile pursuit through Cappadocia, shaped by cavalry and defections.', stakes:'Survival of the royalist cause in Anatolia.', aftermath:'Eumenes escapes to Nora; the war continues despite Antigonus’ battlefield success.' },
+    Gabiene: { type:'Field battle', belligerents:'Antigonus vs. Eumenes', commanders:'Antigonus · Eumenes', result:'Antigonus wins the campaign', forces:'Large successor armies with veteran Silver Shields, cavalry, and elephants; ancient totals are disputed.', stakes:'Control of the eastern satrapies and the last royalist field army.', aftermath:'Antigonus captures the baggage train. The Silver Shields surrender Eumenes, who is executed.' },
+    Gaza: { type:'Field battle', belligerents:'Ptolemy & Seleucus vs. Demetrius', commanders:'Ptolemy & Seleucus · Demetrius', result:'Ptolemaic victory', forces:'Infantry phalanxes, cavalry, and Demetrius’ elephants meet south of Gaza.', stakes:'Control of Coele-Syria and a route back into Babylonia for Seleucus.', aftermath:'Seleucus returns east with a small force, beginning the recovery of his satrapy and empire.' },
+    Salamis: { type:'Naval battle', belligerents:'Antigonids vs. Ptolemaic fleet', commanders:'Demetrius · Menelaus', result:'Decisive Antigonid victory', forces:'A fleet action off Cyprus involving war galleys, transports, and a blockaded harbor.', stakes:'Control of Cyprus and naval supremacy in the eastern Mediterranean.', aftermath:'Cyprus falls. Antigonus and Demetrius assume the royal title, prompting rival kingships.' },
+    Ipsus: { type:'Field battle', belligerents:'Coalition vs. Antigonids', commanders:'Seleucus & Lysimachus · Antigonus & Demetrius', result:'Coalition victory', forces:'One of the age’s largest encounters; Seleucid elephants isolate Demetrius’ cavalry from the phalanx.', stakes:'Antigonus’ last attempt to reunify Alexander’s empire.', aftermath:'Antigonus is killed. His Asian territories are divided, while Demetrius escapes with a mobile remnant.' },
+    Macedon: { type:'Royal seizure', belligerents:'Demetrius vs. the Antipatrid regime', commanders:'Demetrius · Alexander V', result:'Demetrius takes the Macedonian throne', forces:'Political maneuver, court violence, and a veteran field army matter more than one set-piece battle.', stakes:'Possession of the old Argead homeland and its royal legitimacy.', aftermath:'Demetrius’ expansion alarms the other kings, who combine to drive him out.' },
+    Corupedium: { type:'Field battle', belligerents:'Seleucus vs. Lysimachus', commanders:'Seleucus · Lysimachus', result:'Seleucid victory', forces:'Veteran armies of the last two living companions confront each other in western Anatolia.', stakes:'Command of Asia Minor and a possible reunion of Asia with Macedon.', aftermath:'Lysimachus is killed. Seleucus is assassinated months later before he can consolidate the victory.' },
+    Lysimacheia: { type:'Field battle', belligerents:'Antigonus Gonatas vs. Galatian host', commanders:'Antigonus Gonatas · Galatian leaders', result:'Antigonid victory', forces:'Antigonus uses a fortified camp and deception against a raiding force.', stakes:'Security of Thrace and Antigonus’ claim to Macedonian kingship.', aftermath:'The victory strengthens Antigonus’ military reputation and helps stabilize his dynasty.' },
+  };
+  Object.assign(BATTLE_DETAILS, EXPANSION.battles);
 
   // A curated gazetteer of the principal capitals, ports, royal foundations,
   // administrative centers, and campaign junctions of the successor world.
@@ -164,6 +205,221 @@
     { name:'Alexandria Arachosia', ancient:'Alexandreia in Arachosia', p:[65.7,31.62], tier:2, kind:'Military foundation', region:'Arachosia', modern:'Kandahar, Afghanistan', summary:'A Macedonian settlement and administrative center controlling routes between Iran, the Indus, and the Hindu Kush.' },
     { name:'Taxila', ancient:'Taxila / Takshashila', p:[72.84,33.74], tier:1, kind:'Regional metropolis', region:'Gandhara', modern:'Taxila, Pakistan', summary:'A wealthy city and intellectual center at the meeting point of routes from India, Central Asia, and the Iranian plateau.' },
   ];
+  CITIES.push(...EXPANSION.cities);
+
+  // The active cast is a second chronology layered over territorial control.
+  // Locations are deliberately approximate: they place a person with a court,
+  // army, or campaign theatre rather than pretending to track daily movement.
+  const PEOPLE = [
+    {
+      id:'antipater', name:'Antipater', faction:'antipater', intro:323, end:319, death:319,
+      epithet:'The old regent', portrait:'/images/diadochi/people/antipater.jpg', likeness:'Later engraved portrait',
+      source:'https://commons.wikimedia.org/wiki/File:Antipatro_r%C3%A8_-_Fanelli_Francesco_-_1695.jpg',
+      bio:'Alexander’s veteran governor in Europe. His authority anchors Macedonia until his succession choice fractures the regency.',
+      positions:[{year:323,p:[22.52,40.76],place:'Pella'},{year:319,p:[22.52,40.76],place:'Macedonia'}],
+      phases:[{year:323,role:'Regent in Europe',beat:'Holds Macedonia while the empire is divided.'},{year:321,role:'Regent of the kings',beat:'The victors at Triparadisus entrust him with the royal house.'},{year:319,role:'Regent of the empire',beat:'Dies after naming Polyperchon—not Cassander—as successor.'}],
+    },
+    {
+      id:'perdiccas', name:'Perdiccas', faction:'perdiccas', intro:323, end:321, death:321,
+      epithet:'Guardian of the kings', portrait:'/images/diadochi/people/perdiccas.jpg', likeness:'18th-century engraving',
+      source:'https://commons.wikimedia.org/wiki/File:Perdicca,_generale_macedone_365-321_a.C.jpg',
+      bio:'Commander of the royal army and the first regent after Alexander. His attempt to preserve a unified empire ends on the Nile.',
+      positions:[{year:323,p:[44.42,32.54],place:'Babylon'},{year:322,p:[35.3,36.8],place:'Cilicia'},{year:321,p:[32.55,31.04],place:'The Nile'}],
+      phases:[{year:323,role:'Regent and chiliarch',beat:'Takes charge of the kings and the royal army.'},{year:322,role:'Regent on campaign',beat:'Moves against rivals who reject the central regency.'},{year:321,role:'Invader of Egypt',beat:'Killed by his officers after disastrous Nile crossings.'}],
+    },
+    {
+      id:'ptolemy', name:'Ptolemy', faction:'ptolemy', intro:323, end:282, death:282,
+      epithet:'The keeper of Egypt', portrait:'/images/diadochi/people/ptolemy.jpg', likeness:'Hellenistic marble bust',
+      source:'https://commons.wikimedia.org/wiki/File:Ptolemy_I_Soter_Louvre_Ma849.jpg',
+      bio:'Patient, defensible, and rich: Ptolemy turns the Egyptian satrapy into the most durable of the successor kingdoms.',
+      positions:[{year:323,p:[31.24,30.04],place:'Memphis'},{year:321,p:[32.55,31.04],place:'Egyptian frontier'},{year:305,p:[29.91,31.2],place:'Alexandria'},{year:282,p:[29.91,31.2],place:'Alexandria'}],
+      phases:[{year:323,role:'Satrap of Egypt',beat:'Secures Egypt and diverts Alexander’s body to Memphis.'},{year:321,role:'Defender of Egypt',beat:'Breaks Perdiccas without abandoning his compact base.'},{year:305,role:'King Ptolemy I Soter',beat:'Assumes the royal title and builds a Mediterranean dynasty.'},{year:282,role:'King of Egypt',beat:'Dies in Alexandria after securing the succession.'}],
+    },
+    {
+      id:'antigonus', name:'Antigonus', faction:'antigonus', intro:323, end:301, death:301,
+      epithet:'The One-Eyed', portrait:'/images/diadochi/people/antigonus.jpg', likeness:'Later sculptural portrait',
+      source:'https://commons.wikimedia.org/wiki/File:Antigonus_Monophthalmus_Bust.jpg',
+      bio:'The most formidable reunifier of Alexander’s Asian empire. His victories make him master of Asia—and the target of every surviving rival.',
+      positions:[{year:323,p:[30.3,38.7],place:'Phrygia'},{year:316,p:[52.4,31.7],place:'Gabiene'},{year:312,p:[36.3,35.2],place:'Syria'},{year:306,p:[33.4,35.1],place:'Eastern Mediterranean'},{year:301,p:[30.98,38.9],place:'Ipsus'}],
+      phases:[{year:323,role:'Satrap of Phrygia',beat:'Begins with a powerful Anatolian command.'},{year:319,role:'Strategos of Asia',beat:'Hunts Eumenes across the length of the empire.'},{year:316,role:'Master of Asia',beat:'Defeats Eumenes and commands the greatest territorial base.'},{year:306,role:'King Antigonus I',beat:'Claims kingship after the victory at Salamis.'},{year:301,role:'King on the field',beat:'Falls fighting at Ipsus, aged about eighty.'}],
+    },
+    {
+      id:'eumenes', name:'Eumenes', faction:'eumenes', intro:322, end:316, death:316,
+      epithet:'The royalist outsider', portrait:'/images/diadochi/people/eumenes.jpg', likeness:'1700 engraving',
+      source:'https://commons.wikimedia.org/wiki/File:Eumenes_of_Cardia.jpg',
+      bio:'A Greek secretary among Macedonian warlords, Eumenes becomes the most ingenious defender of the joint kingship.',
+      positions:[{year:322,p:[35.3,36.8],place:'Cappadocia'},{year:319,p:[36.1,36.8],place:'Cilicia'},{year:317,p:[49.1,33.5],place:'Media'},{year:316,p:[52.4,31.7],place:'Gabiene'}],
+      phases:[{year:322,role:'Satrap and royal commander',beat:'Defeats Craterus and survives the first coalition.'},{year:319,role:'Champion of the kings',beat:'Takes the royal cause and the veteran Silver Shields east.'},{year:316,role:'Commander at Gabiene',beat:'Betrayed by the Silver Shields and executed by Antigonus.'}],
+    },
+    {
+      id:'lysimachus', name:'Lysimachus', faction:'lysimachus', intro:323, end:281, death:281,
+      epithet:'The Thracian survivor', portrait:'/images/diadochi/people/lysimachus.png', likeness:'Hellenistic marble bust',
+      source:'https://commons.wikimedia.org/wiki/File:Lysimachus_bust_cropped.png',
+      bio:'Initially boxed into turbulent Thrace, Lysimachus outlasts the first generation and eventually joins Europe to western Anatolia.',
+      positions:[{year:323,p:[26.2,42.0],place:'Thrace'},{year:309,p:[26.62,40.58],place:'Lysimachia'},{year:301,p:[30.98,38.9],place:'Ipsus'},{year:281,p:[28.0,38.5],place:'Corupedium'}],
+      phases:[{year:323,role:'Satrap of Thrace',beat:'Fights to hold the rough European frontier.'},{year:305,role:'King of Thrace',beat:'Takes the royal title with the other major successors.'},{year:301,role:'Victor of Ipsus',beat:'Receives much of western Anatolia after Antigonus falls.'},{year:281,role:'King of Thrace and Asia',beat:'Killed in battle against Seleucus at Corupedium.'}],
+    },
+    {
+      id:'cassander', name:'Cassander', faction:'antipater', intro:319, end:297, death:297,
+      epithet:'The dynast of Macedon', portrait:'/images/diadochi/people/cassander.jpg', likeness:'Ancient coin portrait',
+      source:'https://commons.wikimedia.org/wiki/File:Coin_of_Cassander.jpg',
+      bio:'Antipater’s ambitious son wins Macedonia by force, rebuilds Thebes, founds Thessalonica, and extinguishes Alexander’s direct line.',
+      positions:[{year:319,p:[23.73,37.98],place:'Athens'},{year:316,p:[22.52,40.76],place:'Pella'},{year:297,p:[22.52,40.76],place:'Macedonia'}],
+      phases:[{year:319,role:'Claimant against Polyperchon',beat:'Rejects his father’s settlement and fights for Macedonia.'},{year:316,role:'Ruler of Macedonia',beat:'Controls the royal family and restores Thebes.'},{year:305,role:'King Cassander',beat:'Adopts the royal title while consolidating the homeland.'},{year:297,role:'King of Macedonia',beat:'Dies of illness; his fragile succession soon collapses.'}],
+    },
+    {
+      id:'seleucus', name:'Seleucus', faction:'seleucus', intro:321, end:281, death:281,
+      epithet:'The eastern kingmaker', portrait:'/images/diadochi/people/seleucus.jpg', likeness:'Roman copy of a Greek bust',
+      source:'https://commons.wikimedia.org/wiki/File:Seleuco_I_Nicatore.JPG',
+      bio:'Driven out of Babylon and restored with a tiny force, Seleucus assembles the largest and most diverse successor kingdom.',
+      positions:[{year:321,p:[44.42,32.54],place:'Babylon'},{year:316,p:[29.91,31.2],place:'Exile in Egypt'},{year:312,p:[44.42,32.54],place:'Return to Babylon'},{year:301,p:[30.98,38.9],place:'Ipsus'},{year:281,p:[28.0,38.5],place:'Corupedium'}],
+      phases:[{year:321,role:'Satrap of Babylon',beat:'Receives Babylon in the settlement at Triparadisus.'},{year:316,role:'Exile and admiral',beat:'Escapes Antigonus and joins Ptolemy’s coalition.'},{year:312,role:'Restorer of Babylon',beat:'Returns east; Seleucid dating begins from this recovery.'},{year:305,role:'King Seleucus I Nicator',beat:'Rules from Syria deep into the Iranian east.'},{year:301,role:'Victor of Ipsus',beat:'War elephants help break the Antigonid army.'},{year:281,role:'Last great successor',beat:'Wins at Corupedium, then is assassinated crossing into Europe.'}],
+    },
+    {
+      id:'demetrius', name:'Demetrius', faction:'antigonus', intro:314, end:283, death:283,
+      epithet:'The Besieger', portrait:'/images/diadochi/people/demetrius.jpg', likeness:'Roman copy of a Greek bust',
+      source:'https://commons.wikimedia.org/wiki/Category:Busts_of_Demetrius_I_Poliorcetes',
+      bio:'Brilliant, theatrical, and inconsistent, Antigonus’ son turns siegecraft and naval power into a roaming claim on kingship.',
+      positions:[{year:314,p:[35.0,35.2],place:'Syria'},{year:312,p:[34.46,31.5],place:'Gaza'},{year:306,p:[33.9,35.05],place:'Salamis, Cyprus'},{year:304,p:[28.23,36.44],place:'Rhodes'},{year:301,p:[30.98,38.9],place:'Ipsus'},{year:294,p:[22.52,40.76],place:'Pella'},{year:285,p:[36.5,37.0],place:'Cilicia'},{year:283,p:[36.5,37.0],place:'Captivity in Syria'}],
+      phases:[{year:314,role:'Antigonid field commander',beat:'Emerges as the mobile arm of his father’s bid for empire.'},{year:306,role:'King Demetrius Poliorcetes',beat:'The naval victory at Salamis launches a royal claim.'},{year:304,role:'The Besieger at Rhodes',beat:'His colossal siege engines fail to break the island republic.'},{year:301,role:'Heir without an empire',beat:'Escapes Ipsus after his father is killed.'},{year:294,role:'King of Macedonia',beat:'Seizes the homeland but cannot hold its loyalties.'},{year:285,role:'Captive of Seleucus',beat:'Surrenders after a failed invasion of Asia.'},{year:283,role:'Royal prisoner',beat:'Dies in honorable captivity in Syria.'}],
+    },
+    {
+      id:'pyrrhus', name:'Pyrrhus', faction:'pyrrhus', intro:288, end:276,
+      epithet:'The restless king', portrait:'/images/diadochi/people/pyrrhus.jpg', likeness:'Roman copy of a Greek bust',
+      source:'https://commons.wikimedia.org/wiki/File:Pyrrhus.JPG',
+      bio:'A younger-generation commander whose daring campaigns briefly win Macedonia before drawing him toward war in Italy.',
+      positions:[{year:288,p:[20.73,39.16],place:'Epirus'},{year:285,p:[22.52,40.76],place:'Macedonia'},{year:281,p:[20.73,39.16],place:'Epirus'},{year:276,p:[20.73,39.16],place:'Epirus'}],
+      phases:[{year:288,role:'King of Epirus',beat:'Invades Macedonia with Lysimachus and drives out Demetrius.'},{year:285,role:'Joint king of Macedonia',beat:'Briefly holds western Macedonia before Lysimachus expels him.'},{year:281,role:'King of Epirus',beat:'Prepares the western expedition that will make his name proverbial.'}],
+    },
+    {
+      id:'gonatas', name:'Antigonus Gonatas', faction:'antigonus', intro:283, end:276,
+      epithet:'The dynasty rebuilt', portrait:'/images/diadochi/people/gonatas.jpg', likeness:'Coin type issued under Gonatas (head of Pan)',
+      source:'https://commons.wikimedia.org/wiki/File:Antigonus_Gonatas_British_Museum.jpg',
+      bio:'Demetrius’ son inherits little but a claim. He patiently rebuilds Antigonid power and finally secures Macedonia in 276 BCE.',
+      positions:[{year:283,p:[23.73,37.98],place:'Central Greece'},{year:281,p:[26.0,40.6],place:'Thracian coast'},{year:277,p:[25.5,42.0],place:'Lysimachia'},{year:276,p:[22.52,40.76],place:'Macedonia'}],
+      phases:[{year:283,role:'Antigonid claimant',beat:'Inherits his father’s fleet, garrisons, and royal claim.'},{year:277,role:'Victor over the Gauls',beat:'A victory near Lysimachia transforms his reputation.'},{year:276,role:'King of Macedonia',beat:'Takes the Macedonian throne and founds a durable dynasty.'}],
+    },
+  ];
+  PEOPLE.push(...EXPANSION.people);
+
+  const ARMIES = [
+    {
+      id:'royal-army', name:'The Royal Army', faction:'perdiccas', intro:323, end:321,
+      description:'The central Macedonian army that followed Alexander into Asia, now carrying the kings and the regency’s claim to universal authority.',
+      phases:[
+        {year:323,p:[44.7,32.2],place:'Babylon camp',commander:'Perdiccas',composition:'Royal infantry, Companion cavalry, elephants',objective:'Hold the empire together under the joint kings'},
+        {year:322,p:[35.6,36.6],place:'Cilician camp',commander:'Perdiccas',composition:'Royal field army and siege train',objective:'Bring the western satraps back under the regency'},
+        {year:321,p:[32.3,30.8],place:'Pelusium and the Nile',commander:'Perdiccas',composition:'Royal field army, depleted at river crossings',objective:'Break Ptolemy’s control of Egypt'},
+      ],
+    },
+    {
+      id:'european-army', name:'Army of Europe', faction:'antipater', intro:323, end:319,
+      description:'The Macedonian homeland army and garrison network. Whoever controlled it could dominate Greece and claim the machinery of the old kingdom.',
+      phases:[
+        {year:323,p:[22.7,40.5],place:'Pella and the Macedonian musters',commander:'Antipater',composition:'Macedonian levy, cavalry, Greek garrisons',objective:'Secure Europe after Alexander’s death'},
+        {year:322,p:[22.2,39.6],place:'Lamia campaign camp',commander:'Antipater and Craterus',composition:'Relief army reinforced from Asia',objective:'Defeat the Greek coalition'},
+        {year:321,p:[36.1,33.7],place:'Triparadisus assembly',commander:'Antipater',composition:'European army and royal contingents',objective:'Impose a new regency settlement'},
+        {year:319,p:[22.7,40.5],place:'Macedonian royal camp',commander:'Polyperchon',composition:'Homeland army and royal guard',objective:'Preserve Antipater’s regency settlement'},
+      ],
+    },
+    {
+      id:'eumenid-army', name:'Eumenes’ Royalists', faction:'eumenes', intro:322, end:316,
+      description:'A mobile royalist army built around the veteran Silver Shields, repeatedly surviving isolation and pursuit across Asia.',
+      phases:[
+        {year:322,p:[34.4,39.4],place:'Cappadocian field camp',commander:'Eumenes',composition:'Cappadocian cavalry and Macedonian infantry',objective:'Hold Cappadocia for the regency'},
+        {year:321,p:[34.0,37.9],place:'Nora',commander:'Eumenes',composition:'A small besieged remnant',objective:'Survive Antigonus’ blockade'},
+        {year:319,p:[35.5,36.5],place:'Cilician royal camp',commander:'Eumenes',composition:'Silver Shields, royal treasury, eastern levies',objective:'Defend the kings against Antigonus'},
+        {year:318,p:[44.1,32.4],place:'Babylonian crossing camps',commander:'Eumenes',composition:'Coalition of eastern satrapal armies',objective:'Unite the Upper Satrapies'},
+        {year:317,p:[51.3,32.5],place:'Paraitacene',commander:'Eumenes',composition:'Silver Shields, cavalry, and war elephants',objective:'Block Antigonus from the Iranian east'},
+        {year:316,p:[52.2,31.5],place:'Gabiene winter camp',commander:'Eumenes',composition:'Royalist infantry, cavalry, and elephants',objective:'Defeat Antigonus before the coalition fractures'},
+      ],
+    },
+    {
+      id:'antigonid-army', name:'Antigonid Grand Army', faction:'antigonus', intro:323, end:301,
+      description:'Antigonus’ immense Asian field army—the principal instrument of his attempt to reunify Alexander’s empire.',
+      phases:[
+        {year:323,p:[30.4,39.0],place:'Celaenae in Phrygia',commander:'Antigonus',composition:'Phrygian satrapal army',objective:'Secure the Anatolian command'},
+        {year:319,p:[33.8,39.0],place:'Cappadocian pursuit camp',commander:'Antigonus',composition:'Asian field army and cavalry',objective:'Destroy Eumenes’ royalists'},
+        {year:317,p:[50.5,33.2],place:'Media campaign camp',commander:'Antigonus',composition:'Infantry, heavy cavalry, and elephants',objective:'Force Eumenes into a decisive battle'},
+        {year:316,p:[52.8,31.9],place:'Gabiene',commander:'Antigonus',composition:'Asian grand army and baggage raiders',objective:'Capture the royalist baggage and break its cohesion'},
+        {year:314,p:[36.5,35.5],place:'Northern Syrian headquarters',commander:'Antigonus',composition:'Grand army, siege corps, and fleet support',objective:'Strip Ptolemy of the Syrian coast'},
+        {year:312,p:[35.2,32.0],place:'Southern Syria after Gaza',commander:'Antigonus',composition:'Reconstituted Syrian army',objective:'Contain Ptolemy and recover the east'},
+        {year:306,p:[34.2,35.4],place:'Cyprus and Syrian musters',commander:'Antigonus',composition:'Royal army supported by Demetrius’ fleet',objective:'Turn naval victory into universal kingship'},
+        {year:302,p:[31.5,39.1],place:'Central Anatolian concentration',commander:'Antigonus and Demetrius',composition:'The largest Antigonid concentration of the wars',objective:'Crush the allied invasion of Asia'},
+        {year:301,p:[31.1,38.9],place:'Ipsus battlefield camp',commander:'Antigonus',composition:'Macedonian phalanx, cavalry, and elephants',objective:'Defeat the coalition and preserve the Asian kingdom'},
+      ],
+    },
+    {
+      id:'ptolemaic-army', name:'Ptolemaic Army', faction:'ptolemy', intro:323, end:276,
+      description:'Egypt’s compact standing army, backed by the Nile, treasury, fortified frontier, and a fleet that projects power without exposing the kingdom’s core.',
+      phases:[
+        {year:323,p:[31.4,29.9],place:'Memphis garrison camp',commander:'Ptolemy',composition:'Macedonian settlers, mercenaries, Egyptian support troops',objective:'Secure the Nile valley'},
+        {year:321,p:[31.8,30.9],place:'Nile defense line',commander:'Ptolemy',composition:'Field army behind river crossings',objective:'Repel Perdiccas'},
+        {year:320,p:[31.4,29.9],place:'Memphis and the eastern Delta',commander:'Ptolemy',composition:'Standing army and fortified frontier garrisons',objective:'Consolidate Egypt after the invasion'},
+        {year:312,p:[34.5,31.5],place:'Gaza',commander:'Ptolemy and Seleucus',composition:'Egyptian field army and coalition cavalry',objective:'Break Antigonid control of Syria'},
+        {year:311,p:[31.0,30.7],place:'Eastern Delta frontier',commander:'Ptolemaic generals',composition:'Frontier garrisons and mobile reserve',objective:'Hold Egypt and the southern Levant'},
+        {year:306,p:[32.1,34.6],place:'Cyprus evacuation anchorages',commander:'Ptolemaic command',composition:'Surviving army and fleet detachments',objective:'Preserve Egypt after Salamis'},
+        {year:305,p:[31.0,30.7],place:'Pelusiac frontier',commander:'Ptolemy I',composition:'Royal standing army and Delta fortresses',objective:'Defend the new kingdom'},
+      ],
+    },
+    {
+      id:'cassander-army', name:'Cassander’s Macedonians', faction:'antipater', intro:319, end:297,
+      description:'The army that turns Antipater’s family network into a territorial monarchy in Macedonia and Greece.',
+      phases:[
+        {year:319,p:[23.5,38.1],place:'Piraeus and Athens',commander:'Cassander',composition:'Mercenaries, Macedonian adherents, fleet support',objective:'Dislodge Polyperchon from Greece'},
+        {year:316,p:[22.6,40.5],place:'Pella',commander:'Cassander',composition:'Macedonian royal army and garrisons',objective:'Secure Macedonia and the royal family'},
+        {year:305,p:[22.8,40.3],place:'Macedonian musters',commander:'King Cassander',composition:'Royal army and Greek garrison network',objective:'Preserve the homeland against Antigonid pressure'},
+        {year:297,p:[22.6,40.5],place:'Pella royal camp',commander:'Cassander’s household',composition:'Macedonian standing army',objective:'Manage a failing dynastic succession'},
+      ],
+    },
+    {
+      id:'demetrian-army', name:'Demetrius’ Expeditionary Force', faction:'antigonus', intro:314, end:285,
+      description:'A combined army, fleet, and siege corps whose mobility makes Demetrius the era’s most spectacular—and least predictable—commander.',
+      phases:[
+        {year:314,p:[35.5,34.9],place:'Syrian coastal camp',commander:'Demetrius',composition:'Young field army with fleet support',objective:'Hold Syria for Antigonus'},
+        {year:312,p:[34.5,31.5],place:'Gaza',commander:'Demetrius',composition:'Cavalry-heavy field army and elephants',objective:'Block the Ptolemaic invasion'},
+        {year:306,p:[33.9,35.1],place:'Salamis, Cyprus',commander:'Demetrius',composition:'Army, siege train, and victorious fleet',objective:'Destroy Ptolemaic power on Cyprus'},
+        {year:304,p:[28.4,36.3],place:'Siege lines around Rhodes',commander:'Demetrius Poliorcetes',composition:'Siege army, Helepolis, and blockade fleet',objective:'Force Rhodes into the Antigonid alliance'},
+        {year:301,p:[31.4,38.8],place:'Ipsus cavalry wing',commander:'Demetrius',composition:'Elite heavy cavalry and supporting infantry',objective:'Break the allied line'},
+        {year:294,p:[22.7,40.4],place:'Macedonian royal camp',commander:'King Demetrius',composition:'Macedonian army, mercenaries, and fleet',objective:'Hold the Macedonian throne'},
+        {year:288,p:[22.0,40.0],place:'Retreat from Macedonia',commander:'Demetrius',composition:'Shrinking loyalist field army',objective:'Escape Pyrrhus and Lysimachus'},
+        {year:285,p:[36.1,37.0],place:'Cilician surrender camp',commander:'Demetrius',composition:'Exhausted Asian expedition',objective:'Find a route through Seleucid territory'},
+      ],
+    },
+    {
+      id:'seleucid-army', name:'Seleucid Eastern Army', faction:'seleucus', intro:312, end:281,
+      description:'The army built from Seleucus’ return to Babylon, reinforced by Iranian cavalry and eventually by Indian war elephants.',
+      phases:[
+        {year:312,p:[44.5,32.4],place:'Babylon',commander:'Seleucus',composition:'A tiny returning cadre and local recruits',objective:'Retake the eastern capital'},
+        {year:308,p:[50.3,34.3],place:'Median campaign camps',commander:'Seleucus',composition:'Babylonian infantry and Iranian cavalry',objective:'Reconnect the Upper Satrapies'},
+        {year:305,p:[67.0,33.5],place:'Eastern settlement frontier',commander:'Seleucus I',composition:'Eastern army acquiring Indian elephants',objective:'Settle the frontier with Chandragupta'},
+        {year:301,p:[30.8,39.1],place:'Allied camp at Ipsus',commander:'Seleucus',composition:'Combined-arms army with a large elephant corps',objective:'Seal Demetrius’ cavalry away from the battlefield'},
+        {year:294,p:[36.3,35.4],place:'Antioch and northern Syria',commander:'Seleucus I',composition:'Royal army of the Seleucid west',objective:'Consolidate Syria and Anatolian approaches'},
+        {year:281,p:[28.2,38.5],place:'Corupedium',commander:'Seleucus I',composition:'Veteran royal army',objective:'Defeat Lysimachus and cross into Macedonia'},
+      ],
+    },
+    {
+      id:'lysimachid-army', name:'Lysimachid Army', faction:'lysimachus', intro:323, end:281,
+      description:'A hard-used Thracian army that grows from frontier garrisons into the decisive European wing of the anti-Antigonid coalition.',
+      phases:[
+        {year:323,p:[26.6,42.0],place:'Thracian frontier camps',commander:'Lysimachus',composition:'Macedonian garrisons and Thracian levies',objective:'Survive revolts and hold the European satrapy'},
+        {year:309,p:[26.7,40.7],place:'Lysimachia',commander:'Lysimachus',composition:'Royal field army and Chersonese garrisons',objective:'Control the crossing between Europe and Asia'},
+        {year:302,p:[29.2,40.0],place:'Western Anatolian invasion camp',commander:'Lysimachus',composition:'Thracian-Macedonian army with allied support',objective:'Pin Antigonus until Seleucus arrives'},
+        {year:301,p:[30.5,39.2],place:'Allied camp at Ipsus',commander:'Lysimachus',composition:'Coalition infantry and cavalry',objective:'Destroy Antigonus’ Asian monarchy'},
+        {year:281,p:[27.9,38.7],place:'Corupedium',commander:'Lysimachus',composition:'Royal army of Thrace and western Asia',objective:'Stop Seleucus’ advance'},
+      ],
+    },
+    {
+      id:'pyrrhic-army', name:'Pyrrhic Army', faction:'pyrrhus', intro:288, end:276,
+      description:'Pyrrhus’ aggressive Epirote army, small enough to remain mobile and prestigious enough to attract Macedonian defections.',
+      phases:[
+        {year:288,p:[21.1,39.5],place:'Epirote-Macedonian frontier',commander:'Pyrrhus',composition:'Epirote phalanx, cavalry, and elephants',objective:'Invade Macedonia with Lysimachus'},
+        {year:285,p:[21.8,40.2],place:'Western Macedonian camp',commander:'Pyrrhus',composition:'Epirote army and Macedonian defectors',objective:'Hold a share of the Macedonian kingdom'},
+        {year:281,p:[20.9,39.3],place:'Epirus mustering grounds',commander:'Pyrrhus',composition:'Expeditionary army preparing for Italy',objective:'Turn west toward Tarentum'},
+      ],
+    },
+  ];
+  ARMIES.push(...EXPANSION.armies);
 
   const SNAPSHOTS = [
     {
@@ -433,18 +689,23 @@
       ],
     },
   ];
+  SNAPSHOTS.push(...EXPANSION.snapshots);
+  SNAPSHOTS.sort((a, b) => b.year - a.year);
 
   const svg = d3.select('#map');
   const tooltip = document.getElementById('tooltip');
   const mapPanel = document.querySelector('.map-panel');
   const yearRail = document.getElementById('year-rail');
   const playButton = document.getElementById('play');
+  const eraJump = document.getElementById('era-jump');
   const previousButton = document.getElementById('previous-year');
   const nextButton = document.getElementById('next-year');
+  const castRail = document.getElementById('cast-rail');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const lineClosed = d3.line().curve(d3.curveLinearClosed);
   const routeCurve = d3.line().curve(d3.curveCatmullRom.alpha(.65));
   let world;
+  let physical = { lakes: null, rivers: null };
   let projection;
   let path;
   let root;
@@ -457,9 +718,15 @@
   let zoomBehavior;
   let currentZoomTransform = d3.zoomIdentity;
   let cityGroups;
+  let personGroups;
+  let armyGroups;
   let selectedCity;
+  let selectedPerson;
+  let selectedArmy;
+  let selectedBattle;
 
-  const YEAR_STATES = d3.range(323, 275, -1).map(year => {
+  const STORY_YEARS = [...new Set([...SNAPSHOTS.map(snapshot => snapshot.year), ...d3.range(323, 275, -1)])].sort((a, b) => b - a);
+  const YEAR_STATES = STORY_YEARS.map(year => {
     const exact = SNAPSHOTS.find(snapshot => snapshot.year === year);
     if (exact) return { ...exact, milestone: true, sourceYear: year };
     const previous = [...SNAPSHOTS].reverse().find(snapshot => snapshot.year > year) || SNAPSHOTS[0];
@@ -478,23 +745,29 @@
     };
   });
 
+  function yearLabel(year) { return `${Math.abs(year)} ${year > 0 ? 'BCE' : 'CE'}`; }
+  function yearNumber(year) { return Math.abs(year); }
+  function yearEra(year) { return year > 0 ? 'BCE' : 'CE'; }
+
   const eventEls = YEAR_STATES.map((snapshot, index) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = `year-button${snapshot.milestone ? ' milestone' : ''}`;
     button.dataset.index = index;
-    button.setAttribute('aria-label', `${snapshot.year} BCE: ${snapshot.title}`);
-    button.innerHTML = `<span class="year">${snapshot.year}</span><span class="short">${snapshot.short}</span>`;
+    button.setAttribute('aria-label', `${yearLabel(snapshot.year)}: ${snapshot.title}`);
+    button.innerHTML = `<span class="year">${yearNumber(snapshot.year)}</span><span class="era-mini">${yearEra(snapshot.year)}</span><span class="short">${snapshot.short}</span>`;
     button.addEventListener('click', () => { stopPlayback(); setYear(index, true); });
     yearRail.appendChild(button);
     return button;
   });
+  yearRail.style.gridTemplateColumns = `repeat(${YEAR_STATES.length}, minmax(52px, 1fr))`;
+  yearRail.style.minWidth = `${YEAR_STATES.length * 52}px`;
 
   function polygonPath(points) {
     return lineClosed(points.map(point => projection(point)));
   }
 
-  function mergeFactionCells(items) {
+  function mergeFactionCells(items, fillGaps = true) {
     const sample = 3;
     const width = Math.ceil(mapWidth / sample);
     const height = Math.ceil(mapHeight / sample);
@@ -533,6 +806,10 @@
       }
       const x = index % width;
       const y = Math.floor(index / width);
+      if (!fillGaps) {
+        assignment[index] = 65535;
+        continue;
+      }
       let closest = 0;
       let closestDistance = Infinity;
       prepared.forEach((cell, cellIndex) => {
@@ -546,7 +823,10 @@
 
     return [...byFaction.keys()].map(faction => {
       const values = new Float32Array(width * height);
-      for (let index = 0; index < values.length; index += 1) values[index] = prepared[assignment[index]].faction === faction ? 1 : 0;
+      for (let index = 0; index < values.length; index += 1) {
+        const assigned = assignment[index];
+        values[index] = assigned < prepared.length && prepared[assigned].faction === faction ? 1 : 0;
+      }
       const geometry = d3.contours().size([width, height]).smooth(true).thresholds([.5])(values)[0];
       return { faction, d: geometry ? contourPath(geometry) : '' };
     });
@@ -568,7 +848,122 @@
   function hideTooltip() { tooltip.hidden = true; }
 
   function cityIsAvailable(city, year) {
-    return !city.from || year <= city.from;
+    return (!city.from || year <= city.from) && (!city.end || year >= city.end);
+  }
+
+  function peopleForYear(year) {
+    return PEOPLE.filter(person => year <= person.intro && year >= person.end);
+  }
+
+  function armiesForYear(year) {
+    return ARMIES.filter(army => year <= army.intro && year >= army.end);
+  }
+
+  function armyPhase(army, year) {
+    let current = army.phases[0];
+    army.phases.forEach(phase => { if (year <= phase.year) current = phase; });
+    return current;
+  }
+
+  function armyMovement(army, year) {
+    const index = army.phases.findIndex(phase => phase.year === year);
+    if (index <= 0) return null;
+    return { army, from: army.phases[index - 1], to: army.phases[index] };
+  }
+
+  function closeBattleProfile() {
+    selectedBattle = undefined;
+    document.getElementById('battle-profile').hidden = true;
+    document.getElementById('battle-back').hidden = true;
+    document.getElementById('campaign-profile').hidden = false;
+  }
+
+  function armyOffset(army) {
+    const offsets = {
+      'royal-army':[36,25], 'european-army':[36,25], 'eumenid-army':[-36,25],
+      'antigonid-army':[36,25], 'ptolemaic-army':[36,25], 'cassander-army':[-36,25],
+      'demetrian-army':[36,-25], 'seleucid-army':[-36,25], 'lysimachid-army':[-36,25],
+      'pyrrhic-army':[36,25],
+    };
+    return offsets[army.id] || [34,24];
+  }
+
+  function armyTransform(army, year, scale = currentZoomTransform.k) {
+    const [x, y] = projection(armyPhase(army, year).p);
+    const [dx, dy] = armyOffset(army);
+    return `translate(${x + dx / scale} ${y + dy / scale}) scale(${1 / scale})`;
+  }
+
+  function updateArmyScale(transform = currentZoomTransform) {
+    if (!armyGroups) return;
+    const year = YEAR_STATES[currentIndex].year;
+    armyGroups
+      .attr('transform', army => armyTransform(army, year, transform.k))
+      .classed('show-label', () => transform.k >= 1.45);
+  }
+
+  function personPhase(person, year) {
+    let current = person.phases[0];
+    person.phases.forEach(phase => { if (year <= phase.year) current = phase; });
+    return current;
+  }
+
+  function personPosition(person, year) {
+    const positions = person.positions;
+    if (year >= positions[0].year) return { ...positions[0], p: [...positions[0].p] };
+    for (let index = 0; index < positions.length - 1; index += 1) {
+      const start = positions[index];
+      const end = positions[index + 1];
+      if (year <= start.year && year >= end.year) {
+        const progress = (start.year - year) / Math.max(1, start.year - end.year);
+        return {
+          p: [d3.interpolateNumber(start.p[0], end.p[0])(progress), d3.interpolateNumber(start.p[1], end.p[1])(progress)],
+          place: progress < .5 ? start.place : end.place,
+        };
+      }
+    }
+    return { ...positions.at(-1), p: [...positions.at(-1).p] };
+  }
+
+  function personTransform(person, year, scale = currentZoomTransform.k) {
+    const [x, y] = projection(personPosition(person, year).p);
+    return `translate(${x} ${y}) scale(${1 / scale})`;
+  }
+
+  function updatePersonScale(transform = currentZoomTransform) {
+    if (!personGroups) return;
+    const year = YEAR_STATES[currentIndex].year;
+    personGroups.attr('transform', person => personTransform(person, year, transform.k));
+  }
+
+  function cityIconType(city) {
+    const kind = city.kind.toLowerCase();
+    if (/capital|royal/.test(kind)) return 'capital';
+    if (/port|maritime|harbor/.test(kind)) return 'port';
+    if (/fortress|military|frontier/.test(kind)) return 'fortress';
+    if (/metropolis|great polis|regional metropolis/.test(kind)) return 'metropolis';
+    return 'town';
+  }
+
+  function cityIconSize(city) {
+    if (cityIconType(city) === 'capital') return city.tier === 1 ? 15 : 11;
+    return city.tier === 1 ? 12 : 8.5;
+  }
+
+  function cityYearContext(city) {
+    const snapshot = YEAR_STATES[currentIndex];
+    const distance = point => Math.hypot(city.p[0] - point[0], city.p[1] - point[1]);
+    const battle = snapshot.battles.find(item => distance(item.p) < 1.15);
+    if (battle) return `${battle.name} battle zone · ${yearLabel(snapshot.year)}`;
+    const route = snapshot.routes.find(item => item.points.some(point => distance(point) < 1.2));
+    if (route) return `${route.name} passes nearby`;
+    const army = armiesForYear(snapshot.year).find(item => distance(armyPhase(item, snapshot.year).p) < 1.15);
+    if (army) return `${army.name} operating nearby`;
+    return `No major mapped action · ${yearLabel(snapshot.year)}`;
+  }
+
+  function cityDrawPriority(city) {
+    return (city.tier === 1 ? 10 : 0) + (cityIconType(city) === 'capital' ? 10 : 0);
   }
 
   function cityTransform(city, scale = currentZoomTransform.k) {
@@ -583,6 +978,23 @@
       .classed('show-secondary', city => city.tier === 2 && transform.k >= 1.7);
   }
 
+  function closePersonProfile() {
+    selectedPerson = undefined;
+    document.getElementById('person-profile').hidden = true;
+    document.getElementById('person-back').hidden = true;
+    document.getElementById('campaign-profile').hidden = false;
+    if (personGroups) personGroups.classed('selected', false);
+    castRail?.querySelectorAll('.cast-card').forEach(card => card.classList.remove('selected'));
+  }
+
+  function closeArmyProfile() {
+    selectedArmy = undefined;
+    document.getElementById('army-profile').hidden = true;
+    document.getElementById('army-back').hidden = true;
+    document.getElementById('campaign-profile').hidden = false;
+    if (armyGroups) armyGroups.classed('selected', false);
+  }
+
   function closeCityProfile() {
     selectedCity = undefined;
     document.getElementById('city-profile').hidden = true;
@@ -594,14 +1006,25 @@
   function selectCity(city) {
     stopPlayback();
     selectedCity = city;
+    selectedPerson = undefined;
+    selectedArmy = undefined;
+    selectedBattle = undefined;
     document.getElementById('campaign-profile').hidden = true;
+    document.getElementById('person-profile').hidden = true;
+    document.getElementById('person-back').hidden = true;
+    document.getElementById('army-profile').hidden = true;
+    document.getElementById('army-back').hidden = true;
+    document.getElementById('battle-profile').hidden = true;
+    document.getElementById('battle-back').hidden = true;
     document.getElementById('city-profile').hidden = false;
     document.getElementById('city-back').hidden = false;
     document.getElementById('city-name').textContent = city.name;
+    document.getElementById('city-dossier-symbol').setAttribute('href', `#city-icon-${cityIconType(city)}`);
     document.getElementById('city-ancient').textContent = city.ancient;
     document.getElementById('city-kind').textContent = city.kind;
     document.getElementById('city-region').textContent = city.region;
     document.getElementById('city-modern').textContent = city.modern;
+    document.getElementById('city-context').textContent = cityYearContext(city);
     document.getElementById('city-summary').textContent = city.summary;
     if (cityGroups) cityGroups.classed('selected', item => item === city);
     if (window.innerWidth < 981) {
@@ -609,11 +1032,121 @@
     }
   }
 
+  function populatePersonProfile(person, year) {
+    const phase = personPhase(person, year);
+    const position = personPosition(person, year);
+    const isDeathYear = person.death === year;
+    const portraitImage = document.getElementById('person-portrait');
+    const portraitMonogram = document.getElementById('person-monogram');
+    portraitImage.hidden = !person.portrait;
+    portraitMonogram.hidden = Boolean(person.portrait);
+    portraitMonogram.textContent = person.monogram || person.name.split(/\s+/).map(part => part[0]).slice(0,2).join('');
+    if (person.portrait) portraitImage.src = person.portrait;
+    portraitImage.alt = person.portrait ? `${person.name}, ${person.likeness.toLowerCase()}` : '';
+    document.getElementById('person-name').textContent = person.name;
+    document.getElementById('person-epithet').textContent = person.epithet;
+    document.getElementById('person-role').textContent = phase.role;
+    document.getElementById('person-location').textContent = position.place;
+    document.getElementById('person-beat').textContent = phase.beat;
+    document.getElementById('person-bio').textContent = person.bio;
+    document.getElementById('person-status').textContent = isDeathYear ? `Dies · ${yearLabel(year)}` : year === person.intro ? `Enters the story · ${yearLabel(year)}` : `Active · ${yearLabel(year)}`;
+    document.getElementById('person-status').classList.toggle('death', isDeathYear);
+    const imageSource = document.getElementById('person-image-source');
+    document.getElementById('person-source-prefix').hidden = !person.source;
+    document.getElementById('person-source-suffix').hidden = !person.source;
+    document.getElementById('person-monogram-note').hidden = Boolean(person.source);
+    imageSource.hidden = !person.source;
+    imageSource.href = person.source || '#';
+    imageSource.textContent = person.likeness || 'Editorial coin-style monogram';
+  }
+
+  function selectPerson(person) {
+    stopPlayback();
+    selectedPerson = person;
+    selectedCity = undefined;
+    selectedArmy = undefined;
+    selectedBattle = undefined;
+    const year = YEAR_STATES[currentIndex].year;
+    populatePersonProfile(person, year);
+    document.getElementById('campaign-profile').hidden = true;
+    document.getElementById('city-profile').hidden = true;
+    document.getElementById('city-back').hidden = true;
+    document.getElementById('army-profile').hidden = true;
+    document.getElementById('army-back').hidden = true;
+    document.getElementById('battle-profile').hidden = true;
+    document.getElementById('battle-back').hidden = true;
+    document.getElementById('person-profile').hidden = false;
+    document.getElementById('person-back').hidden = false;
+    if (cityGroups) cityGroups.classed('selected', false);
+    if (personGroups) personGroups.classed('selected', item => item === person);
+    castRail?.querySelectorAll('.cast-card').forEach(card => card.classList.toggle('selected', card.dataset.person === person.id));
+  }
+
+  function selectArmy(army) {
+    stopPlayback();
+    selectedArmy = army;
+    selectedCity = undefined;
+    selectedPerson = undefined;
+    selectedBattle = undefined;
+    const year = YEAR_STATES[currentIndex].year;
+    const phase = armyPhase(army, year);
+    document.getElementById('army-name').textContent = army.name;
+    document.getElementById('army-faction').textContent = FACTIONS[army.faction].name;
+    document.getElementById('army-commander').textContent = phase.commander;
+    document.getElementById('army-location').textContent = phase.place;
+    document.getElementById('army-composition').textContent = phase.composition;
+    document.getElementById('army-objective').textContent = phase.objective;
+    document.getElementById('army-description').textContent = army.description;
+    document.getElementById('army-standard').style.setProperty('--army-color', FACTIONS[army.faction].light);
+    document.getElementById('campaign-profile').hidden = true;
+    document.getElementById('city-profile').hidden = true;
+    document.getElementById('person-profile').hidden = true;
+    document.getElementById('city-back').hidden = true;
+    document.getElementById('person-back').hidden = true;
+    document.getElementById('battle-profile').hidden = true;
+    document.getElementById('battle-back').hidden = true;
+    document.getElementById('army-profile').hidden = false;
+    document.getElementById('army-back').hidden = false;
+    if (cityGroups) cityGroups.classed('selected', false);
+    if (personGroups) personGroups.classed('selected', false);
+    if (armyGroups) armyGroups.classed('selected', item => item === army);
+    castRail?.querySelectorAll('.cast-card').forEach(card => card.classList.remove('selected'));
+  }
+
+  function selectBattle(battle) {
+    stopPlayback();
+    const detail = BATTLE_DETAILS[battle.name] || {};
+    selectedBattle = battle;
+    selectedCity = undefined;
+    selectedPerson = undefined;
+    selectedArmy = undefined;
+    document.getElementById('battle-name').textContent = battle.name;
+    document.getElementById('battle-year').textContent = yearLabel(YEAR_STATES[currentIndex].year);
+    document.getElementById('battle-type').textContent = detail.type || 'Military action';
+    document.getElementById('battle-belligerents').textContent = detail.belligerents || 'Contending successor forces';
+    document.getElementById('battle-commanders').textContent = detail.commanders || 'Commanders disputed';
+    document.getElementById('battle-result').textContent = detail.result || battle.note;
+    document.getElementById('battle-forces').textContent = detail.forces || 'Surviving accounts do not permit a reliable reconstruction.';
+    document.getElementById('battle-stakes').textContent = detail.stakes || battle.note;
+    document.getElementById('battle-aftermath').textContent = detail.aftermath || battle.note;
+    ['campaign-profile','city-profile','person-profile','army-profile'].forEach(id => { document.getElementById(id).hidden = true; });
+    ['city-back','person-back','army-back'].forEach(id => { document.getElementById(id).hidden = true; });
+    document.getElementById('battle-profile').hidden = false;
+    document.getElementById('battle-back').hidden = false;
+    if (cityGroups) cityGroups.classed('selected', false);
+    if (personGroups) personGroups.classed('selected', false);
+    if (armyGroups) armyGroups.classed('selected', false);
+    castRail?.querySelectorAll('.cast-card').forEach(card => card.classList.remove('selected'));
+    if (window.innerWidth < 981) document.querySelector('.detail-panel').scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+  }
+
   function createDefs() {
     const defs = svg.append('defs');
     defs.append('clipPath').attr('id', 'land-clip').append('path').attr('d', path(world.land));
+    defs.append('clipPath').attr('id', 'person-portrait-clip').append('circle').attr('r', 13);
     const extentClip = defs.append('clipPath').attr('id', 'empire-extent-clip');
     Object.values(EMPIRE_EXTENTS).forEach(points => extentClip.append('path').attr('d', polygonPath(points)));
+    defs.append('clipPath').attr('id', 'broad-story-extent-clip').append('path').attr('d', polygonPath(BROAD_STORY_EXTENT));
 
     [['arrow-land','#eadfbe'],['arrow-sea','#9ed3e0']].forEach(([id, color]) => {
       defs.append('marker')
@@ -621,6 +1154,34 @@
         .attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
         .append('path').attr('d', 'M0,-5L10,0L0,5Z').attr('fill', color);
     });
+
+    const symbol = (id, viewBox = '-8 -8 16 16') => defs.append('symbol').attr('id', id).attr('viewBox', viewBox);
+    const capital = symbol('city-icon-capital');
+    capital.append('path').attr('class', 'city-icon-fill').attr('d', 'M-6,-2L0,-6L6,-2Z');
+    capital.append('path').attr('class', 'city-icon-stroke').attr('d', 'M-5,-1H5M-4,-1V4M0,-1V4M4,-1V4M-6,5H6');
+    capital.append('circle').attr('class', 'city-icon-gem').attr('r', 1.2).attr('cy', -3.2);
+
+    const port = symbol('city-icon-port');
+    port.append('circle').attr('class', 'city-icon-stroke').attr('r', 1.7).attr('cy', -3.8);
+    port.append('path').attr('class', 'city-icon-stroke').attr('d', 'M0,-2V5M-3,0H3M-6,2.5C-5,6 -2.5,7 0,4.5C2.5,7 5,6 6,2.5M-6,2.5L-3.8,2M6,2.5L3.8,2');
+
+    const fortress = symbol('city-icon-fortress');
+    fortress.append('path').attr('class', 'city-icon-fill').attr('d', 'M-6,-5H-3V-2H-1V-5H1V-2H3V-5H6V6H-6Z');
+    fortress.append('path').attr('class', 'city-icon-stroke').attr('d', 'M-6,-2H6M-2,6V2A2,2 0 0 1 2,2V6');
+
+    const metropolis = symbol('city-icon-metropolis');
+    metropolis.append('path').attr('class', 'city-icon-stroke').attr('d', 'M0,-7V-4M0,4V7M-7,0H-4M4,0H7M-5,-5L-3,-3M3,3L5,5M5,-5L3,-3M-3,3L-5,5');
+    metropolis.append('circle').attr('class', 'city-icon-fill').attr('r', 3.5);
+    metropolis.append('circle').attr('class', 'city-icon-gem').attr('r', 1.25);
+
+    const town = symbol('city-icon-town');
+    town.append('path').attr('class', 'city-icon-fill').attr('d', 'M0,-4.8L4.8,0L0,4.8L-4.8,0Z');
+    town.append('circle').attr('class', 'city-icon-gem').attr('r', 1.15);
+
+    const battle = symbol('battle-icon-swords', '-12 -12 24 24');
+    const swordPath = 'M-1.15,-10L1.15,-10L1.6,3.2L4.8,3.2L4.8,5.2L1.45,5.2L1.45,9L0,11L-1.45,9L-1.45,5.2L-4.8,5.2L-4.8,3.2L-1.6,3.2Z';
+    battle.append('path').attr('class', 'battle-sword-blade').attr('d', swordPath).attr('transform', 'rotate(-43)');
+    battle.append('path').attr('class', 'battle-sword-blade').attr('d', swordPath).attr('transform', 'rotate(43)');
   }
 
   function renderBase() {
@@ -632,7 +1193,7 @@
     mapHeight = height;
     svg.attr('viewBox', `0 0 ${width} ${height}`);
 
-    const focus = width < 640 ? [[18, 20], [72, 46]] : [[15, 18], [80, 46]];
+    const focus = width < 640 ? [[-10, 18], [72, 57]] : [[-12, 16], [80, 58]];
     projection = d3.geoMercator().fitExtent(
       [[20, 18], [width - 20, height - 18]],
       { type: 'MultiPoint', coordinates: focus },
@@ -661,6 +1222,8 @@
       currentZoomTransform = event.transform;
       root.attr('transform', event.transform);
       updateCityScale(event.transform);
+      updatePersonScale(event.transform);
+      updateArmyScale(event.transform);
     });
     svg.call(zoomBehavior).call(zoomBehavior.transform, currentZoomTransform);
     document.getElementById('zoom-in').onclick = () => svg.transition().duration(220).call(zoomBehavior.scaleBy, 1.45);
@@ -699,8 +1262,9 @@
     const resolvedTerritories = snapshot.territories.flatMap(item =>
       (REGION_GROUPS[item.region] || [item.region]).map(cell => ({ ...item, cell }))
     );
-    const mergedTerritories = mergeFactionCells(resolvedTerritories);
-    const territories = scene.append('g').attr('clip-path', 'url(#land-clip)').append('g').attr('clip-path', 'url(#empire-extent-clip)');
+    const mergedTerritories = mergeFactionCells(resolvedTerritories, snapshot.extent !== 'med');
+    const extentClipId = snapshot.extent === 'med' ? 'broad-story-extent-clip' : 'empire-extent-clip';
+    const territories = scene.append('g').attr('clip-path', 'url(#land-clip)').append('g').attr('clip-path', `url(#${extentClipId})`);
     const territoryPaths = territories.selectAll('path')
       .data(mergedTerritories)
       .join('path')
@@ -708,7 +1272,7 @@
       .attr('d', d => d.d)
       .attr('fill', d => FACTIONS[d.faction].color)
       .attr('fill-opacity', .88)
-      .on('pointermove', (event, d) => showTooltip(event, FACTIONS[d.faction].name, `Approximate control · ${snapshot.year} BCE`))
+      .on('pointermove', (event, d) => showTooltip(event, FACTIONS[d.faction].name, `Approximate control · ${yearLabel(snapshot.year)}`))
       .on('pointerleave', hideTooltip);
 
     if (isAnimatedChange) {
@@ -720,7 +1284,40 @@
         .attr('stroke-opacity', 1);
     }
 
-    if (snapshot.year >= 316) {
+    // Inland water and relief sit above political color. This keeps geography
+    // legible while still allowing the territorial layer to dominate the story.
+    const physicalLayer = scene.append('g').attr('class', 'physical-layer').attr('aria-hidden', 'true');
+    if (physical.lakes) {
+      physicalLayer.append('g').attr('class', 'lake-layer').selectAll('path')
+        .data(physical.lakes.features).join('path')
+        .attr('class', 'inland-lake')
+        .attr('d', path);
+    }
+    if (physical.rivers) {
+      physicalLayer.append('g').attr('class', 'river-layer').selectAll('path')
+        .data(physical.rivers.features).join('path')
+        .attr('class', feature => `river river-rank-${Math.min(6, feature.properties.scalerank || 6)}`)
+        .attr('d', path);
+    }
+    const mountains = physicalLayer.append('g').attr('class', 'mountain-layer');
+    mountains.selectAll('path.mountain-shadow').data(MOUNTAIN_RANGES).join('path')
+      .attr('class', range => `mountain-shadow${range.mobile === false ? ' desktop-relief' : ''}`)
+      .attr('d', range => routeCurve(range.points.map(point => projection(point))));
+    mountains.selectAll('path.mountain-ridge').data(MOUNTAIN_RANGES).join('path')
+      .attr('class', range => `mountain-ridge${range.mobile === false ? ' desktop-relief' : ''}`)
+      .attr('d', range => routeCurve(range.points.map(point => projection(point))));
+    mountains.selectAll('text').data(MOUNTAIN_RANGES).join('text')
+      .attr('class', range => `mountain-label${range.mobile === false ? ' desktop-relief' : ''}`)
+      .attr('x', range => projection(range.label)[0])
+      .attr('y', range => projection(range.label)[1])
+      .attr('transform', range => {
+        const [x, y] = projection(range.label);
+        return `rotate(${range.rotate || 0} ${x} ${y})`;
+      })
+      .text(range => range.name);
+    physicalLayer.append('path').datum(world.borders).attr('class', 'country-mesh overlay').attr('d', path);
+
+    if (snapshot.year <= 323 && snapshot.year >= 316) {
       const satrapies = scene.append('g').attr('clip-path', 'url(#land-clip)').append('g').attr('clip-path', 'url(#empire-extent-clip)');
       satrapies.selectAll('path').data(SATRAPY_LINES).join('path')
         .attr('class', 'satrapy-line')
@@ -768,19 +1365,95 @@
         .on('pointerleave', hideTooltip);
 
       const [sx, sy] = points[0];
-      const marker = group.append('g').attr('transform', `translate(${sx} ${sy})`).style('pointer-events', 'none');
-      marker.append('path').attr('d', 'M-6,-7L6,-7L5,2L0,8L-5,2Z').attr('fill', FACTIONS[d.faction].color).attr('stroke', '#f1e5c4').attr('stroke-width', .8);
-      marker.append('text').attr('text-anchor', 'middle').attr('y', 2.2).attr('fill', '#fff5da').style('font', '700 6px var(--body)').text(FACTIONS[d.faction].name[0]);
+      const marker = group.append('g')
+        .attr('class', d.naval ? 'route-unit naval-unit' : 'route-unit army-unit')
+        .attr('transform', `translate(${sx} ${sy})`)
+        .style('pointer-events', 'none');
+      if (d.naval) {
+        marker.append('path').attr('class', 'unit-shadow').attr('d', 'M-9,2Q0,6 9,2L6,6H-6Z');
+        marker.append('path').attr('class', 'unit-hull').attr('d', 'M-8,1Q0,4.5 8,1L5,5H-5Z').attr('fill', FACTIONS[d.faction].color);
+        marker.append('path').attr('class', 'unit-detail').attr('d', 'M-5,0H6M-2,0V-5L4,-1H-2M-7,5L-10,7M-3,5L-5,8M2,5L3,8M6,4L9,6');
+      } else {
+        marker.append('path').attr('class', 'unit-shadow').attr('d', 'M-7,-8H7V3L0,8L-7,3Z');
+        marker.append('path').attr('class', 'unit-standard').attr('d', 'M-6,-8H6V2L0,7L-6,2Z').attr('fill', FACTIONS[d.faction].color);
+        marker.append('path').attr('class', 'unit-detail').attr('d', 'M-8,-10V9M-8,-9H6');
+        marker.append('circle').attr('class', 'unit-gem').attr('r', 1.7).attr('cy', -1.5);
+      }
     });
 
-    const battles = scene.append('g').selectAll('g')
+    const activeArmies = armiesForYear(snapshot.year);
+    const armyMovements = activeArmies.map(army => armyMovement(army, snapshot.year)).filter(Boolean);
+    const movementGroups = scene.append('g').attr('class', 'army-movements').selectAll('g')
+      .data(armyMovements).join('g');
+    movementGroups.append('path')
+      .attr('class', 'army-movement-shadow')
+      .attr('d', movement => routeCurve([projection(movement.from.p), projection(movement.to.p)]));
+    movementGroups.append('path')
+      .attr('class', 'army-movement-line')
+      .attr('stroke', movement => FACTIONS[movement.army.faction].light)
+      .attr('d', movement => routeCurve([projection(movement.from.p), projection(movement.to.p)]))
+      .on('pointermove', (event, movement) => showTooltip(event, movement.army.name, `${movement.from.place} → ${movement.to.place}`))
+      .on('pointerleave', hideTooltip);
+    armyGroups = scene.append('g').attr('class', 'army-camps').selectAll('g')
+      .data(activeArmies, army => army.id).join('g')
+      .attr('class', army => `army-camp${armyMovement(army, snapshot.year) ? ' arrived' : ''}${selectedArmy === army ? ' selected' : ''}`)
+      .on('click', (event, army) => { event.stopPropagation(); selectArmy(army); })
+      .on('pointermove', (event, army) => {
+        const phase = armyPhase(army, snapshot.year);
+        showTooltip(event, army.name, `${phase.commander} · Encamped at ${phase.place}`);
+      })
+      .on('pointerleave', hideTooltip);
+    armyGroups.append('line')
+      .attr('class', 'army-camp-leader')
+      .attr('x1', 0).attr('y1', 0)
+      .attr('x2', army => -armyOffset(army)[0])
+      .attr('y2', army => -armyOffset(army)[1]);
+    armyGroups.append('circle').attr('class', 'army-camp-hit').attr('r', 17)
+      .attr('role', 'button')
+      .attr('tabindex', 0)
+      .attr('aria-label', army => `${army.name}, commanded by ${armyPhase(army, snapshot.year).commander}, encamped at ${armyPhase(army, snapshot.year).place}`)
+      .on('click', (event, army) => { event.stopPropagation(); selectArmy(army); })
+      .on('keydown', (event, army) => {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectArmy(army); }
+      });
+    armyGroups.append('circle').attr('class', 'army-camp-ring').attr('r', 12).attr('stroke', army => FACTIONS[army.faction].light);
+    armyGroups.append('path').attr('class', 'army-tent').attr('d', 'M-8,6L0,-6L8,6ZM0,-6V6M-8,6H8');
+    armyGroups.append('path').attr('class', 'army-standard-pole').attr('d', 'M-9,-9V8');
+    armyGroups.append('path').attr('class', 'army-standard-flag').attr('d', 'M-9,-9H2L-1,-4H-9Z').attr('fill', army => FACTIONS[army.faction].light);
+    armyGroups.append('rect').attr('class', 'army-camp-label-backdrop').attr('x', 15).attr('y', -9).attr('height', 18).attr('width', army => Math.max(64, army.name.length * 5.6 + 14));
+    armyGroups.append('text').attr('class', 'army-camp-label').attr('x', 22).attr('y', 3).text(army => army.name);
+    updateArmyScale();
+
+    if (isAnimatedChange && !reducedMotion) {
+      armyGroups.attr('opacity', 0)
+        .attr('transform', army => `${armyTransform(army, snapshot.year)} translate(0 8)`)
+        .transition().delay((army, index) => 520 + index * 35).duration(360).ease(d3.easeCubicOut)
+        .attr('opacity', 1)
+        .attr('transform', army => armyTransform(army, snapshot.year));
+    }
+
+    const battles = scene.append('g').attr('class', 'battles').selectAll('g')
       .data(snapshot.battles).join('g')
+      .attr('class', 'battle-marker')
       .attr('transform', d => `translate(${projection(d.p).join(' ')})`)
+      .attr('role', 'button')
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `Open dossier for ${d.name}, ${yearLabel(snapshot.year)}`)
+      .on('click', (event, d) => { event.stopPropagation(); selectBattle(d); })
+      .on('keydown', (event, d) => {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectBattle(d); }
+      })
       .on('pointermove', (event, d) => showTooltip(event, d.name, d.note))
       .on('pointerleave', hideTooltip);
-    battles.append('circle').attr('class', 'battle-ring').attr('r', 9);
-    battles.append('path').attr('class', 'battle-cross').attr('d', 'M-4,-4L4,4M4,-4L-4,4');
-    battles.append('text').attr('class', 'battle-label').attr('x', 13).attr('y', 3).text(d => d.name);
+    battles.append('circle').attr('class', 'battle-aura').attr('r', 14);
+    battles.append('circle').attr('class', 'battle-ring').attr('r', 11);
+    battles.append('use').attr('class', 'battle-swords').attr('href', '#battle-icon-swords').attr('x', -8).attr('y', -8).attr('width', 16).attr('height', 16);
+    battles.append('rect')
+      .attr('class', 'battle-label-backdrop')
+      .attr('x', 14).attr('y', -8.5)
+      .attr('width', d => Math.max(45, d.name.length * 5.6 + 14))
+      .attr('height', 17);
+    battles.append('text').attr('class', 'battle-label').attr('x', 21).attr('y', 3).text(d => d.name);
     if (isAnimatedChange) {
       battles
         .attr('opacity', 0)
@@ -790,10 +1463,11 @@
         .attr('transform', d => `translate(${projection(d.p).join(' ')}) scale(1)`);
     }
 
-    const availableCities = CITIES.filter(city => cityIsAvailable(city, snapshot.year));
+    const availableCities = CITIES.filter(city => cityIsAvailable(city, snapshot.year))
+      .sort((a, b) => cityDrawPriority(a) - cityDrawPriority(b));
     cityGroups = scene.append('g').attr('class', 'cities').selectAll('g')
       .data(availableCities, city => city.name).join('g')
-      .attr('class', city => `city-marker tier-${city.tier}${selectedCity === city ? ' selected' : ''}`)
+      .attr('class', city => `city-marker tier-${city.tier} icon-${cityIconType(city)}${selectedCity === city ? ' selected' : ''}`)
       .attr('role', 'button')
       .attr('tabindex', 0)
       .attr('aria-label', city => `${city.name}, ${city.kind} in ${city.region}`)
@@ -803,16 +1477,68 @@
       })
       .on('pointermove', (event, city) => showTooltip(event, city.name, `${city.kind} · ${city.region}`))
       .on('pointerleave', hideTooltip);
-    cityGroups.append('circle').attr('class', 'city-hit').attr('r', 8);
-    cityGroups.append('circle').attr('class', 'city-select-ring').attr('r', 6);
-    cityGroups.append('circle').attr('class', 'city-dot').attr('r', city => city.tier === 1 ? 3 : 2.1);
+    cityGroups.append('circle').attr('class', 'city-hit').attr('r', city => cityIconSize(city) * .72 + 4);
+    cityGroups.append('circle').attr('class', 'city-halo').attr('r', city => cityIconSize(city) * .54);
+    cityGroups.append('circle').attr('class', 'city-select-ring').attr('r', city => cityIconSize(city) * .62 + 2);
+    cityGroups.append('use')
+      .attr('class', 'city-emblem')
+      .attr('href', city => `#city-icon-${cityIconType(city)}`)
+      .attr('x', city => -cityIconSize(city) / 2)
+      .attr('y', city => -cityIconSize(city) / 2)
+      .attr('width', city => cityIconSize(city))
+      .attr('height', city => cityIconSize(city));
     cityGroups.append('text')
       .attr('class', 'city-label')
-      .attr('x', (city, index) => index % 2 ? 6 : -6)
-      .attr('y', (city, index) => index % 3 ? -5 : 10)
+      .attr('x', (city, index) => (index % 2 ? 1 : -1) * (cityIconSize(city) * .55 + 4))
+      .attr('y', (city, index) => index % 3 ? -(cityIconSize(city) * .36 + 2) : cityIconSize(city) * .55 + 7)
       .attr('text-anchor', (city, index) => index % 2 ? 'start' : 'end')
       .text(city => city.name);
     updateCityScale();
+
+    const activePeople = peopleForYear(snapshot.year);
+    personGroups = scene.append('g').attr('class', 'people-layer').selectAll('g')
+      .data(activePeople, person => person.id).join('g')
+      .attr('class', person => `person-marker${person.death === snapshot.year ? ' death-year' : ''}${person.intro === snapshot.year ? ' entering-story' : ''}${selectedPerson === person ? ' selected' : ''}`)
+      .attr('role', 'button')
+      .attr('tabindex', 0)
+      .attr('aria-label', person => `${person.name}, ${personPhase(person, snapshot.year).role}, near ${personPosition(person, snapshot.year).place}`)
+      .on('click', (event, person) => { event.stopPropagation(); selectPerson(person); })
+      .on('keydown', (event, person) => {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectPerson(person); }
+      })
+      .on('pointermove', (event, person) => showTooltip(event, person.name, `${personPhase(person, snapshot.year).role} · ${personPosition(person, snapshot.year).place}`))
+      .on('pointerleave', hideTooltip);
+    personGroups.append('circle').attr('class', 'person-aura').attr('r', 20);
+    personGroups.append('circle').attr('class', 'person-ring').attr('r', 15).attr('stroke', person => FACTIONS[person.faction].light);
+    personGroups.append('image')
+      .attr('class', 'person-map-portrait')
+      .attr('href', person => person.portrait)
+      .attr('x', -13).attr('y', -13).attr('width', 26).attr('height', 26)
+      .attr('preserveAspectRatio', 'xMidYMid slice')
+      .attr('clip-path', 'url(#person-portrait-clip)');
+    personGroups.filter(person => !person.portrait).append('text')
+      .attr('class', 'person-map-monogram').attr('text-anchor', 'middle').attr('y', 3.5)
+      .text(person => person.monogram || person.name.split(/\s+/).map(part => part[0]).slice(0,2).join(''));
+    personGroups.append('path').attr('class', 'person-pointer').attr('d', 'M-4,14L0,20L4,14Z').attr('fill', person => FACTIONS[person.faction].light);
+    personGroups.append('rect').attr('class', 'person-label-backdrop').attr('x', 18).attr('y', -9).attr('height', 18).attr('width', person => Math.max(56, person.name.length * 6.2 + 14));
+    personGroups.append('text').attr('class', 'person-label').attr('x', 25).attr('y', 3).text(person => person.name);
+    personGroups.filter(person => person.death === snapshot.year).append('g').attr('class', 'death-mark')
+      .call(group => {
+        group.append('circle').attr('cx', 12).attr('cy', -12).attr('r', 7);
+        group.append('path').attr('d', 'M9,-15L15,-9M15,-15L9,-9');
+      });
+    updatePersonScale();
+    // Battles remain the primary event target in milestone years, even when a
+    // commander portrait occupies the same campaign theatre.
+    scene.select('.battles').raise();
+
+    if (isAnimatedChange && !reducedMotion) {
+      personGroups.attr('opacity', 0)
+        .attr('transform', person => `${personTransform(person, snapshot.year)} scale(.65)`)
+        .transition().delay((person, index) => 650 + index * 55).duration(420).ease(d3.easeBackOut.overshoot(1.18))
+        .attr('opacity', 1)
+        .attr('transform', person => personTransform(person, snapshot.year));
+    }
 
     if (isAnimatedChange) {
       cityGroups.attr('opacity', 0)
@@ -840,18 +1566,51 @@
     }
 
     updateLegend(snapshot);
+    updateCast(snapshot, direction);
+  }
+
+  function updateCast(snapshot, direction = 0) {
+    const activePeople = peopleForYear(snapshot.year);
+    document.getElementById('cast-count').textContent = `${activePeople.length} active`;
+    castRail.innerHTML = activePeople.map(person => {
+      const phase = personPhase(person, snapshot.year);
+      const position = personPosition(person, snapshot.year);
+      const entering = person.intro === snapshot.year;
+      const dying = person.death === snapshot.year;
+      const state = dying ? 'Dies this year' : entering ? 'Enters story' : phase.role;
+      return `<button class="cast-card${entering ? ' entering' : ''}${dying ? ' dying' : ''}${selectedPerson === person ? ' selected' : ''}" data-person="${person.id}" type="button" aria-label="Open ${person.name} character dossier">
+        <span class="cast-portrait-wrap${person.portrait ? '' : ' monogram'}" style="--faction:${FACTIONS[person.faction].light}">${person.portrait ? `<img src="${person.portrait}" alt="">` : `<b>${person.monogram || person.name.split(/\s+/).map(part => part[0]).slice(0,2).join('')}</b>`}</span>
+        <span class="cast-copy"><strong>${person.name}</strong><small>${state}</small><em>${position.place}</em></span>
+      </button>`;
+    }).join('');
+    castRail.querySelectorAll('.cast-card').forEach(card => {
+      card.addEventListener('click', () => selectPerson(PEOPLE.find(person => person.id === card.dataset.person)));
+    });
+    if (!reducedMotion && direction !== 0) {
+      castRail.animate([
+        { opacity: .35, transform: `translateX(${direction < 0 ? -10 : 10}px)` },
+        { opacity: 1, transform: 'translateX(0)' },
+      ], { duration: 520, easing: 'cubic-bezier(.2,.75,.25,1)' });
+    }
   }
 
   function updateLegend(snapshot) {
     const used = [...new Set(snapshot.territories.map(item => item.faction))];
     document.getElementById('map-key').innerHTML = used.map(id => `<span class="key-item"><i class="key-swatch" style="background:${FACTIONS[id].color}"></i>${FACTIONS[id].name}</span>`).join('')
+      + `<span class="key-item"><i class="key-capital"></i>Capital</span>`
       + `<span class="key-item"><i class="key-city"></i>${CITIES.filter(city => cityIsAvailable(city, snapshot.year)).length} cities</span>`
+      + (snapshot.battles.length ? '<span class="key-item"><i class="key-battle">⚔</i>Battle</span>' : '')
+      + `<span class="key-item"><i class="key-camp"></i>${armiesForYear(snapshot.year).length} field armies</span>`
       + '<span class="key-item"><i class="key-route"></i>Army</span><span class="key-item"><i class="key-route naval"></i>Fleet</span>';
   }
 
   function updateNarrative(snapshot, direction = 0) {
+    closeBattleProfile();
+    closeArmyProfile();
+    closePersonProfile();
     closeCityProfile();
-    document.getElementById('date-year').textContent = snapshot.year;
+    document.getElementById('date-year').textContent = yearNumber(snapshot.year);
+    document.querySelector('.date-era').textContent = yearEra(snapshot.year);
     document.getElementById('war-label').textContent = snapshot.war;
     document.getElementById('event-title').textContent = snapshot.title;
     document.getElementById('event-copy').textContent = snapshot.copy;
@@ -886,6 +1645,9 @@
     if (centerButton) eventEls[currentIndex].scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'nearest', inline: 'center' });
     previousButton.disabled = currentIndex === 0;
     nextButton.disabled = currentIndex === YEAR_STATES.length - 1;
+    const chapterOptions = [...eraJump.options];
+    const activeChapter = [...chapterOptions].reverse().find(option => currentIndex >= YEAR_STATES.findIndex(state => state.year === Number(option.value))) || chapterOptions[0];
+    eraJump.value = activeChapter.value;
     if (!reducedMotion && direction !== 0) {
       mapPanel.classList.remove('state-forward', 'state-backward', 'state-changing');
       document.querySelector('.chronology').classList.remove('state-changing');
@@ -910,7 +1672,7 @@
     clearInterval(playback);
     playback = undefined;
     playButton.setAttribute('aria-pressed', 'false');
-    playButton.innerHTML = '<span aria-hidden="true">▶</span><span>Play every year</span>';
+    playButton.innerHTML = '<span aria-hidden="true">▶</span><span>Play the timeline</span>';
   }
 
   playButton.addEventListener('click', () => {
@@ -926,6 +1688,11 @@
 
   previousButton.addEventListener('click', () => { stopPlayback(); setYear(currentIndex - 1, true); });
   nextButton.addEventListener('click', () => { stopPlayback(); setYear(currentIndex + 1, true); });
+  eraJump.addEventListener('change', () => {
+    stopPlayback();
+    const index = YEAR_STATES.findIndex(snapshot => snapshot.year === Number(eraJump.value));
+    if (index >= 0) setYear(index, true);
+  });
   window.addEventListener('keydown', event => {
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
     if (event.key === 'ArrowLeft') { event.preventDefault(); stopPlayback(); setYear(currentIndex - 1, true); }
@@ -933,6 +1700,9 @@
   });
 
   document.getElementById('city-back').addEventListener('click', closeCityProfile);
+  document.getElementById('person-back').addEventListener('click', closePersonProfile);
+  document.getElementById('army-back').addEventListener('click', closeArmyProfile);
+  document.getElementById('battle-back').addEventListener('click', closeBattleProfile);
 
   function showLoadError() {
     const box = document.createElement('div');
@@ -948,12 +1718,32 @@
         return response.json();
       });
 
-  topologySource
-    .then(topology => {
+  const physicalSource = location.protocol === 'file:'
+    ? Promise.resolve([null, null])
+    : Promise.all([
+        fetch('/assets/diadochi/lakes-50m.geojson').then(response => response.ok ? response.json() : null),
+        fetch('/assets/diadochi/rivers-50m.geojson').then(response => response.ok ? response.json() : null),
+      ]).catch(error => {
+        console.warn('Physical geography could not be loaded.', error);
+        return [null, null];
+      });
+
+  function cropPhysical(collection) {
+    if (!collection) return null;
+    const features = collection.features.filter(feature => {
+      const [[west, south], [east, north]] = d3.geoBounds(feature);
+      return east >= -13 && west <= 81 && north >= 16 && south <= 59;
+    });
+    return { ...collection, features };
+  }
+
+  Promise.all([topologySource, physicalSource])
+    .then(([topology, [lakes, rivers]]) => {
       world = {
         land: topojson.feature(topology, topology.objects.land),
         borders: topojson.mesh(topology, topology.objects.countries, (a, b) => a !== b),
       };
+      physical = { lakes: cropPhysical(lakes), rivers: cropPhysical(rivers) };
       renderBase();
       setYear(0);
       let resizeTimer;

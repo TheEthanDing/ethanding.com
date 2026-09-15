@@ -30,7 +30,9 @@ const mimeTypes = {
 function securityHeaders(extra = {}) {
   return {
     'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
+    // The homepage's interactive previews are same-site frames. Continue to
+    // prevent third-party embedding while allowing those first-party cards.
+    'X-Frame-Options': 'SAMEORIGIN',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
     ...extra,
@@ -190,12 +192,20 @@ function validateBooks(value) {
     sagas: Array.isArray(book.sagas) ? book.sagas.map(String).map((v) => v.trim()).filter(Boolean) : [],
     dateStarted: String(book.dateStarted || ''),
     dateFinished: String(book.dateFinished || ''),
-    daysTaken: book.daysTaken !== null && book.daysTaken !== '' && Number.isFinite(Number(book.daysTaken)) ? Number(book.daysTaken) : null,
+    daysTaken: calculateDaysTaken(book.dateStarted, book.dateFinished),
     rating: book.rating !== null && book.rating !== '' && Number.isFinite(Number(book.rating)) ? Number(book.rating) : null,
     notes: String(book.notes || ''),
     owned: book.owned === true,
     cover: String(book.cover || ''),
   })).filter((book) => book.title).sort((a, b) => (b.dateFinished || '').localeCompare(a.dateFinished || ''));
+}
+
+function calculateDaysTaken(dateStarted, dateFinished) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStarted) || !/^\d{4}-\d{2}-\d{2}$/.test(dateFinished)) return null;
+  const start = Date.parse(`${dateStarted}T00:00:00Z`);
+  const finish = Date.parse(`${dateFinished}T00:00:00Z`);
+  if (!Number.isFinite(start) || !Number.isFinite(finish) || new Date(start).toISOString().slice(0, 10) !== dateStarted || new Date(finish).toISOString().slice(0, 10) !== dateFinished || finish < start) return null;
+  return Math.round((finish - start) / 86400000) + 1;
 }
 
 async function serveStatic(res, relativePath) {
@@ -204,7 +214,7 @@ async function serveStatic(res, relativePath) {
   try {
     const body = await fs.readFile(absolute);
     const extension = path.extname(absolute).toLowerCase();
-    const cache = relativePath === '/diadochi.html' || relativePath.startsWith('/data/')
+    const cache = relativePath === '/index.html' || relativePath === '/diadochi.html' || relativePath.startsWith('/data/') || relativePath.startsWith('/images/project-previews/')
       ? 'no-cache'
       : relativePath.startsWith('/images/books/')
         ? 'public, max-age=31536000, immutable'
@@ -331,4 +341,6 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, HOST, () => console.log(`ethanding.com listening on http://${HOST}:${PORT}`));
+if (require.main === module) server.listen(PORT, HOST, () => console.log(`ethanding.com listening on http://${HOST}:${PORT}`));
+
+module.exports = { calculateDaysTaken, validateBooks };

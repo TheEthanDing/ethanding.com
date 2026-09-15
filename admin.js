@@ -2,6 +2,23 @@ const state = { books: [], site: {}, currentId: null, panel: 'books', dirty: fal
 const $ = (selector) => document.querySelector(selector);
 const escapeHtml = (value = '') => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
+function calculateDaysTaken(dateStarted, dateFinished) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStarted) || !/^\d{4}-\d{2}-\d{2}$/.test(dateFinished)) return null;
+  const start = Date.parse(`${dateStarted}T00:00:00Z`);
+  const finish = Date.parse(`${dateFinished}T00:00:00Z`);
+  if (!Number.isFinite(start) || !Number.isFinite(finish) || finish < start) return null;
+  return Math.round((finish - start) / 86400000) + 1;
+}
+
+function allAuthors() {
+  const authors = new Map();
+  state.books.flatMap((book) => book.authors || []).forEach((author) => {
+    const name = String(author).trim();
+    if (name && !authors.has(name.toLocaleLowerCase())) authors.set(name.toLocaleLowerCase(), name);
+  });
+  return [...authors.values()].sort((a, b) => a.localeCompare(b));
+}
+
 function toast(message) {
   const element = $('#toast');
   element.textContent = message;
@@ -83,14 +100,22 @@ function renderBookEditor() {
         </span>
         <input class="cover-input" id="cover-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Choose a cover image for ${escapeHtml(book.title)}">
       </label>
-      <div><p class="eyebrow">Book entry</p><h2>${escapeHtml(book.title || 'Untitled')}</h2><p>${escapeHtml(book.authors.join(', ') || 'Add the author below')}</p></div>
+      <div><p class="eyebrow">Book entry</p><h2>${escapeHtml(book.title || 'Untitled')}</h2><p id="editor-authors">${escapeHtml(book.authors.join(', ') || 'Add the author below')}</p></div>
     </div>
     <form id="book-form" class="form-grid">
       <label class="span-2">Title<input name="title" value="${escapeHtml(book.title)}" required></label>
-      <label class="span-2">Authors <span style="font-weight:400;color:var(--muted)">separated by commas</span><input name="authors" value="${escapeHtml(book.authors.join(', '))}"></label>
+      <div class="field-group span-2">
+        <label id="authors-label" for="author-input">Authors <span class="field-note">select or create</span></label>
+        <div class="author-picker" id="author-picker">
+          <div class="author-values" id="author-values"></div>
+          <input id="author-input" type="text" autocomplete="off" role="combobox" aria-labelledby="authors-label" aria-controls="author-options" aria-expanded="false" aria-autocomplete="list" placeholder="Find or create an author">
+          <div class="author-options hidden" id="author-options" role="listbox"></div>
+        </div>
+        <p class="field-help">Choose an existing author, or type a new name and press Enter.</p>
+      </div>
       <label>Date started<input name="dateStarted" type="date" value="${escapeHtml(book.dateStarted)}"></label>
       <label>Date finished<input name="dateFinished" type="date" value="${escapeHtml(book.dateFinished)}"></label>
-      <label>Days taken<input name="daysTaken" type="number" min="0" value="${book.daysTaken ?? ''}"></label>
+      <label>Days taken <span class="field-note">auto-calculated</span><input id="days-taken" name="daysTaken" type="number" value="${calculateDaysTaken(book.dateStarted, book.dateFinished) ?? ''}" placeholder="Select both dates" readonly aria-describedby="days-taken-help"><span class="field-help" id="days-taken-help">Includes both the start and finish date.</span></label>
       <label>Rating <span style="font-weight:400;color:var(--muted)">1–5</span><input name="rating" type="number" min="1" max="5" step="1" value="${book.rating ?? ''}"></label>
       <label class="span-2">Categories <span style="font-weight:400;color:var(--muted)">separated by commas</span><input name="categories" value="${escapeHtml((book.categories || []).join(', '))}"></label>
       <label class="span-2">Sagas <span style="font-weight:400;color:var(--muted)">separated by commas</span><input name="sagas" value="${escapeHtml((book.sagas || []).join(', '))}"></label>
@@ -99,14 +124,20 @@ function renderBookEditor() {
       <label class="span-2">Cover path<input name="cover" value="${escapeHtml(book.cover)}" placeholder="/images/books/cover.jpg"></label>
     </form>
     <div class="form-actions"><button id="delete-book" class="button danger">Remove book</button><span class="count">ID ${escapeHtml(book.id)}</span></div>`;
+  book.daysTaken = calculateDaysTaken(book.dateStarted, book.dateFinished);
+  initializeAuthorPicker(book);
   $('#book-form').addEventListener('input', (event) => {
     if (!event.target.name) return;
-    if (['authors', 'categories', 'sagas'].includes(event.target.name)) book[event.target.name] = event.target.value.split(',').map((v) => v.trim()).filter(Boolean);
+    if (['categories', 'sagas'].includes(event.target.name)) book[event.target.name] = event.target.value.split(',').map((v) => v.trim()).filter(Boolean);
     else if (event.target.name === 'owned') book.owned = event.target.checked;
-    else if (['daysTaken', 'rating'].includes(event.target.name)) book[event.target.name] = event.target.value === '' ? null : Number(event.target.value);
+    else if (event.target.name === 'rating') book.rating = event.target.value === '' ? null : Number(event.target.value);
     else book[event.target.name] = event.target.value;
+    if (event.target.name === 'dateStarted' || event.target.name === 'dateFinished') {
+      book.daysTaken = calculateDaysTaken(book.dateStarted, book.dateFinished);
+      $('#days-taken').value = book.daysTaken ?? '';
+    }
     setDirty();
-    if (event.target.name === 'title' || event.target.name === 'authors') renderBooksSoon();
+    if (event.target.name === 'title') renderBooksSoon();
   });
   $('#delete-book').addEventListener('click', () => {
     if (!confirm(`Remove “${book.title}” from the reading log?`)) return;
@@ -126,6 +157,91 @@ function renderBookEditor() {
     coverDrop.classList.remove('is-dragging');
     uploadCoverFile(event.dataTransfer.files[0]);
   });
+}
+
+function initializeAuthorPicker(book) {
+  const input = $('#author-input');
+  const values = $('#author-values');
+  const options = $('#author-options');
+  let activeIndex = -1;
+  let matches = [];
+
+  function updateBookAuthorText() {
+    const text = book.authors.join(', ') || 'Add the author below';
+    $('#editor-authors').textContent = text;
+    const rowAuthor = document.querySelector('.book-row.active .book-name span');
+    if (rowAuthor) rowAuthor.textContent = book.authors.join(', ') || 'No author';
+  }
+
+  function renderValues() {
+    values.innerHTML = book.authors.map((author) => `<span class="author-chip">${escapeHtml(author)}<button type="button" data-remove-author="${escapeHtml(author)}" aria-label="Remove ${escapeHtml(author)}">&times;</button></span>`).join('');
+    input.placeholder = book.authors.length ? 'Add another author' : 'Find or create an author';
+    values.querySelectorAll('[data-remove-author]').forEach((button) => button.addEventListener('click', () => {
+      book.authors = book.authors.filter((author) => author !== button.dataset.removeAuthor);
+      renderValues();
+      renderOptions();
+      updateBookAuthorText();
+      setDirty();
+      input.focus();
+    }));
+  }
+
+  function closeOptions() {
+    options.classList.add('hidden');
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    activeIndex = -1;
+  }
+
+  function renderOptions() {
+    const query = input.value.trim();
+    const selected = new Set(book.authors.map((author) => author.toLocaleLowerCase()));
+    matches = allAuthors().filter((author) => !selected.has(author.toLocaleLowerCase()) && (!query || author.toLocaleLowerCase().includes(query.toLocaleLowerCase()))).slice(0, 8);
+    const exactMatch = allAuthors().find((author) => author.toLocaleLowerCase() === query.toLocaleLowerCase());
+    const createOption = query && !exactMatch ? `<button type="button" class="author-option create-option" role="option" data-create-author="${escapeHtml(query)}"><span class="option-mark">+</span><span>Create <strong>“${escapeHtml(query)}”</strong></span><kbd>Enter</kbd></button>` : '';
+    options.innerHTML = matches.map((author, index) => `<button type="button" class="author-option ${index === activeIndex ? 'active' : ''}" id="author-option-${index}" role="option" data-author="${escapeHtml(author)}" aria-selected="${index === activeIndex}"><span class="option-mark">✓</span><span>${escapeHtml(author)}</span></button>`).join('') + createOption;
+    if (!options.innerHTML) return closeOptions();
+    options.classList.remove('hidden');
+    input.setAttribute('aria-expanded', 'true');
+    if (activeIndex >= 0 && matches[activeIndex]) input.setAttribute('aria-activedescendant', `author-option-${activeIndex}`);
+    else input.removeAttribute('aria-activedescendant');
+    options.querySelectorAll('[data-author]').forEach((button) => button.addEventListener('mousedown', (event) => { event.preventDefault(); addAuthor(button.dataset.author); }));
+    options.querySelectorAll('[data-create-author]').forEach((button) => button.addEventListener('mousedown', (event) => { event.preventDefault(); addAuthor(button.dataset.createAuthor); }));
+  }
+
+  function addAuthor(rawName) {
+    const typedName = String(rawName || '').trim().replace(/\s+/g, ' ');
+    if (!typedName) return;
+    const existing = allAuthors().find((author) => author.toLocaleLowerCase() === typedName.toLocaleLowerCase());
+    const name = existing || typedName;
+    if (!book.authors.some((author) => author.toLocaleLowerCase() === name.toLocaleLowerCase())) book.authors.push(name);
+    input.value = '';
+    renderValues();
+    closeOptions();
+    updateBookAuthorText();
+    setDirty();
+    input.focus();
+  }
+
+  input.addEventListener('focus', renderOptions);
+  input.addEventListener('input', () => { activeIndex = -1; renderOptions(); });
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      activeIndex = event.key === 'ArrowDown' ? Math.min(activeIndex + 1, matches.length - 1) : Math.max(activeIndex - 1, 0);
+      renderOptions();
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      addAuthor(activeIndex >= 0 ? matches[activeIndex] : input.value);
+    } else if (event.key === 'Backspace' && !input.value && book.authors.length) {
+      book.authors.pop();
+      renderValues();
+      updateBookAuthorText();
+      setDirty();
+    } else if (event.key === 'Escape') closeOptions();
+  });
+  input.addEventListener('blur', () => setTimeout(closeOptions, 100));
+  renderValues();
 }
 
 let renderTimer;

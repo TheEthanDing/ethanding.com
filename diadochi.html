@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="An interactive map of the Wars of the Diadochi, following the breakup of Alexander the Great's empire from 323 to 276 BCE.">
+  <meta name="description" content="An interactive historical map following the ancient Mediterranean from the Persian invasions of Greece through the rise and fall of the western Roman Empire.">
   <meta name="theme-color" content="#11191d">
-  <title>The Diadochi · Ethan Ding</title>
+  <title>The Ancient World · Ethan Ding</title>
   <link rel="icon" href="/images/profile.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
@@ -165,6 +165,56 @@
 
     .chronology-actions { display: flex; align-items: center; gap: 6px; }
 
+    .era-jump {
+      min-width: 138px;
+      padding: 6px 24px 6px 9px;
+      border: 1px solid rgba(224, 189, 114, .35);
+      border-radius: 2px;
+      color: var(--paper);
+      font: 750 8px/1 var(--sans);
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      background: #17272c;
+      cursor: pointer;
+    }
+
+    .era-jump:focus-visible { outline: 1px solid var(--bronze-hi); outline-offset: 2px; }
+
+    .cast-strip {
+      position: relative;
+      z-index: 9;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 12px;
+      align-items: stretch;
+      min-height: 78px;
+      padding: 8px 10px;
+      border: 1px solid rgba(224,189,114,.28);
+      background: rgba(10,19,23,.9);
+      box-shadow: 0 16px 44px rgba(0,0,0,.25);
+      backdrop-filter: blur(16px) saturate(.82);
+    }
+
+    .cast-heading { display: grid; align-content: center; gap: 5px; width: 74px; padding: 0 8px 0 4px; border-right: 1px solid var(--line); text-transform: uppercase; }
+    .cast-heading span { color: var(--bronze-hi); font-size: 8px; font-weight: 850; letter-spacing: .17em; line-height: 1.35; }
+    .cast-heading strong { color: #8d846d; font-size: 7px; letter-spacing: .12em; }
+    .cast-rail { display: flex; gap: 7px; min-width: 0; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #6c5334 transparent; }
+    .cast-rail::-webkit-scrollbar { height: 3px; }
+    .cast-rail::-webkit-scrollbar-thumb { background: #6c5334; }
+    .cast-card { position: relative; display: grid; flex: 0 0 153px; grid-template-columns: 50px minmax(0,1fr); gap: 8px; align-items: center; min-width: 0; padding: 5px 7px 5px 5px; overflow: hidden; border: 1px solid rgba(234,223,190,.17); color: var(--paper); text-align: left; background: rgba(17,29,34,.8); cursor: pointer; }
+    .cast-card:hover, .cast-card:focus-visible, .cast-card.selected { border-color: var(--bronze-hi); background: rgba(65,53,35,.66); outline: none; }
+    .cast-card.entering::after, .cast-card.dying::after { position: absolute; top: 3px; right: 3px; width: 6px; height: 6px; border-radius: 50%; content: ""; background: #e8bb67; box-shadow: 0 0 9px #e8bb67; }
+    .cast-card.dying { border-color: rgba(222,91,77,.66); background: linear-gradient(90deg, rgba(137,38,34,.25), rgba(17,29,34,.82)); }
+    .cast-card.dying::after { background: #f07163; box-shadow: 0 0 10px #f07163; }
+    .cast-portrait-wrap { width: 46px; height: 46px; padding: 2px; border: 2px solid var(--faction); border-radius: 50%; background: #101b1f; box-shadow: 0 5px 14px rgba(0,0,0,.3); }
+    .cast-portrait-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; filter: sepia(.18) contrast(1.08); }
+    .cast-card.dying .cast-portrait-wrap img { filter: grayscale(.75) sepia(.22) contrast(1.15); }
+    .cast-copy { display: grid; gap: 3px; min-width: 0; }
+    .cast-copy strong { overflow: hidden; color: #f4e7c5; font: 650 13px/1 var(--display); text-overflow: ellipsis; white-space: nowrap; }
+    .cast-copy small { overflow: hidden; color: var(--bronze-hi); font-size: 6.5px; font-weight: 850; letter-spacing: .08em; line-height: 1.15; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+    .cast-card.dying .cast-copy small { color: #ff9689; }
+    .cast-copy em { overflow: hidden; color: #887f6a; font-size: 7px; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
+
     .play-button, .step-button {
       display: inline-flex;
       align-items: center;
@@ -240,6 +290,7 @@
       font: 600 15px/1 var(--display);
       font-variant-numeric: tabular-nums;
     }
+    .year-button .era-mini { margin-top: -2px; color: #786f5b; font-size: 5px; font-weight: 900; letter-spacing: .12em; line-height: 1; }
 
     .year-button .short {
       max-width: 100px;
@@ -391,7 +442,19 @@
     .key-swatch { width: 10px; height: 10px; border: 1px solid rgba(255,255,255,.38); }
     .key-route { width: 21px; height: 0; border-top: 2px solid var(--paper); }
     .key-route.naval { border-top-style: dashed; border-color: #9ed3e0; }
-    .key-city { width: 7px; height: 7px; border: 1px solid #10191d; border-radius: 50%; background: var(--bronze-hi); box-shadow: 0 0 0 1px rgba(234,223,190,.3); }
+    .key-city { width: 7px; height: 7px; border: 1px solid #10191d; transform: rotate(45deg); background: var(--paper); box-shadow: 0 0 0 1px rgba(234,223,190,.3); }
+    .key-capital {
+      position: relative;
+      width: 12px;
+      height: 10px;
+      border-right: 1px solid var(--bronze-hi);
+      border-bottom: 2px solid var(--bronze-hi);
+      border-left: 1px solid var(--bronze-hi);
+    }
+    .key-capital::before { position: absolute; top: -4px; left: 1px; width: 8px; height: 8px; content: ""; border-top: 2px solid var(--bronze-hi); border-left: 2px solid var(--bronze-hi); transform: rotate(45deg); }
+    .key-battle { color: var(--bronze-hi); font: 700 13px/1 Georgia, serif; }
+    .key-camp { position: relative; width: 12px; height: 9px; border-right: 1px solid var(--bronze-hi); border-bottom: 1px solid var(--bronze-hi); border-left: 1px solid var(--bronze-hi); }
+    .key-camp::before { position: absolute; top: -5px; left: 1px; width: 8px; height: 8px; content: ""; border-top: 1px solid var(--bronze-hi); border-left: 1px solid var(--bronze-hi); transform: rotate(45deg); }
 
     .detail-panel {
       position: relative;
@@ -406,7 +469,7 @@
         var(--night-2);
     }
 
-    .city-profile[hidden], .campaign-profile[hidden], .city-back[hidden] { display: none; }
+    .city-profile[hidden], .campaign-profile[hidden], .army-profile[hidden], .battle-profile[hidden], .city-back[hidden] { display: none; }
 
     .city-back {
       align-self: flex-start;
@@ -424,6 +487,8 @@
     .city-back:hover { border-color: var(--bronze-hi); color: var(--bronze-hi); }
 
     .city-kicker { margin: 0 0 9px; color: var(--bronze-hi); font-size: 9px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+    .city-title-row { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 13px; align-items: center; }
+    .city-dossier-icon { width: 52px; height: 52px; padding: 9px; overflow: visible; color: #f4d58d; border: 1px solid rgba(224,189,114,.42); background: radial-gradient(circle, rgba(189,138,69,.22), rgba(8,17,20,.72)); box-shadow: inset 0 0 18px rgba(224,189,114,.08), 0 8px 22px rgba(0,0,0,.22); }
     .city-name { margin: 0; color: var(--paper); font: 400 clamp(34px, 3.4vw, 54px)/.94 var(--display); }
     .city-ancient { margin: 8px 0 20px; color: #a99e83; font: italic 17px/1.2 var(--display); }
     .city-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin: 0 0 20px; border: 1px solid var(--line); background: var(--line); }
@@ -432,6 +497,46 @@
     .city-fact strong { color: var(--paper); font: 500 13px/1.25 var(--display); }
     .city-summary { margin: 0; color: #beb398; font: 16px/1.6 var(--display); }
     .city-note { margin-top: 22px; padding-top: 15px; border-top: 1px solid var(--line); color: #827962; font-size: 9px; line-height: 1.5; letter-spacing: .05em; }
+    .city-note a { color: var(--bronze-hi); text-underline-offset: 3px; }
+
+    .person-profile[hidden], .person-back[hidden] { display: none; }
+    .person-profile-head { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 16px; align-items: center; }
+    .person-profile-portrait { width: 84px; height: 84px; padding: 4px; border: 1px solid rgba(224,189,114,.6); border-radius: 50%; background: rgba(189,138,69,.12); box-shadow: 0 0 0 5px rgba(189,138,69,.06), 0 12px 30px rgba(0,0,0,.28); }
+    .person-profile-portrait img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; filter: sepia(.18) contrast(1.08); }
+    .person-profile-portrait img[hidden], .person-profile-portrait span[hidden] { display: none; }
+    .person-profile-portrait { display: grid; place-items: center; }
+    .person-profile-portrait > * { grid-area: 1 / 1; }
+    .person-profile-portrait span { color: #f0d99f; font: 500 26px/1 var(--display); letter-spacing: -.04em; }
+    .person-map-monogram { fill: #f3dfac; paint-order: stroke; stroke: rgba(8,14,16,.9); stroke-width: 1.6px; font: 800 8px/1 var(--body); pointer-events: none; }
+    .cast-portrait-wrap.monogram { display: grid; place-items: center; color: #f1d99b; background: radial-gradient(circle, rgba(171,123,57,.28), rgba(11,21,24,.94)); font: 700 14px/1 var(--display); }
+    .person-name { margin: 0; color: var(--paper); font: 400 clamp(30px, 2.8vw, 46px)/.92 var(--display); }
+    .person-epithet { margin: 7px 0 0; color: var(--bronze-hi); font: italic 15px/1.2 var(--display); }
+    .person-status { display: inline-flex; width: fit-content; margin: 18px 0 12px; padding: 6px 9px; border: 1px solid rgba(224,189,114,.38); color: var(--bronze-hi); background: rgba(189,138,69,.08); font-size: 8px; font-weight: 850; letter-spacing: .16em; text-transform: uppercase; }
+    .person-status.death { border-color: rgba(224,83,74,.66); color: #ff9a8d; background: rgba(156,35,32,.18); animation: death-pulse 1.8s ease-in-out infinite; }
+    .person-facts { margin-bottom: 14px; }
+    .person-beat { margin: 0 0 12px; color: #f1dfb2; font: 600 17px/1.35 var(--display); }
+    .person-bio { margin: 0; color: #bdb196; font: 14px/1.52 var(--display); }
+
+    .army-profile-head { display: grid; grid-template-columns: 64px minmax(0,1fr); gap: 15px; align-items: center; margin-bottom: 18px; }
+    .army-dossier-standard { position: relative; width: 58px; height: 62px; border: 1px solid rgba(224,189,114,.35); background: radial-gradient(circle at 50% 32%, rgba(224,189,114,.13), rgba(8,17,20,.7)); }
+    .army-dossier-standard i { position: absolute; top: 8px; bottom: 7px; left: 15px; width: 2px; background: #e8d7aa; box-shadow: 0 1px 0 #111; }
+    .army-dossier-standard span { position: absolute; top: 9px; left: 17px; width: 29px; height: 25px; background: var(--army-color); clip-path: polygon(0 0,100% 0,76% 50%,100% 100%,0 100%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
+    .army-name { margin: 0; color: var(--paper); font: 400 clamp(28px,2.5vw,42px)/.94 var(--display); }
+    .army-faction { margin: 7px 0 0; color: var(--bronze-hi); font-size: 8px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    .army-facts { margin-bottom: 14px; }
+    .army-objective { margin: 0 0 14px; padding: 12px 13px; border-left: 3px solid var(--bronze); background: rgba(189,138,69,.08); }
+    .army-objective span { display: block; margin-bottom: 5px; color: #8f856d; font-size: 7px; font-weight: 850; letter-spacing: .15em; text-transform: uppercase; }
+    .army-objective strong { color: #f0ddb0; font: 600 16px/1.35 var(--display); }
+    .army-description { margin: 0; color: #bdb196; font: 14px/1.52 var(--display); }
+    .battle-profile-head { display: grid; grid-template-columns: 68px minmax(0,1fr); gap: 15px; align-items: center; margin-bottom: 16px; }
+    .battle-dossier-emblem { display: grid; place-items: center; width: 64px; height: 64px; border: 1px solid rgba(224,189,114,.48); border-radius: 50%; color: #f3d58d; background: radial-gradient(circle, rgba(137,52,38,.64), rgba(17,24,25,.9) 68%); box-shadow: 0 0 0 5px rgba(189,138,69,.06), 0 12px 28px rgba(0,0,0,.3); }
+    .battle-dossier-emblem svg { width: 38px; height: 38px; overflow: visible; }
+    .battle-name { margin: 0; color: var(--paper); font: 400 clamp(29px,2.8vw,46px)/.94 var(--display); }
+    .battle-meta { margin: 7px 0 0; color: var(--bronze-hi); font-size: 8px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .battle-stakes { margin: 0 0 14px; padding: 12px 13px; border-left: 3px solid #b86143; color: #f0ddb0; background: rgba(145,62,44,.12); font: 600 16px/1.38 var(--display); }
+    .battle-section { margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--line); }
+    .battle-section span { display: block; margin-bottom: 6px; color: #8f856d; font-size: 7px; font-weight: 850; letter-spacing: .16em; text-transform: uppercase; }
+    .battle-section p { margin: 0; color: #bdb196; font: 14px/1.5 var(--display); }
 
     .date-lockup {
       display: grid;
@@ -544,6 +649,17 @@
     .graticule { fill: none; stroke: rgba(184, 215, 220, .075); stroke-width: .55; vector-effect: non-scaling-stroke; }
     .land-base { fill: var(--land); stroke: #3b463f; stroke-width: .7; vector-effect: non-scaling-stroke; }
     .country-mesh { fill: none; stroke: rgba(38, 48, 43, .18); stroke-width: .38; vector-effect: non-scaling-stroke; }
+    .country-mesh.overlay { stroke: rgba(20, 30, 27, .28); stroke-width: .48; pointer-events: none; }
+    .physical-layer { pointer-events: none; }
+    .inland-lake { fill: #337db0; fill-opacity: .92; stroke: rgba(178,224,238,.48); stroke-width: .55; vector-effect: non-scaling-stroke; }
+    .river { fill: none; stroke: #4c9bc2; stroke-width: .62; stroke-opacity: .82; vector-effect: non-scaling-stroke; }
+    .river-rank-0, .river-rank-1 { stroke-width: 1.12; stroke-opacity: .94; }
+    .river-rank-2, .river-rank-3 { stroke-width: .82; stroke-opacity: .88; }
+    .river-rank-6 { stroke-opacity: .52; stroke-width: .42; }
+    .mountain-shadow, .mountain-ridge { fill: none; vector-effect: non-scaling-stroke; }
+    .mountain-shadow { stroke: rgba(7,14,13,.34); stroke-width: 5.4; stroke-linecap: round; }
+    .mountain-ridge { stroke: rgba(221,201,151,.45); stroke-width: 1.25; stroke-dasharray: 1.2 3.2; stroke-linecap: round; }
+    .mountain-label { fill: rgba(235,219,178,.52); paint-order: stroke; stroke: rgba(17,27,25,.8); stroke-width: 2.4px; font: 700 6.5px/1 var(--body); letter-spacing: .2em; text-anchor: middle; }
     .background-label {
       fill: rgba(60, 55, 43, .62);
       font: 650 11px/1 var(--label);
@@ -586,12 +702,23 @@
     .route-line.entering { animation: march 1.1s ease-out both; }
     .route-hit { fill: none; stroke: transparent; stroke-width: 15; cursor: help; }
 
+    .route-unit { filter: drop-shadow(0 2px 2px rgba(5,12,15,.55)); }
+    .route-unit .unit-shadow { fill: rgba(6,12,15,.72); stroke: rgba(6,12,15,.85); stroke-width: 2.8; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+    .route-unit .unit-standard, .route-unit .unit-hull { stroke: #f3e5bf; stroke-width: .9; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+    .route-unit .unit-detail { fill: none; stroke: #fff1c7; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+    .route-unit .unit-gem { fill: #f5d37e; stroke: rgba(8,17,20,.8); stroke-width: .6; vector-effect: non-scaling-stroke; }
+
     .city-marker { cursor: pointer; outline: none; pointer-events: all; }
     .city-hit { fill: transparent; }
-    .city-dot { fill: #efe4bf; stroke: #10191d; stroke-width: 1.1; vector-effect: non-scaling-stroke; transition: r .16s, fill .16s; }
-    .city-marker.tier-1 .city-dot { fill: var(--bronze-hi); }
-    .city-marker:hover .city-dot, .city-marker:focus .city-dot { fill: #fff4cc; }
-    .city-marker.selected .city-dot { fill: #fff4cc; }
+    .city-halo { fill: rgba(11,22,26,.82); stroke: rgba(245,231,194,.72); stroke-width: .75; vector-effect: non-scaling-stroke; transition: fill .18s, stroke .18s, r .18s; }
+    .city-marker.tier-1 .city-halo { fill: rgba(93,66,29,.9); stroke: var(--bronze-hi); stroke-width: 1.1; }
+    .city-marker.icon-capital .city-halo { fill: rgba(85,50,20,.95); stroke: #f4cf7b; stroke-width: 1.35; }
+    .city-marker:hover .city-halo, .city-marker:focus .city-halo, .city-marker.selected .city-halo { fill: rgba(141,96,39,.98); stroke: #fff0bb; }
+    .city-emblem { color: #eee2bd; overflow: visible; pointer-events: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,.45)); }
+    .city-marker.tier-1 .city-emblem, .city-marker.icon-capital .city-emblem { color: #ffe6a3; }
+    .city-icon-fill { fill: rgba(12,23,26,.82); stroke: currentColor; stroke-width: 1.1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+    .city-icon-stroke { fill: none; stroke: currentColor; stroke-width: 1.15; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+    .city-icon-gem { fill: currentColor; stroke: rgba(8,17,20,.75); stroke-width: .45; vector-effect: non-scaling-stroke; }
     .city-select-ring { fill: none; stroke: var(--bronze-hi); stroke-width: 1.4; vector-effect: non-scaling-stroke; opacity: 0; }
     .city-marker.selected .city-select-ring { opacity: 1; }
     .city-label {
@@ -605,19 +732,58 @@
       pointer-events: auto;
       cursor: pointer;
     }
+    .city-marker.tier-1 .city-label { fill: #fff0c7; font-size: 9.4px; font-weight: 750; stroke-width: 3.5px; }
+    .city-marker.icon-capital .city-label { fill: #ffdfa0; font-family: var(--label); font-size: 10px; letter-spacing: .08em; }
     .city-marker.tier-2 .city-label { opacity: 0; }
     .city-marker.show-secondary .city-label { opacity: 1; }
 
-    .battle-ring { fill: rgba(14, 23, 27, .65); stroke: var(--bronze-hi); stroke-width: 1.4; vector-effect: non-scaling-stroke; cursor: help; }
-    .battle-cross { fill: none; stroke: var(--paper); stroke-width: 1.3; vector-effect: non-scaling-stroke; pointer-events: none; }
+    .person-marker { cursor: pointer; outline: none; pointer-events: all; filter: drop-shadow(0 4px 5px rgba(4,10,12,.7)); }
+    .person-aura { fill: rgba(224,189,114,.08); stroke: rgba(224,189,114,.34); stroke-width: .8; stroke-dasharray: 2.5 2.5; vector-effect: non-scaling-stroke; opacity: 0; }
+    .person-ring { fill: rgba(8,16,19,.96); stroke-width: 2.2; vector-effect: non-scaling-stroke; }
+    .person-map-portrait { pointer-events: none; filter: sepia(.18) contrast(1.08); }
+    .person-pointer { stroke: rgba(8,16,19,.9); stroke-width: 1; vector-effect: non-scaling-stroke; }
+    .person-label-backdrop { fill: rgba(8,17,20,.91); stroke: rgba(231,210,157,.48); stroke-width: .7; vector-effect: non-scaling-stroke; }
+    .person-label { fill: #fff0c7; font: 800 8px/1 var(--body); letter-spacing: .08em; text-transform: uppercase; pointer-events: none; }
+    .person-marker:hover .person-aura, .person-marker:focus .person-aura, .person-marker.selected .person-aura { opacity: 1; }
+    .person-marker.selected .person-ring { stroke: #fff0b7; stroke-width: 3; }
+    .person-marker.entering-story .person-aura { opacity: 1; animation: person-arrival 2s ease-out infinite; }
+    .person-marker.death-year .person-map-portrait { filter: grayscale(.7) sepia(.3) contrast(1.2); }
+    .person-marker.death-year .person-ring { stroke: #ef7264; }
+    .death-mark circle { fill: #8f2927; stroke: #ffd1c9; stroke-width: 1; vector-effect: non-scaling-stroke; }
+    .death-mark path { fill: none; stroke: #fff2e7; stroke-width: 1.5; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+
+    .army-camp { cursor: pointer; outline: none; pointer-events: all; filter: drop-shadow(0 3px 3px rgba(4,10,12,.62)); }
+    .army-camp-leader { stroke: rgba(244,225,181,.58); stroke-width: .8; stroke-dasharray: 2 2; vector-effect: non-scaling-stroke; pointer-events: none; }
+    .army-camp-hit { fill: transparent; }
+    .army-camp-ring { fill: rgba(9,18,21,.94); stroke-width: 1.7; vector-effect: non-scaling-stroke; }
+    .army-tent { fill: rgba(17,28,31,.95); stroke: #f0dfb5; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+    .army-standard-pole { fill: none; stroke: #f0dfb5; stroke-width: 1; vector-effect: non-scaling-stroke; }
+    .army-standard-flag { stroke: rgba(255,244,211,.7); stroke-width: .7; vector-effect: non-scaling-stroke; }
+    .army-camp-label-backdrop { fill: rgba(9,18,21,.9); stroke: rgba(224,189,114,.4); stroke-width: .65; vector-effect: non-scaling-stroke; opacity: 0; transition: opacity .15s; }
+    .army-camp-label { fill: #f6e5bd; font: 800 7px/1 var(--body); letter-spacing: .07em; text-transform: uppercase; pointer-events: none; opacity: 0; transition: opacity .15s; }
+    .army-camp.show-label .army-camp-label, .army-camp.show-label .army-camp-label-backdrop,
+    .army-camp:hover .army-camp-label, .army-camp:hover .army-camp-label-backdrop,
+    .army-camp:focus .army-camp-label, .army-camp:focus .army-camp-label-backdrop,
+    .army-camp.selected .army-camp-label, .army-camp.selected .army-camp-label-backdrop { opacity: 1; }
+    .army-camp:hover .army-camp-ring, .army-camp:focus .army-camp-ring, .army-camp.selected .army-camp-ring { fill: rgba(91,63,31,.98); stroke: #fff0b7; stroke-width: 2.4; }
+    .army-camp.selected .army-camp-label-backdrop { stroke: #fff0b7; }
+    .army-camp.arrived .army-camp-ring { animation: camp-arrival 1.9s ease-out infinite; }
+    .army-movement-shadow, .army-movement-line { fill: none; vector-effect: non-scaling-stroke; }
+    .army-movement-shadow { stroke: rgba(5,10,12,.72); stroke-width: 5; }
+    .army-movement-line { stroke-width: 1.7; stroke-dasharray: 4 3; marker-end: url(#arrow-land); pointer-events: stroke; }
+
+    .battle-aura { fill: rgba(193,80,50,.12); stroke: rgba(245,190,111,.44); stroke-width: .75; stroke-dasharray: 2.5 2; vector-effect: non-scaling-stroke; pointer-events: none; animation: battle-signal 2.4s ease-in-out infinite; }
+    .battle-marker { cursor: pointer; outline: none; }
+    .battle-ring { fill: rgba(39, 21, 18, .92); stroke: #e3b965; stroke-width: 1.5; vector-effect: non-scaling-stroke; filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+    .battle-marker:hover .battle-ring, .battle-marker:focus .battle-ring { fill: #6f3427; stroke: #fff0b7; stroke-width: 2.4; }
+    .battle-swords { color: #f2d58f; overflow: visible; pointer-events: none; }
+    .battle-sword-blade { fill: #f1dab0; stroke: #3d261b; stroke-width: .75; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+    .battle-label-backdrop { fill: rgba(13,22,25,.9); stroke: rgba(226,185,101,.72); stroke-width: .7; vector-effect: non-scaling-stroke; }
     .battle-label {
-      fill: var(--paper);
-      font: 800 8px/1 var(--body);
-      letter-spacing: .08em;
+      fill: #ffe6ad;
+      font: 800 7.5px/1 var(--body);
+      letter-spacing: .1em;
       text-transform: uppercase;
-      paint-order: stroke;
-      stroke: rgba(14, 23, 27, .92);
-      stroke-width: 3px;
       pointer-events: none;
     }
 
@@ -661,6 +827,22 @@
     @keyframes panel-signal {
       0% { border-color: rgba(224, 189, 114, .72); box-shadow: 0 20px 58px rgba(0,0,0,.3), inset 0 0 34px rgba(224, 189, 114, .08); }
       100% { border-color: rgba(234, 223, 190, .22); box-shadow: 0 20px 58px rgba(0,0,0,.3), inset 0 0 0 rgba(224, 189, 114, 0); }
+    }
+
+    @keyframes battle-signal {
+      0%, 100% { opacity: .52; transform: scale(.92); }
+      50% { opacity: 1; transform: scale(1.08); }
+    }
+    @keyframes camp-arrival { 0%,100% { stroke-opacity: 1; } 55% { stroke-opacity: .4; stroke-width: 5; } }
+
+    @keyframes person-arrival {
+      0% { opacity: .9; transform: scale(.6); }
+      100% { opacity: 0; transform: scale(1.4); }
+    }
+
+    @keyframes death-pulse {
+      0%, 100% { box-shadow: 0 0 0 rgba(212,70,60,0); }
+      50% { box-shadow: 0 0 18px rgba(212,70,60,.22); }
     }
 
     @media (max-width: 980px) {
@@ -731,8 +913,8 @@
       top: 58px;
       left: 16px;
       display: block;
-      width: min(370px, calc(100vw - 32px));
-      padding: 16px 18px 17px;
+      width: min(330px, calc(100vw - 32px));
+      padding: 14px 17px 15px;
       border: 1px solid rgba(234, 223, 190, .22);
       background:
         linear-gradient(135deg, rgba(189, 138, 69, .09), transparent 54%),
@@ -743,15 +925,9 @@
     }
 
     .masthead .eyebrow { margin-bottom: 6px; font-size: 8px; }
-    .masthead h1 { font-size: clamp(38px, 4vw, 58px); line-height: .82; }
+    .masthead h1 { font-size: clamp(38px, 3.7vw, 52px); line-height: .82; }
     .masthead h1 em { margin-top: .35em; font-size: .24em; letter-spacing: .18em; }
-    .masthead .dek {
-      max-width: 42ch;
-      margin-top: 13px;
-      color: #c6b99a;
-      font-size: 13px;
-      line-height: 1.42;
-    }
+    .masthead .dek { display: none; }
 
     .war-room {
       position: fixed;
@@ -778,9 +954,9 @@
       max-height: none;
     }
 
-    .map-tools { top: 264px; left: 16px; }
+    .map-tools { top: 176px; left: 16px; }
     .map-instruction { top: 16px; right: 16px; }
-    .map-key { right: 16px; bottom: 132px; }
+    .map-key { right: auto; bottom: 232px; left: 16px; max-width: min(640px, calc(100vw - 424px)); }
 
     .detail-panel {
       position: fixed;
@@ -818,6 +994,16 @@
         rgba(10, 19, 23, .9);
       box-shadow: 0 18px 60px rgba(0, 0, 0, .32);
       backdrop-filter: blur(16px) saturate(.8);
+    }
+
+    .cast-strip {
+      position: fixed;
+      z-index: 17;
+      right: 392px;
+      bottom: 142px;
+      left: 16px;
+      min-height: 78px;
+      margin: 0;
     }
 
     .chronology-head { margin-bottom: 5px; }
@@ -883,6 +1069,29 @@
         max-height: 36vh;
         padding: 12px 13px;
       }
+      .person-profile-head { grid-template-columns: 56px minmax(0,1fr); gap: 10px; }
+      .person-profile-portrait { width: 56px; height: 56px; }
+      .person-name { font-size: 23px; }
+      .person-epithet { margin-top: 4px; font-size: 11px; }
+      .person-status { margin: 10px 0 8px; padding: 4px 6px; font-size: 6px; }
+      .person-beat { font-size: 12px; }
+      .person-bio { font-size: 10px; line-height: 1.35; }
+      .army-profile-head { grid-template-columns: 42px minmax(0,1fr); gap: 8px; margin-bottom: 10px; }
+      .army-dossier-standard { width: 40px; height: 44px; }
+      .army-dossier-standard i { left: 9px; }
+      .army-dossier-standard span { left: 11px; width: 22px; height: 19px; }
+      .army-name { font-size: 20px; }
+      .army-faction { font-size: 6px; }
+      .army-objective { margin-bottom: 8px; padding: 8px; }
+      .army-objective strong { font-size: 11px; }
+      .army-description { font-size: 10px; line-height: 1.35; }
+      .battle-profile-head { grid-template-columns: 42px minmax(0,1fr); gap: 8px; margin-bottom: 9px; }
+      .battle-dossier-emblem { width: 40px; height: 40px; }
+      .battle-dossier-emblem svg { width: 25px; height: 25px; }
+      .battle-name { font-size: 21px; }
+      .battle-stakes { margin-bottom: 8px; padding: 8px; font-size: 11px; }
+      .battle-section { margin-top: 8px; padding-top: 8px; }
+      .battle-section p { font-size: 10px; line-height: 1.35; }
       .date-lockup { gap: 7px; padding-bottom: 9px; }
       .date-year { font-size: 38px; }
       .date-era { font-size: 7px; }
@@ -891,15 +1100,35 @@
       .event-copy { margin: 8px 0 0; font-size: 11px; line-height: 1.35; }
       .dispatch, .city-note { display: none; }
       .city-back { margin: 0 0 10px; padding: 6px; font-size: 7px; }
+      .city-title-row { grid-template-columns: 34px minmax(0, 1fr); gap: 8px; }
+      .city-dossier-icon { width: 34px; height: 34px; padding: 6px; }
       .city-ancient { margin: 4px 0 9px; font-size: 12px; }
       .city-facts { grid-template-columns: 1fr; margin-bottom: 9px; }
       .city-fact { padding: 7px 8px; }
       .city-fact[style] { grid-column: 1 !important; }
       .city-summary { font-size: 11px; line-height: 1.35; }
+      .city-marker .city-label { opacity: 0; }
+      .city-marker.icon-capital .city-label,
+      .city-marker.icon-metropolis .city-label,
+      .city-marker.selected .city-label,
+      .city-marker.show-secondary .city-label { opacity: 1; }
+      .city-marker.tier-2 .city-halo { opacity: .78; }
+      .army-camp-label, .army-camp-label-backdrop { opacity: 0; }
+      .army-camp.selected .army-camp-label, .army-camp.selected .army-camp-label-backdrop { opacity: 1; }
+      .desktop-relief { display: none; }
       .map-tools { top: 164px; left: 8px; }
       .map-button { width: 31px; height: 31px; }
       .map-instruction { display: none; }
-      .map-key { right: 8px; bottom: 112px; left: 8px; padding: 6px 8px; font-size: 7px; }
+      .map-key { display: none; }
+      .cast-strip { right: 8px; bottom: 145px; left: 8px; min-height: 66px; padding: 6px; }
+      .cast-heading { width: 58px; padding-right: 6px; }
+      .cast-heading span { font-size: 6px; }
+      .cast-heading strong { font-size: 6px; }
+      .cast-card { flex-basis: 126px; grid-template-columns: 39px minmax(0,1fr); gap: 6px; padding: 4px 5px 4px 4px; }
+      .cast-portrait-wrap { width: 37px; height: 37px; }
+      .cast-copy strong { font-size: 11px; }
+      .cast-copy small { font-size: 5.5px; }
+      .cast-copy em { font-size: 6px; }
       .chronology { right: 8px; bottom: 8px; left: 8px; padding: 8px 9px 6px; }
       .chronology-head { align-items: flex-start; gap: 6px; }
       .chronology-title { max-width: 116px; font-size: 7px; line-height: 1.35; }
@@ -915,46 +1144,64 @@
   <div class="page-shell">
     <nav class="site-nav" aria-label="Site navigation">
       <a href="/">← Ethan Ding</a>
-      <span>Interactive history · 323–276 BCE</span>
+      <span>Interactive history · 499 BCE–476 CE</span>
     </nav>
 
     <header class="masthead">
       <div>
-        <p class="eyebrow">Alexander’s empire after Alexander</p>
-        <h1>The Diadochi <em>Forty-seven years of succession war</em></h1>
+        <p class="eyebrow">Persia · Greece · Macedon · Rome</p>
+        <h1>The Ancient World <em>One thousand years of empires in motion</em></h1>
       </div>
-      <p class="dek">Follow the generals who inherited the largest empire of their age—and <strong>marched it into rival kingdoms</strong>. Choose a date to redraw control, campaigns, and the battle that changed the balance.</p>
+      <p class="dek">Follow the roads, fleets, armies, and cities that connect the Persian Wars to Alexander, Carthage, and Rome’s divided imperial world.</p>
     </header>
 
     <section class="chronology" aria-label="Chronology controls">
       <div class="chronology-head">
-        <span class="chronology-title">Annual chronology · 323–276 BCE</span>
+        <span class="chronology-title">Milestone chronology · 499 BCE–476 CE</span>
         <div class="chronology-actions">
+          <label class="sr-only" for="era-jump">Jump to an era</label>
+          <select class="era-jump" id="era-jump">
+            <option value="499">Persian Wars</option>
+            <option value="431">Classical Greece</option>
+            <option value="359">Macedon &amp; Alexander</option>
+            <option value="323">The Diadochi</option>
+            <option value="264">Roman Republic</option>
+            <option value="-14">Roman Empire</option>
+            <option value="-293">Late Antiquity</option>
+          </select>
           <button class="step-button" id="previous-year" type="button" aria-label="Previous year"><span aria-hidden="true">←</span><span>Previous</span></button>
-          <button class="play-button" id="play" type="button" aria-pressed="false"><span aria-hidden="true">▶</span><span>Play every year</span></button>
+          <button class="play-button" id="play" type="button" aria-pressed="false"><span aria-hidden="true">▶</span><span>Play the timeline</span></button>
           <button class="step-button" id="next-year" type="button" aria-label="Next year"><span>Next</span><span aria-hidden="true">→</span></button>
         </div>
       </div>
       <div class="year-scroll"><div class="year-rail" id="year-rail"></div></div>
     </section>
 
+    <section class="cast-strip" aria-label="Significant people active in the selected year">
+      <div class="cast-heading"><span>The active cast</span><strong id="cast-count">0 active</strong></div>
+      <div class="cast-rail" id="cast-rail"></div>
+    </section>
+
     <main class="war-room">
       <section class="map-panel" aria-label="Interactive political and campaign map">
         <svg id="map" role="img" aria-labelledby="map-title map-desc">
-          <title id="map-title">The Wars of the Diadochi, 323 to 276 BCE</title>
-          <desc id="map-desc">An interactive, pannable and zoomable map showing approximate territorial control, army and fleet movements, clickable major cities, and battles after the death of Alexander the Great.</desc>
+          <title id="map-title">The ancient Mediterranean and Near East, 499 BCE to 476 CE</title>
+          <desc id="map-desc">An interactive map of territorial control, cities, battles, people, and army movements across the Persian, Greek, Macedonian, and Roman worlds.</desc>
         </svg>
         <div class="map-tools" aria-label="Map controls">
           <button class="map-button" id="zoom-in" type="button" aria-label="Zoom in">+</button>
           <button class="map-button" id="zoom-out" type="button" aria-label="Zoom out">−</button>
           <button class="map-button" id="zoom-reset" type="button" aria-label="Reset map">↺</button>
         </div>
-        <div class="map-instruction">Drag to pan · scroll to zoom · select a city</div>
+        <div class="map-instruction">Drag to pan · scroll to zoom · select a city, person, army, or battle</div>
         <div class="map-key" id="map-key"></div>
       </section>
 
       <aside class="detail-panel" aria-live="polite">
         <button class="city-back" id="city-back" type="button" hidden>← Return to campaign</button>
+        <button class="city-back" id="person-back" type="button" hidden>← Return to campaign</button>
+        <button class="city-back" id="army-back" type="button" hidden>← Return to campaign</button>
+        <button class="city-back" id="battle-back" type="button" hidden>← Return to campaign</button>
         <div class="campaign-profile" id="campaign-profile">
           <div class="date-lockup"><span class="date-year" id="date-year">323</span><span class="date-era">BCE</span></div>
           <p class="war-label" id="war-label"></p>
@@ -967,22 +1214,83 @@
         </div>
         <div class="city-profile" id="city-profile" hidden>
           <p class="city-kicker">City dossier</p>
-          <h2 class="city-name" id="city-name"></h2>
+          <div class="city-title-row">
+            <svg class="city-dossier-icon" aria-hidden="true"><use id="city-dossier-symbol" href="#city-icon-town"></use></svg>
+            <h2 class="city-name" id="city-name"></h2>
+          </div>
           <p class="city-ancient" id="city-ancient"></p>
           <div class="city-facts">
             <div class="city-fact"><span>Role</span><strong id="city-kind"></strong></div>
             <div class="city-fact"><span>Region</span><strong id="city-region"></strong></div>
             <div class="city-fact" style="grid-column:1/-1"><span>Modern location</span><strong id="city-modern"></strong></div>
+            <div class="city-fact" style="grid-column:1/-1"><span>Selected year</span><strong id="city-context"></strong></div>
           </div>
           <p class="city-summary" id="city-summary"></p>
           <p class="city-note">City locations are approximate archaeological or historical site centroids. “Major” identifies capitals, ports, foundations, administrative centers, and strategic junctions—not a precise population ranking.</p>
+        </div>
+        <div class="person-profile" id="person-profile" hidden>
+          <div class="person-profile-head">
+            <div class="person-profile-portrait"><img id="person-portrait" src="" alt=""><span id="person-monogram" hidden></span></div>
+            <div>
+              <p class="city-kicker">Character dossier</p>
+              <h2 class="person-name" id="person-name"></h2>
+              <p class="person-epithet" id="person-epithet"></p>
+            </div>
+          </div>
+          <div class="person-status" id="person-status"></div>
+          <div class="city-facts person-facts">
+            <div class="city-fact"><span>Current role</span><strong id="person-role"></strong></div>
+            <div class="city-fact"><span>Approx. location</span><strong id="person-location"></strong></div>
+          </div>
+          <p class="person-beat" id="person-beat"></p>
+          <p class="person-bio" id="person-bio"></p>
+          <p class="city-note"><span id="person-source-prefix">Portrait: </span><a id="person-image-source" href="" target="_blank" rel="noopener noreferrer"></a><span id="person-source-suffix"> via Wikimedia Commons. </span><span id="person-monogram-note" hidden>Editorial coin-style monogram; no reliable contemporary portrait is asserted. </span>Position marks a court or campaign theatre, not a precise daily location.</p>
+        </div>
+        <div class="army-profile" id="army-profile" hidden>
+          <div class="army-profile-head">
+            <div class="army-dossier-standard" id="army-standard" aria-hidden="true">
+              <i></i><span></span>
+            </div>
+            <div>
+              <p class="city-kicker">Army in the field</p>
+              <h2 class="army-name" id="army-name"></h2>
+              <p class="army-faction" id="army-faction"></p>
+            </div>
+          </div>
+          <div class="city-facts army-facts">
+            <div class="city-fact"><span>Commander</span><strong id="army-commander"></strong></div>
+            <div class="city-fact"><span>Encamped</span><strong id="army-location"></strong></div>
+            <div class="city-fact" style="grid-column:1/-1"><span>Composition</span><strong id="army-composition"></strong></div>
+          </div>
+          <p class="army-objective"><span>Current objective</span><strong id="army-objective"></strong></p>
+          <p class="army-description" id="army-description"></p>
+          <p class="city-note">Camp markers identify an approximate headquarters, mustering ground, siege line, or campaign theatre for the selected year. They do not claim a precisely located archaeological campsite.</p>
+        </div>
+        <div class="battle-profile" id="battle-profile" hidden>
+          <div class="battle-profile-head">
+            <div class="battle-dossier-emblem" aria-hidden="true"><svg><use href="#battle-icon-swords"></use></svg></div>
+            <div>
+              <p class="city-kicker">Battle dossier</p>
+              <h2 class="battle-name" id="battle-name"></h2>
+              <p class="battle-meta"><span id="battle-year"></span> · <span id="battle-type"></span></p>
+            </div>
+          </div>
+          <div class="city-facts army-facts">
+            <div class="city-fact"><span>Belligerents</span><strong id="battle-belligerents"></strong></div>
+            <div class="city-fact"><span>Commanders</span><strong id="battle-commanders"></strong></div>
+            <div class="city-fact" style="grid-column:1/-1"><span>Result</span><strong id="battle-result"></strong></div>
+          </div>
+          <p class="battle-stakes" id="battle-stakes"></p>
+          <div class="battle-section"><span>Forces &amp; character</span><p id="battle-forces"></p></div>
+          <div class="battle-section"><span>What changed next</span><p id="battle-aftermath"></p></div>
+          <p class="city-note">Battle sites, force descriptions, and routes are editorial reconstructions. Ancient troop totals are often rhetorical or disputed; the map emphasizes operational relationships rather than false precision.</p>
         </div>
       </aside>
     </main>
 
     <details class="sources">
       <summary>Sources &amp; method</summary>
-      <div class="source-copy">Chronology follows the dated synthesis in <a href="https://www.livius.org/articles/concept/diadochi/chronology-of-the-diadochi/" target="_blank" rel="noopener noreferrer">Livius’ Chronology of the Diadochi</a>, cross-checked against the <a href="https://www.metmuseum.org/essays/art-of-the-hellenistic-age-and-the-hellenistic-tradition" target="_blank" rel="noopener noreferrer">Metropolitan Museum’s Hellenistic overview</a> and <a href="https://www.worldhistory.org/image/14355/map-of-the-hellenistic-kingdoms-after-alexander-c3/" target="_blank" rel="noopener noreferrer">World History Encyclopedia’s map of the successor kingdoms</a>. City coordinates and identifications are cross-checked against the <a href="https://pleiades.stoa.org/" target="_blank" rel="noopener noreferrer">Pleiades ancient-world gazetteer</a>. Basemap geometry: <a href="https://github.com/topojson/world-atlas" target="_blank" rel="noopener noreferrer">world-atlas / Natural Earth</a>. Ancient control boundaries and routes are approximate editorial reconstructions; several dates and troop movements remain disputed in the surviving sources.</div>
+      <div class="source-copy">The extended chronology is cross-checked against the Metropolitan Museum’s <a href="https://www.metmuseum.org/toah/ht/04/eusb.html" target="_blank" rel="noopener noreferrer">Ancient Greece, 1000 BCE–1 CE</a> and <a href="https://www.metmuseum.org/toah/ht/05/eusb.html" target="_blank" rel="noopener noreferrer">Ancient Greece, 1–500 CE</a> timelines, with the Diadochi chapter following <a href="https://www.livius.org/articles/concept/diadochi/chronology-of-the-diadochi/" target="_blank" rel="noopener noreferrer">Livius’ chronology</a>. City coordinates and identifications are cross-checked against the <a href="https://pleiades.stoa.org/" target="_blank" rel="noopener noreferrer">Pleiades ancient-world gazetteer</a>. Character medallions without a securely sourced likeness use clearly editorial monograms rather than invented portraits. Coastlines, lakes, and river centerlines use 1:50m <a href="https://github.com/nvkelso/natural-earth-vector" target="_blank" rel="noopener noreferrer">Natural Earth vector data</a>; mountain chains are generalized editorial ridgelines. Ancient control boundaries, routes, positions, battles, and army encampments are approximate reconstructions. Several dates, army strengths, and movements remain disputed.</div>
     </details>
   </div>
 
@@ -998,7 +1306,8 @@
         document.body.appendChild(script);
       });
       load(`${root}/assets/diadochi/countries-50m.js`)
-        .then(() => load(`${root}/diadochi.js?v=17`))
+        .then(() => load(`${root}/assets/diadochi/ancient-world-data.js?v=2`))
+        .then(() => load(`${root}/diadochi.js?v=34`))
         .catch(() => {
           const panel = document.querySelector('.map-panel');
           const box = document.createElement('div');

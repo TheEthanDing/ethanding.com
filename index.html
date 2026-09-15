@@ -6,7 +6,8 @@
     <title>Ethan Ding</title>
     <link rel="icon" type="image/png" href="/images/profile.png" />
     <link rel="stylesheet" crossorigin href="/assets/index-dwlculdd.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/assets/bookshelf.css?v=20260908-4">
+    <script defer src="/assets/bookshelf.js?v=20260908-4"></script>
     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8KB6YWZ4KS"></script>
@@ -25,9 +26,7 @@
         padding: 3rem 1.5rem;
       }
       .header {
-        margin-bottom: 2rem;
-        padding-bottom: 2rem;
-        border-bottom: 1px solid #eaeaea;
+        margin-bottom: 1.75rem;
       }
       .profile-section {
         display: flex;
@@ -62,10 +61,187 @@
         text-decoration: underline;
       }
       .reading-section {
+        padding-top: 2rem;
         margin-bottom: 1.5rem;
         padding-bottom: 1.5rem;
+        border-top: 1px solid #eaeaea;
         border-bottom: 1px solid #eaeaea;
       }
+
+      /* A live project reel: the work provides the color; the frame stays quiet. */
+      .project-showcase {
+        position: relative;
+        margin: 0 0 2rem;
+        outline: none;
+      }
+      .showcase-heading {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+      }
+      .showcase-heading h3 {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .showcase-count {
+        color: #8a8a8a;
+        font-size: 0.6875rem;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.08em;
+      }
+      .showcase-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #d7d7d7;
+        border-radius: 14px;
+        background: #f5f5f3;
+        box-shadow: 0 16px 50px rgba(0, 0, 0, 0.08);
+      }
+      .showcase-stage {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 2 / 1;
+        overflow: hidden;
+        border-bottom: 1px solid #d7d7d7;
+        background: #111;
+      }
+      .showcase-stage::after {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        content: "";
+        pointer-events: none;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+      }
+      .showcase-preview {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        opacity: 0;
+        transition: opacity 0.55s ease;
+      }
+      .showcase-preview.is-active { opacity: 1; }
+      .showcase-link {
+        position: absolute;
+        inset: 0;
+        z-index: 4;
+      }
+      .showcase-link:focus-visible {
+        outline: 3px solid #111;
+        outline-offset: -5px;
+      }
+      .showcase-meta {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 1rem;
+        align-items: center;
+        min-height: 68px;
+        padding: 0.75rem 1rem 0.8rem;
+        background: rgba(255, 255, 255, 0.96);
+      }
+      .showcase-label {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: #888;
+        font-size: 0.625rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .showcase-title {
+        display: block;
+        overflow: hidden;
+        font-size: clamp(1.05rem, 4.3vw, 1.45rem);
+        font-weight: 500;
+        line-height: 1.15;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .showcase-open {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        color: #222;
+        font-size: 0.75rem;
+        white-space: nowrap;
+      }
+      .showcase-open span {
+        display: grid;
+        width: 27px;
+        height: 27px;
+        place-items: center;
+        border: 1px solid #cfcfcf;
+        border-radius: 50%;
+        font-size: 1rem;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+      .showcase-card:hover .showcase-open span { transform: translateX(2px); border-color: #222; }
+      .showcase-controls {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr) 34px;
+        gap: 0.65rem;
+        align-items: center;
+        margin-top: 0.8rem;
+      }
+      .showcase-arrow {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border: 1px solid #d8d8d8;
+        border-radius: 50%;
+        color: #333;
+        background: #fff;
+        font: inherit;
+        cursor: pointer;
+        transition: border-color 0.2s, transform 0.2s;
+      }
+      .showcase-arrow:hover { border-color: #222; transform: scale(1.04); }
+      .showcase-arrow:focus-visible,
+      .showcase-dot:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
+      .showcase-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.4rem;
+      }
+      .showcase-dot {
+        width: 6px;
+        height: 6px;
+        padding: 0;
+        border: 0;
+        border-radius: 99px;
+        background: #c8c8c8;
+        cursor: pointer;
+        transition: width 0.28s ease, background 0.28s ease;
+      }
+      .showcase-dot.is-active { width: 20px; background: #222; }
+      .showcase-progress {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 5;
+        height: 2px;
+        overflow: hidden;
+        background: #ededed;
+      }
+      .showcase-progress-bar {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #111;
+        transform: scaleX(0);
+        transform-origin: left;
+      }
+      .project-showcase.is-running .showcase-progress-bar { animation: showcaseProgress 5s linear forwards; }
+      @keyframes showcaseProgress { to { transform: scaleX(1); } }
       .writing-section {
         margin-bottom: 2rem;
       }
@@ -163,12 +339,6 @@
         color: #666;
         margin-bottom: 1.5rem;
       }
-      .books-container {
-        margin-top: 1.5rem;
-      }
-      .reading-section-container {
-        margin: 2rem 0;
-      }
       .reading-chart {
         margin-bottom: 1.5rem;
       }
@@ -187,115 +357,6 @@
         position: relative;
         height: 180px;
         width: 100%;
-      }
-      .books-carousel {
-        position: relative;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-        padding: 0.5rem 0;
-        margin: 0 -1.5rem;
-      }
-      .books-carousel::-webkit-scrollbar {
-        height: 4px;
-      }
-      .books-carousel::-webkit-scrollbar-track {
-        background: #f1f1f1;
-      }
-      .books-carousel::-webkit-scrollbar-thumb {
-        background: #ccc;
-        border-radius: 2px;
-      }
-      .books-carousel::-webkit-scrollbar-thumb:hover {
-        background: #999;
-      }
-      .carousel-content {
-        display: flex;
-        padding: 0 1.5rem;
-        align-items: flex-start;
-        min-height: 120px;
-      }
-      .month-section {
-        position: relative;
-        flex-shrink: 0;
-        padding-right: 1rem;
-        border-right: 1px solid #e5e5e5;
-        margin-right: 1rem;
-      }
-      .month-section:last-child {
-        border-right: none;
-        margin-right: 0;
-        padding-right: 0;
-      }
-      .month-header {
-        position: absolute;
-        top: 50%;
-        right: -0.25rem;
-        transform: translateY(-50%) translateX(100%) rotate(90deg);
-        transform-origin: left center;
-        font-size: 0.625rem;
-        font-weight: 600;
-        color: #aaa;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        background: #fff;
-        padding: 0 0.25rem;
-        white-space: nowrap;
-        z-index: 1;
-      }
-      .month-books {
-        display: flex;
-        gap: 0.25rem;
-      }
-      .book-card {
-        width: 70px;
-        flex-shrink: 0;
-        cursor: pointer;
-        transition: transform 0.15s ease;
-      }
-      .book-card:hover {
-        transform: translateY(-3px);
-      }
-      .book-cover {
-        position: relative;
-        width: 100%;
-        height: 100px;
-        background: #f0f0f0;
-        border-radius: 2px;
-        overflow: hidden;
-        margin-bottom: 0.3rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-        border: 1px solid #f0f0f0;
-      }
-      .book-cover img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: crisp-edges;
-        will-change: transform;
-      }
-      .book-img {
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-      }
-      .book-img[src] {
-        opacity: 1;
-      }
-      .book-title {
-        font-weight: 500;
-        font-size: 0.688rem;
-        line-height: 1.1;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        padding: 0 0.25rem;
-      }
-      .book-author {
-        display: none; /* Hide author to save space */
       }
       .loading {
         text-align: center;
@@ -351,25 +412,6 @@
         margin-bottom: 1.5rem;
       }
       
-      .skeleton-books {
-        display: flex;
-        gap: 0.5rem;
-        overflow: hidden;
-        padding: 1rem 0;
-      }
-      
-      .skeleton-book {
-        width: 70px;
-        flex-shrink: 0;
-      }
-      
-      .skeleton-book-cover {
-        width: 100%;
-        height: 100px;
-        border-radius: 2px;
-        margin-bottom: 0.3rem;
-      }
-      
       .skeleton-article {
         display: flex;
         gap: 1rem;
@@ -405,33 +447,6 @@
         gap: 2rem;
         margin-top: 4rem;
       }
-      .interactive-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.6rem;
-        padding: 0.7rem 0;
-        color: #222;
-        font-size: 0.875rem;
-        text-decoration: none;
-        border-bottom: 1px solid #d8d8d8;
-        transition: color 0.2s, border-color 0.2s;
-      }
-      .interactive-link span {
-        color: #888;
-        font-size: 0.7rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-      .interactive-link:hover {
-        color: #000;
-        border-color: #000;
-      }
-      .interactive-links {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        min-width: min(100%, 300px);
-      }
       .social-links {
         display: flex;
         gap: 1rem;
@@ -464,6 +479,20 @@
       .location-button:hover {
         color: #000;
       }
+      @media (max-width: 520px) {
+        .container { padding: 2rem 1rem; }
+        .showcase-card { border-radius: 10px; }
+        .showcase-meta { min-height: 69px; padding: 0.75rem 0.8rem 0.85rem; }
+        .showcase-open { font-size: 0; }
+        .showcase-open span { font-size: 1rem; }
+        .showcase-dots { gap: 0.3rem; }
+        .showcase-dot { width: 5px; height: 5px; }
+        .showcase-dot.is-active { width: 14px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .showcase-preview, .showcase-dot, .showcase-arrow, .showcase-open span { transition: none; }
+        .project-showcase.is-running .showcase-progress-bar { animation: none; }
+      }
     </style>
   </head>
   <body>
@@ -477,41 +506,67 @@
         <h2 id="site-previous">Previously: <span><a href="https://bvp.com/" target="_blank" rel="noopener noreferrer">Bessemer</a>, </span><span><a href="https://tackle.io/" target="_blank" rel="noopener noreferrer">Tackle</a></span></h2>
         <h2><a id="site-building" href="https://mandate.beehiiv.com/p/the-next-trillion-dollar-company" target="_blank" rel="noopener noreferrer">Learn what I'm building</a></h2>
       </div>
-      
-      <section class="reading-section">
-        <div class="reading-header">
-          <h3>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/>
-            </svg>
-            Reading
-          </h3>
+
+      <section class="project-showcase" id="project-showcase" aria-labelledby="showcase-heading" aria-roledescription="carousel" tabindex="0">
+        <div class="showcase-heading">
+          <h3 id="showcase-heading">Interactive work</h3>
+          <span class="showcase-count" id="showcase-count">01 / 13</span>
         </div>
-        <div class="reading-section-container">
-          <div class="reading-chart">
-            <div class="chart-header">
-              <h4 class="chart-title">Reading Activity</h4>
-              <p class="reading-pace">Current pace: <span id="book-count">58</span> books in the past 365 days</p>
-            </div>
-            <div class="chart-container">
-              <canvas id="readingChart"></canvas>
-            </div>
+        <article class="showcase-card" aria-live="polite">
+          <div class="showcase-stage" id="showcase-stage">
+            <img class="showcase-preview is-active" id="showcase-preview-a" src="/images/project-previews/ancient-world.png" alt="" aria-hidden="true">
+            <img class="showcase-preview" id="showcase-preview-b" alt="" aria-hidden="true">
+            <a class="showcase-link" id="showcase-link" href="/diadochi" aria-label="Open The Ancient World interactive"></a>
           </div>
-          <div id="books-list">
-            <div class="skeleton-books">
-              <div class="skeleton-book"><div class="skeleton skeleton-book-cover"></div></div>
-              <div class="skeleton-book"><div class="skeleton skeleton-book-cover"></div></div>
-              <div class="skeleton-book"><div class="skeleton skeleton-book-cover"></div></div>
-              <div class="skeleton-book"><div class="skeleton skeleton-book-cover"></div></div>
-              <div class="skeleton-book"><div class="skeleton skeleton-book-cover"></div></div>
-              <div class="skeleton-book"><div class="skeleton skeleton-book-cover"></div></div>
-              <div class="skeleton-book"><div class="skeleton skeleton-book-cover"></div></div>
-              <div class="skeleton-book"><div class="skeleton skeleton-book-cover"></div></div>
+          <div class="showcase-meta">
+            <div>
+              <span class="showcase-label" id="showcase-label">Interactive map</span>
+              <strong class="showcase-title" id="showcase-title">The Ancient World</strong>
             </div>
+            <span class="showcase-open" aria-hidden="true">Open project <span>→</span></span>
           </div>
+          <div class="showcase-progress" aria-hidden="true"><span class="showcase-progress-bar"></span></div>
+        </article>
+        <div class="showcase-controls">
+          <button class="showcase-arrow" id="showcase-previous" type="button" aria-label="Previous interactive project">←</button>
+          <div class="showcase-dots" id="showcase-dots" role="group" aria-label="Choose an interactive project"></div>
+          <button class="showcase-arrow" id="showcase-next" type="button" aria-label="Next interactive project">→</button>
         </div>
       </section>
       
+      <section class="reading-section bookshelf-section" id="bookshelf" aria-labelledby="shelf-title">
+        <header class="shelf-heading">
+          <div><h3 id="shelf-title">The bookshelf.</h3><p>What I’ve been reading, one book at a time.</p></div>
+          <dl class="shelf-stats"><div><dt id="shelf-total">—</dt><dd>books collected</dd></div><div><dt id="shelf-years">—</dt><dd>years of reading</dd></div></dl>
+        </header>
+        <div class="shelf-searchbar" role="search" aria-label="Search my bookshelf">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+          <input id="shelf-search" type="search" placeholder="Find a title or author" aria-label="Find a title or author" autocomplete="off">
+          <button id="shelf-search-clear" type="button" aria-label="Clear search" hidden>×</button><kbd aria-hidden="true">/</kbd>
+          <select id="shelf-year" aria-label="Year read"><option value="">All years</option></select>
+          <select id="shelf-sort" aria-label="Sort books"><option value="newest">Recently read</option><option value="oldest">Oldest first</option><option value="title">Title A–Z</option><option value="author">Author A–Z</option></select>
+        </div>
+        <div class="shelf-filterbar">
+          <div id="shelf-categories" class="shelf-categories" role="group" aria-label="Book categories"></div>
+          <span class="shelf-hint"><svg width="13" height="16" viewBox="0 0 13 16" fill="none" stroke="currentColor" aria-hidden="true"><rect x="2" y="1" width="9" height="14" rx="1"/><path d="M4 1v14"/></svg>Hover to browse · Click to open</span>
+        </div>
+        <div class="shelf-resultbar"><p id="shelf-results" role="status" aria-live="polite">Opening the collection…</p><button id="shelf-clear" type="button" hidden>Clear filters ×</button></div>
+        <div id="books-list" class="wooden-bookshelf"><p class="shelf-loading">Gathering the books…</p></div>
+        <div class="shelf-footer"><span>Jacket colors from my covers. Book sizes vary by edition.</span><span id="shelf-showing"></span></div>
+        <button id="shelf-more" type="button" class="shelf-more" hidden>Explore more shelves</button>
+        <details class="shelf-activity" id="shelf-activity"><summary>Reading activity · <span id="book-count">—</span> books in the past year</summary>
+          <div class="reading-chart"><div class="chart-header"><h4 class="chart-title">Reading activity</h4><p class="reading-pace">Click a month to browse its books</p></div><div class="chart-container"><canvas id="readingChart"></canvas></div></div>
+        </details>
+        <noscript><p>This interactive shelf needs JavaScript. <a href="/data/books.json">View the reading log</a>.</p></noscript>
+      </section>
+      <dialog class="book-dialog" id="book-dialog" aria-labelledby="book-title" aria-describedby="book-author">
+        <button type="button" id="book-close" class="book-close" aria-label="Close book details">×</button>
+        <div class="book-dialog-layout">
+          <div class="book-display"><span class="book-display-label">From Ethan’s bookshelf</span><div class="book-stage" id="book-stage"></div><button id="book-turn" class="book-turn" type="button">Show spine</button><p class="book-edition-note" id="book-edition-note"></p></div>
+          <div class="book-information"><span class="book-category" id="book-category"></span><h2 id="book-title"></h2><p class="book-author" id="book-author"></p><dl class="book-facts" id="book-facts"></dl><div class="book-notes" id="book-notes" hidden><h3>My notes</h3><p></p></div><p class="book-subjects" id="book-subjects"></p><a id="book-goodreads" class="book-goodreads" href="https://www.goodreads.com" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">g</span>Find on Goodreads<span aria-hidden="true">↗</span></a><a id="book-source" class="book-source" target="_blank" rel="noopener noreferrer" hidden>Book information on Open Library ↗</a><nav class="book-navigation" aria-label="Browse book details"><span id="book-position" aria-live="polite"></span><button id="book-previous" type="button" aria-label="Previous book">←</button><button id="book-next" type="button" aria-label="Next book">→</button></nav></div>
+        </div>
+      </dialog>
+
       <section class="writing-section">
         <div class="reading-header">
           <h3>
@@ -554,60 +609,6 @@
       </section>
       
       <footer>
-        <div class="interactive-links" aria-label="Interactive notes">
-          <a class="interactive-link" href="/foundry-viz/">
-            <span>Interactive</span>
-            Foundry docs complexity map →
-          </a>
-          <a class="interactive-link" href="/healthcare-map">
-            <span>Interactive</span>
-            Healthcare ecosystem map →
-          </a>
-          <a class="interactive-link" href="/bi-pricing">
-            <span>Interactive</span>
-            BI tool per-seat pricing →
-          </a>
-          <a class="interactive-link" href="/data-agent-stack">
-            <span>Interactive</span>
-            One agent, your whole stack →
-          </a>
-          <a class="interactive-link" href="/analytics-token-tam">
-            <span>Interactive</span>
-            Analytics token TAM model →
-          </a>
-          <a class="interactive-link" href="/diadochi">
-            <span>Interactive</span>
-            The wars of Alexander’s successors →
-          </a>
-          <a class="interactive-link" href="/sengoku-clans">
-            <span>Interactive</span>
-            Power of the Sengoku clans →
-          </a>
-          <a class="interactive-link" href="/semiconductor-wars">
-            <span>Interactive</span>
-            Wars of the semis →
-          </a>
-          <a class="interactive-link" href="/airline-wars">
-            <span>Interactive</span>
-            Wars of the airlines →
-          </a>
-          <a class="interactive-link" href="/wall-street-houses">
-            <span>Interactive</span>
-            The houses of Wall Street →
-          </a>
-          <a class="interactive-link" href="/railroad-empires">
-            <span>Interactive</span>
-            The iron railroad empires →
-          </a>
-          <a class="interactive-link" href="/oil-wars">
-            <span>Interactive</span>
-            The oil wars →
-          </a>
-          <a class="interactive-link" href="/bell-wars">
-            <span>Interactive</span>
-            The Bell wars →
-          </a>
-        </div>
         <div class="social-links">
           <a id="site-twitter" href="https://twitter.com/theethanding" target="_blank" rel="noopener noreferrer" aria-label="Twitter" class="social-link">
             <svg width="16" height="16" viewBox="0 0 24 24">
@@ -636,7 +637,6 @@
     </main>
     <script>
       let allBooks = [];
-      let displayCount = 10;
       let chartInstance = null;
       
       // Fetch books from the repository-owned data file.
@@ -677,172 +677,17 @@
           // Update book count with rolling 365-day count
           document.getElementById('book-count').textContent = booksLastYear.length;
           
-          // Create reading chart
-          createReadingChart();
-          
-          // Display books
-          displayBooks();
+          // Cached enrichment is optional: a catalog outage must never hide the reading log.
+          const optionalJson = async url => { try { const res = await fetch(url); return res.ok ? await res.json() : {}; } catch { return {}; } };
+          const [metadata, appearances] = await Promise.all([optionalJson('/data/book-metadata.json'), optionalJson('/data/book-appearance.json')]);
+          if (!window.Bookshelf) await new Promise(resolve => window.addEventListener('DOMContentLoaded', resolve, { once: true }));
+          window.Bookshelf.init(books, metadata.books || {}, appearances);
           
         } catch (error) {
           console.error('Error fetching books:', error);
-          document.getElementById('books-list').innerHTML = '<p>Unable to load books right now.</p>';
+          document.getElementById('books-list').innerHTML = '<p class="shelf-loading">The bookshelf couldn’t load. Please refresh to try again.</p>';
+          document.getElementById('shelf-results').textContent = 'Books are temporarily unavailable.';
         }
-      }
-      
-      function displayBooks() {
-        const booksContainer = document.getElementById('books-list');
-        
-        if (allBooks.length === 0) {
-          booksContainer.innerHTML = '<p>No books found.</p>';
-          return;
-        }
-        
-        // Group books by month
-        const booksByMonth = {};
-        allBooks.forEach((record, index) => {
-          const dateFinished = record.fields['Date Finished'];
-          if (dateFinished) {
-            const date = new Date(dateFinished);
-            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            if (!booksByMonth[monthKey]) {
-              booksByMonth[monthKey] = [];
-            }
-            record.index = index; // Store index for scrolling
-            booksByMonth[monthKey].push(record);
-          }
-        });
-        
-        // Sort months chronologically
-        const sortedMonths = Object.keys(booksByMonth).sort();
-        
-        // Create carousel HTML
-        let carouselHTML = '<div class="books-carousel" id="booksCarousel"><div class="carousel-content">';
-        
-        sortedMonths.forEach(monthKey => {
-          const [year, month] = monthKey.split('-');
-          const date = new Date(year, month - 1);
-          const monthName = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-          
-          carouselHTML += `<div class="month-section" data-month="${monthKey}">
-            <div class="month-header">${monthName}</div>
-            <div class="month-books">`;
-          
-          booksByMonth[monthKey].forEach(record => {
-            const fields = record.fields;
-            const title = fields.Book ? fields.Book.trim() : 'Untitled';
-            const authors = fields.Author ? fields.Author.join(', ') : 'Unknown Author';
-            
-            // Get cover image if available - use optimized versions for faster loading
-            let coverUrl = '';
-            let fullCoverUrl = '';
-            if (fields.cover && fields.cover.length > 0) {
-              const cover = fields.cover[0];
-              // Use optimized images if available, fallback to thumbnails
-              if (cover.optimized) {
-                coverUrl = cover.optimized.small;
-                fullCoverUrl = cover.optimized.large;
-              } else {
-                coverUrl = cover.thumbnails?.small?.url || cover.thumbnails?.large?.url || cover.url;
-                fullCoverUrl = cover.thumbnails?.large?.url || cover.url;
-              }
-            }
-            
-            carouselHTML += `
-              <div class="book-card" data-index="${record.index}">
-                <div class="book-cover" ${fullCoverUrl ? `data-full-src="${escapeHtml(fullCoverUrl)}"` : ''}>
-                  ${coverUrl ? `<img class="book-img" src="${escapeHtml(coverUrl)}" alt="${escapeHtml(title)}" loading="lazy" decoding="async">` : ''}
-                </div>
-                <div class="book-title">${escapeHtml(title)}</div>
-                <div class="book-author">${escapeHtml(authors)}</div>
-              </div>
-            `;
-          });
-          
-          carouselHTML += '</div></div>';
-        });
-        
-        carouselHTML += '</div></div>';
-        booksContainer.innerHTML = carouselHTML;
-        
-        // Store month positions for chart interaction
-        window.monthPositions = {};
-        document.querySelectorAll('.month-section').forEach(section => {
-          const monthKey = section.getAttribute('data-month');
-          window.monthPositions[monthKey] = section.offsetLeft;
-        });
-
-        // Start at the newest end of the reading history.
-        const carousel = document.getElementById('booksCarousel');
-        if (carousel) {
-          carousel.style.scrollBehavior = 'auto';
-          carousel.scrollLeft = carousel.scrollWidth;
-          carousel.style.scrollBehavior = '';
-        }
-        
-        // Set up lazy loading with Intersection Observer
-        setupLazyLoading();
-        
-        // Upgrade visible images to high quality
-        upgradeVisibleImages();
-      }
-      
-      function setupLazyLoading() {
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              const bookCover = entry.target;
-              const img = bookCover.querySelector('img');
-              const fullSrc = bookCover.getAttribute('data-full-src');
-              
-              if (img && fullSrc && !img.hasAttribute('data-upgraded')) {
-                // Create new image to preload
-                const newImg = new Image();
-                newImg.onload = function() {
-                  img.src = fullSrc;
-                  img.setAttribute('data-upgraded', 'true');
-                };
-                newImg.src = fullSrc;
-              }
-              
-              observer.unobserve(bookCover);
-            }
-          });
-        }, {
-          rootMargin: '50px'
-        });
-        
-        // Observe all book covers
-        document.querySelectorAll('.book-cover[data-full-src]').forEach(cover => {
-          imageObserver.observe(cover);
-        });
-      }
-      
-      function upgradeVisibleImages() {
-        // Immediately upgrade images that are already visible
-        const carousel = document.getElementById('booksCarousel');
-        if (!carousel) return;
-        
-        const visibleCovers = carousel.querySelectorAll('.book-cover[data-full-src]');
-        visibleCovers.forEach(cover => {
-          const rect = cover.getBoundingClientRect();
-          if (rect.left < window.innerWidth && rect.right > 0) {
-            const img = cover.querySelector('img');
-            const fullSrc = cover.getAttribute('data-full-src');
-            if (img && fullSrc && !img.hasAttribute('data-upgraded')) {
-              const newImg = new Image();
-              newImg.onload = function() {
-                img.src = fullSrc;
-                img.setAttribute('data-upgraded', 'true');
-              };
-              newImg.src = fullSrc;
-            }
-          }
-        });
-      }
-      
-      function showMoreBooks() {
-        displayCount = Math.min(displayCount + 10, allBooks.length);
-        displayBooks();
       }
       
       function createReadingChart() {
@@ -957,65 +802,28 @@
               intersect: false,
               mode: 'index'
             },
-            onHover: (event, activeElements) => {
-              event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
-            },
-            plugins: {
-              legend: {
-                display: false
-              },
-              tooltip: {
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                padding: 8,
-                cornerRadius: 4,
-                displayColors: false,
-                callbacks: {
-                  label: function(context) {
-                    return context.parsed.y + ' books';
-                  }
-                }
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: {
-                  stepSize: 1,
-                  font: {
-                    size: 11
-                  }
-                },
-                grid: {
-                  drawBorder: false,
-                  color: 'rgba(0, 0, 0, 0.05)'
-                }
-              },
-              x: {
-                ticks: {
-                  font: {
-                    size: 11
-                  }
-                },
-                grid: {
-                  display: false,
-                  drawBorder: false
-                }
-              }
-            },
-            onHover: (event, activeElements) => {
-              if (activeElements.length > 0) {
-                const index = activeElements[0].index;
-                const monthKey = Object.keys(monthlyData)[index];
-                const carousel = document.getElementById('booksCarousel');
-                if (carousel && window.monthPositions && window.monthPositions[monthKey]) {
-                  carousel.scrollLeft = window.monthPositions[monthKey];
-                }
-              }
+            onClick: (event, activeElements) => {
+              if (activeElements.length) window.Bookshelf?.filterMonth(Object.keys(monthlyData)[activeElements[0].index]);
             }
           }
         });
       }
       
+      let chartLoading = false;
+      document.getElementById('shelf-activity').addEventListener('toggle', async event => {
+        if (!event.currentTarget.open || chartInstance || chartLoading) return;
+        chartLoading = true;
+        try {
+          if (!window.Chart) await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js';
+            script.onload = resolve; script.onerror = reject; document.head.append(script);
+          });
+          createReadingChart();
+        } catch { document.querySelector('#shelf-activity .chart-container').textContent = 'Reading activity could not load. Refresh to try again.'; }
+        finally { chartLoading = false; }
+      });
+
       // Helper function to format dates
       function formatDate(dateStr) {
         const date = new Date(dateStr);
@@ -1035,6 +843,129 @@
         const textArea = document.createElement('textarea');
         textArea.innerHTML = text;
         return textArea.value;
+      }
+
+      const interactiveProjects = [
+        { title: 'The Ancient World', label: 'Interactive map · 499 BCE–476 CE', href: '/diadochi', image: '/images/project-previews/ancient-world.png' },
+        { title: 'Foundry docs complexity map', label: 'Interactive systems map', href: '/foundry-viz/', image: '/images/project-previews/foundry.png' },
+        { title: 'Healthcare ecosystem map', label: 'Interactive market map', href: '/healthcare-map', image: '/images/project-previews/healthcare.png' },
+        { title: 'One agent, your whole stack', label: 'Interactive architecture', href: '/data-agent-stack', image: '/images/project-previews/data-agent.png' },
+        { title: 'BI tool per-seat pricing', label: 'Interactive comparison', href: '/bi-pricing', image: '/images/project-previews/bi-pricing.png' },
+        { title: 'Analytics token TAM model', label: 'Interactive market model', href: '/analytics-token-tam', image: '/images/project-previews/analytics-token.png' },
+        { title: 'Power of the Sengoku clans', label: 'Interactive history', href: '/sengoku-clans', image: '/images/project-previews/sengoku.png' },
+        { title: 'Wars of the semis', label: 'Interactive industry history', href: '/semiconductor-wars', image: '/images/project-previews/semiconductor.png' },
+        { title: 'Wars of the airlines', label: 'Interactive industry history', href: '/airline-wars', image: '/images/project-previews/airlines.png' },
+        { title: 'The houses of Wall Street', label: 'Interactive industry history', href: '/wall-street-houses', image: '/images/project-previews/wall-street.png' },
+        { title: 'The iron railroad empires', label: 'Interactive industry history', href: '/railroad-empires', image: '/images/project-previews/railroads.png' },
+        { title: 'The oil wars', label: 'Interactive industry history', href: '/oil-wars', image: '/images/project-previews/oil.png' },
+        { title: 'The Bell wars', label: 'Interactive industry history', href: '/bell-wars', image: '/images/project-previews/bell.png' }
+      ];
+
+      function setupProjectShowcase() {
+        const showcase = document.getElementById('project-showcase');
+        const previews = [document.getElementById('showcase-preview-a'), document.getElementById('showcase-preview-b')];
+        const link = document.getElementById('showcase-link');
+        const label = document.getElementById('showcase-label');
+        const title = document.getElementById('showcase-title');
+        const count = document.getElementById('showcase-count');
+        const dots = document.getElementById('showcase-dots');
+        const previous = document.getElementById('showcase-previous');
+        const next = document.getElementById('showcase-next');
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        let current = 0;
+        let activePreview = 0;
+        let loadSequence = 0;
+        let rotationTimer;
+        let pointerInside = false;
+        let focusInside = false;
+        let touchStartX = null;
+
+        dots.innerHTML = interactiveProjects.map((project, index) =>
+          `<button class="showcase-dot${index === 0 ? ' is-active' : ''}" type="button" data-index="${index}" aria-label="Show ${escapeHtml(project.title)}" aria-pressed="${index === 0 ? 'true' : 'false'}"></button>`
+        ).join('');
+
+        function pauseRotation() {
+          window.clearTimeout(rotationTimer);
+          rotationTimer = undefined;
+          showcase.classList.remove('is-running');
+        }
+
+        function canRotate() {
+          return !reducedMotion.matches && !pointerInside && !focusInside && !document.hidden;
+        }
+
+        function scheduleRotation() {
+          pauseRotation();
+          if (!canRotate()) return;
+          void showcase.offsetWidth;
+          showcase.classList.add('is-running');
+          rotationTimer = window.setTimeout(() => showProject(current + 1), 5000);
+        }
+
+        function updateProjectCopy(project, index) {
+          label.textContent = project.label;
+          title.textContent = project.title;
+          count.textContent = `${String(index + 1).padStart(2, '0')} / ${String(interactiveProjects.length).padStart(2, '0')}`;
+          link.href = project.href;
+          link.setAttribute('aria-label', `Open ${project.title}`);
+          dots.querySelectorAll('.showcase-dot').forEach((dot, dotIndex) => {
+            const selected = dotIndex === index;
+            dot.classList.toggle('is-active', selected);
+            dot.setAttribute('aria-pressed', selected ? 'true' : 'false');
+          });
+        }
+
+        function showProject(index, immediate = false) {
+          const normalized = (index + interactiveProjects.length) % interactiveProjects.length;
+          const project = interactiveProjects[normalized];
+          const targetIndex = immediate ? activePreview : 1 - activePreview;
+          const targetPreview = previews[targetIndex];
+          const sequence = ++loadSequence;
+          current = normalized;
+          pauseRotation();
+          updateProjectCopy(project, normalized);
+
+          const reveal = () => {
+            if (sequence !== loadSequence) return;
+            previews.forEach((preview, previewIndex) => preview.classList.toggle('is-active', previewIndex === targetIndex));
+            activePreview = targetIndex;
+            scheduleRotation();
+          };
+
+          targetPreview.onload = reveal;
+          targetPreview.src = project.image;
+          if (targetPreview.complete) window.requestAnimationFrame(reveal);
+        }
+
+        previous.addEventListener('click', () => showProject(current - 1));
+        next.addEventListener('click', () => showProject(current + 1));
+        dots.addEventListener('click', event => {
+          const dot = event.target.closest('.showcase-dot');
+          if (dot) showProject(Number(dot.dataset.index));
+        });
+        showcase.addEventListener('keydown', event => {
+          if (event.key === 'ArrowLeft') { event.preventDefault(); showProject(current - 1); }
+          if (event.key === 'ArrowRight') { event.preventDefault(); showProject(current + 1); }
+        });
+        showcase.addEventListener('pointerenter', () => { pointerInside = true; pauseRotation(); });
+        showcase.addEventListener('pointerleave', () => { pointerInside = false; scheduleRotation(); });
+        showcase.addEventListener('focusin', () => { focusInside = true; pauseRotation(); });
+        showcase.addEventListener('focusout', () => {
+          window.setTimeout(() => {
+            focusInside = showcase.contains(document.activeElement);
+            if (!focusInside) scheduleRotation();
+          }, 0);
+        });
+        showcase.addEventListener('touchstart', event => { touchStartX = event.changedTouches[0]?.clientX ?? null; }, { passive: true });
+        showcase.addEventListener('touchend', event => {
+          if (touchStartX === null) return;
+          const distance = (event.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
+          if (Math.abs(distance) > 45) showProject(current + (distance < 0 ? 1 : -1));
+          touchStartX = null;
+        }, { passive: true });
+        document.addEventListener('visibilitychange', () => document.hidden ? pauseRotation() : scheduleRotation());
+        reducedMotion.addEventListener?.('change', scheduleRotation);
+        showProject(0, true);
       }
       
       async function fetchAndDisplaySiteCopy() {
@@ -1058,6 +989,7 @@
       }
 
       // Fetch local content when page loads
+      setupProjectShowcase();
       fetchAndDisplayBooks();
       fetchAndDisplaySiteCopy();
       
