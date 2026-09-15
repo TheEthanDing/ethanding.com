@@ -1,0 +1,58 @@
+/* Shared homepage typography. The work and the book jackets provide the color. */
+.home-page {
+  --site-ink: #292d27;
+  --site-muted: #747970;
+  --site-line: #e4e4dd;
+  --site-display: Georgia, 'Times New Roman', serif;
+  --site-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--site-ink);
+  font-family: var(--site-body);
+}
+.home-page .profile-section h1 { font: 400 24px/1.2 var(--site-display); letter-spacing: -.5px; }
+.home-page .header h2 { color: var(--site-muted); font-size: 14px; line-height: 1.6; }
+.home-page .showcase-heading h3,
+.home-page .shelf-heading h3,
+.home-page .reading-header h3 {
+  font: 400 clamp(28px, 3vw, 34px)/1.15 var(--site-display);
+  letter-spacing: -1px;
+  text-transform: none;
+  margin: 0;
+}
+.home-page .showcase-heading,
+.home-page .shelf-heading,
+.home-page .reading-header { align-items: center; margin-bottom: 24px; }
+.home-page .shelf-heading h3 { margin-bottom: 9px; }
+.home-page .shelf-heading p { font-size: 14px; line-height: 1.6; }
+.home-page .project-showcase { margin-bottom: 40px; }
+.home-page .reading-section.bookshelf-section { margin: 40px 0; padding: 40px 0; border-color: var(--site-line); }
+.home-page .writing-section { max-width: none; }
+.home-page .article-content { max-width: 680px; }
+.home-page .showcase-title,
+.home-page .article-title { font: 400 clamp(20px, 2.1vw, 24px)/1.25 var(--site-display); letter-spacing: -.4px; }
+.home-page .showcase-label,
+.home-page .showcase-count,
+.home-page .article-date,
+.home-page #shelf-page-status { font: 400 11px/1.5 var(--site-body); letter-spacing: 0; color: var(--site-muted); text-transform: none; }
+.home-page .article-excerpt { font-size: 14px; line-height: 1.6; color: var(--site-muted); }
+.home-page .view-all-link,
+.home-page .showcase-open { font: 400 12px/1.5 var(--site-body); color: var(--site-muted); }
+.home-page .showcase-card { border-color: var(--site-line); border-radius: 8px; box-shadow: 0 12px 35px #292d2710; }
+.home-page .showcase-meta { padding: 16px; }
+.home-page .showcase-controls { grid-template-columns: 44px minmax(0, 1fr) 44px; }
+.home-page .showcase-arrow,
+.home-page .shelf-arrow { width: 44px; height: 44px; border: 1px solid #d4d8cf; color: var(--site-ink); background: #fff; font: 400 20px/1 var(--site-body); }
+.home-page .shelf-arrow:hover:not(:disabled),
+.home-page .showcase-arrow:hover { background: #f6f7f3; border-color: #747970; }
+.home-page .shelf-stats dt { font: 400 28px/1.1 var(--site-display); }
+.home-page .article-card { border-color: var(--site-line); }
+@media (max-width: 600px) {
+  .home-page .shelf-heading p { font-size: 12px; }
+  .home-page .shelf-stats dt { font-size: 25px; }
+  .home-page .reading-section.bookshelf-section { padding: 32px 0; margin: 32px 0; }
+  .home-page .showcase-heading,
+  .home-page .shelf-heading,
+  .home-page .reading-header { margin-bottom: 20px; }
+  .home-page .showcase-heading h3,
+  .home-page .shelf-heading h3,
+  .home-page .reading-header h3 { font-size: clamp(26px, 8.2vw, 30px); }
+}

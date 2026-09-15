@@ -1,0 +1,109 @@
+/* A wide logical canvas, fitted to the actual window by health-plan-viewer.js. */
+body { height: 100dvh; overflow: hidden; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+.site-nav { max-width: none; width: 100%; padding: 10px 16px; gap: 14px; border-bottom: 1px solid #dce1e7; background: #fff; }
+.site-nav button { min-height: 32px; padding: 6px 10px; border: 1px solid transparent; border-radius: 4px; white-space: nowrap; }
+.site-nav button:hover { background: #f1f3f6; }
+.site-nav button[aria-pressed="true"] { border-color: #cbd4e0; background: #edf2f8; color: #263c5a; }
+.site-nav button:focus-visible, .map-viewport:focus-visible { outline: 2px solid #4876b7; outline-offset: -2px; }
+.map-view-controls, .map-actions { display: flex; align-items: center; gap: 4px; }
+.map-view-controls output { min-width: 42px; text-align: center; font-variant-numeric: tabular-nums; }
+.map-view-controls #map-zoom-in, .map-view-controls #map-zoom-out { width: 34px; font-size: 19px; padding: 2px; }
+.map-viewport { display: flex; overflow: auto; min-height: 0; min-width: 0; padding: 10px; overscroll-behavior: contain; }
+.map-viewport.is-pannable { cursor: grab; }
+.map-viewport.is-panning { cursor: grabbing; user-select: none; }
+.map-canvas { flex: 0 0 auto; position: relative; overflow: clip; margin: auto; background: #fff; }
+#map-poster { position: absolute; top: 0; left: 0; width: 2400px; max-width: none; margin: 0; padding: 18px; transform-origin: top left; display: grid; grid-template-columns: 1fr 1.6fr 1fr; gap: 10px; }
+#map-poster .masthead { grid-column: 1 / -1; padding: 0; align-items: center; gap: 20px; }
+#map-poster .masthead h1 { font-size: 32px; line-height: 1.1; letter-spacing: -1px; max-width: none; }
+#map-poster .masthead p { font-size: 11px; margin: 6px 0 0; }
+#map-poster .edition { font-size: 10px; }
+#map-poster .edition strong { font-size: 26px; }
+#map-poster .map-legend { grid-column: 1 / -1; margin: 0; font-size: 10px; gap: 6px 12px; }
+#map-poster .legend-note { margin-left: auto; flex-basis: auto; }
+#map-poster .top-stack { grid-column: 1; grid-row: 3; display: grid; grid-template-columns: 1fr; gap: 8px; margin: 0; align-content: start; }
+#map-poster .brokers .split { grid-template-columns: 2fr 1fr; gap: 6px; }
+#map-poster .risk-grid { grid-template-columns: 1fr 1.1fr 1fr; gap: 6px; }
+#map-poster .plan-shell { grid-column: 2; grid-row: 3; padding: 8px; border-width: 1px; }
+#map-poster .vbc-shell { grid-column: 3; grid-row: 3; margin: 0; padding: 8px; border-width: 1px; }
+#map-poster .market-grid { grid-template-columns: 1.2fr 1fr 1.2fr 1fr; gap: 6px; margin-bottom: 6px; }
+#map-poster .vbc-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+#map-poster .shared-shell { grid-column: 1 / -1; grid-row: 4; margin: 0; padding: 8px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 8px; border-width: 1px; }
+#map-poster .shared-title { grid-column: 1 / -1; margin-bottom: 0; }
+#map-poster .engine-grid, #map-poster .services { display: contents; }
+#map-poster .administration, #map-poster .pharmacy { grid-column: span 3; }
+#map-poster .payments, #map-poster .network, #map-poster .services > .clinical { grid-column: span 2; }
+#map-poster .pharmacy-network { grid-column: span 2; }
+#map-poster .care-band { grid-column: span 6; margin: 0; }
+#map-poster .care-grid { grid-template-columns: .85fr 1.15fr 1.15fr; gap: 6px; }
+#map-poster .care-grid > .subgroup:last-child { grid-column: auto; }
+#map-poster .pharmacy-grid { grid-template-columns: 1fr 1.2fr; gap: 6px; }
+#map-poster .oversight-grid { grid-column: span 4; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0; }
+#map-poster .shared-shell > .support-caption { grid-column: 1 / -1; }
+#map-poster .zone { border-width: 1px; }
+#map-poster .zone-title { padding: 5px 6px; font-size: 13px; line-height: 1.2; min-height: 0; }
+#map-poster .zone-body { padding: 5px; }
+#map-poster .subhead { padding: 4px 5px; font-size: 10px; line-height: 1.25; min-height: 0; }
+#map-poster .subgroup + .subgroup { margin-top: 5px; }
+#map-poster .split > .subgroup, #map-poster .risk-grid > .subgroup, #map-poster .market-grid > .subgroup, #map-poster .vbc-grid > .subgroup, #map-poster .care-grid > .subgroup, #map-poster .pharmacy-grid > .subgroup { margin: 0; }
+#map-poster .distribution, #map-poster .blues-band { margin-top: 6px; }
+#map-poster .plan-title, #map-poster .shared-title, #map-poster .vbc-title { flex-direction: row; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 5px 10px; margin: -8px -8px 8px; padding: 6px 8px; font-size: 15px; line-height: 1.2; }
+#map-poster .shared-title { margin-bottom: 0; }
+#map-poster .plan-title small, #map-poster .shared-title small, #map-poster .vbc-title small { font-size: 9px; max-width: none; }
+#map-poster .marks { padding: 6px 4px; gap: 4px 6px; min-height: 0; align-content: start; }
+#map-poster .mark { width: 66px; min-height: 34px; padding: 2px 1px; gap: 3px; }
+#map-poster .mark img { width: 100%; max-width: 64px; height: 22px; object-fit: contain; }
+#map-poster .mark img.padded-logo, #map-poster .mark[data-company="guidewell"] img { object-fit: cover; }
+#map-poster .mark[data-company="papa"] img { max-width: 28px; }
+#map-poster .mark small { font-size: 6.5px; line-height: 1.15; }
+#map-poster .mark small, #map-poster .mark > .cohort-tag { display: none; }
+.show-company-labels #map-poster .mark small { display: block; }
+.show-company-labels #map-poster .mark > .cohort-tag { display: inline-flex; }
+#map-poster .mark[data-cohort]::after { content: ''; position: absolute; top: 1px; right: 1px; width: 4px; height: 4px; border-radius: 50%; background: #7b8795; }
+#map-poster .mark[data-cohort="startup"]::after { background: #9466c3; }
+#map-poster .map-legend > .cohort-tag::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #7b8795; }
+#map-poster .map-legend > .cohort-tag.startup::before { background: #9466c3; }
+#map-poster .brand-pair { width: auto; max-width: 100%; min-height: 36px; gap: 3px; padding: 2px; justify-content: center; }
+#map-poster .brand-pair .parent { width: 48px; }
+#map-poster .brand-pair .child { width: 63px; }
+#map-poster .brand-pair .mark img { height: 20px; }
+#map-poster .brand-pair .parent img { height: 17px; }
+#map-poster .pair-line { height: 22px; margin: 0 1px; }
+#map-poster .cohort-tag, #map-poster .brand-pair .cohort-tag { font-size: 6px; padding: 2px 3px; gap: 2px; }
+#map-poster .brand-pair .parent .cohort-tag { font-size: 5.5px; }
+#map-poster .source-tag { font-size: 6px; padding-left: 2px; }
+#map-poster .map-legend > .cohort-tag { font-size: 9px; }
+#map-poster .icon-wordmark { font-size: 9px; gap: 2px; max-width: 100%; }
+#map-poster .mark .icon { width: 16px; height: 19px; }
+#map-poster .parent-name { font-size: 8px; }
+#map-poster .product-name { font-size: 16px; }
+#map-poster .zone-note, #map-poster .market-note { font-size: 8px; line-height: 1.35; margin: 5px; min-height: 0; }
+#map-poster .minor-head { font-size: 8px; margin: 0 5px; padding-top: 4px; }
+#map-poster .vbc-intro, #map-poster .support-caption { font-size: 8px; line-height: 1.4; margin: 5px 2px 0; }
+#map-poster .vbc-intro { margin-bottom: 6px; }
+#map-poster .map-footer { grid-column: 1 / -1; display: flex; flex-direction: row; margin: 0; font-size: 8px; gap: 20px; }
+#map-poster .map-footer p { max-width: 2100px; }
+#map-poster .byline { font-size: 10px; }
+.map-view-footer { display: flex; justify-content: space-between; gap: 16px; padding: 7px 16px; border-top: 1px solid #dce1e7; background: #fff; color: #657185; font-size: 10px; }
+.map-sources-dialog { width: min(1060px, calc(100vw - 28px)); max-height: calc(100dvh - 32px); padding: 20px; border: 1px solid #d0d7e0; border-radius: 8px; background: #fff; color: #17263c; }
+.map-sources-dialog::backdrop { background: #14253888; }
+.map-sources-dialog > header { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.map-sources-dialog h2 { font-size: 22px; margin: 0; }
+.map-sources-dialog button { width: 40px; height: 40px; font-size: 24px; border: 1px solid #dce1e7; border-radius: 50%; background: #fff; cursor: pointer; }
+.map-sources-dialog .read-more { padding: 0; margin: 16px 0 0; }
+@media (max-width: 700px) {
+  .site-nav { flex-wrap: wrap; gap: 5px 8px; padding: 7px 10px; font-size: 11px; }
+  .map-view-controls { order: 3; width: 100%; justify-content: center; flex-wrap: wrap; }
+  .map-actions { margin-left: auto; flex-wrap: wrap; }
+  .site-nav button { padding: 5px 7px; }
+  .map-view-footer { padding: 7px 10px; font-size: 9px; }
+  .map-view-footer > span:last-child { display: none; }
+  .map-viewport { padding: 6px; }
+}
+@media print {
+  @page { size: A2 landscape; margin: 7mm; }
+  body { display: block; height: auto; overflow: visible; background: #fff; }
+  .site-nav, .map-view-footer, .map-sources-dialog { display: none !important; }
+  .map-viewport { display: block; overflow: visible; padding: 0; }
+  .map-canvas { width: auto !important; height: auto !important; overflow: visible; margin: 0; }
+  #map-poster { position: static; width: 2400px !important; transform: none !important; zoom: .83; }
+}

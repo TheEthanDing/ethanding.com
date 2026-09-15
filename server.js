@@ -214,7 +214,7 @@ async function serveStatic(res, relativePath) {
   try {
     const body = await fs.readFile(absolute);
     const extension = path.extname(absolute).toLowerCase();
-    const cache = relativePath === '/index.html' || relativePath === '/diadochi.html' || relativePath.startsWith('/data/') || relativePath.startsWith('/images/project-previews/')
+    const cache = relativePath === '/index.html' || relativePath === '/diadochi.html' || relativePath === '/health-plan-landscape.html' || relativePath.startsWith('/data/') || relativePath.startsWith('/images/project-previews/')
       ? 'no-cache'
       : relativePath.startsWith('/images/books/')
         ? 'public, max-age=31536000, immutable'

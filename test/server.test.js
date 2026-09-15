@@ -54,6 +54,7 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /id="shelf-search"/);
   assert.match(homepage, /id="shelf-next-section"/);
   assert.match(homepage, /id="shelf-timeline"/);
+  assert.match(homepage, /assets\/site-design\.css/);
   assert.doesNotMatch(homepage, /id="shelf-more"/);
   assert.match(homepage, /id="book-dialog"/);
   assert.match(homepage, /Healthcare ecosystem map/);
@@ -304,7 +305,7 @@ test('serves the healthcare ecosystem map and its script', async () => {
 });
 
 test('serves bookshelf assets and cached public enrichment', async () => {
-  for (const [file, type] of [['/assets/bookshelf-layout.js', /javascript/], ['/assets/bookshelf.js', /javascript/], ['/assets/bookshelf.css', /text\/css/], ['/data/book-metadata.json', /json/], ['/data/book-appearance.json', /json/]]) {
+  for (const [file, type] of [['/assets/site-design.css', /text\/css/], ['/assets/bookshelf-layout.js', /javascript/], ['/assets/bookshelf.js', /javascript/], ['/assets/bookshelf.css', /text\/css/], ['/data/book-metadata.json', /json/], ['/data/book-appearance.json', /json/]]) {
     const response = await fetch(`${base}${file}`);
     assert.equal(response.status, 200, file);
     assert.match(response.headers.get('content-type'), type, file);
@@ -315,9 +316,19 @@ test('serves bookshelf assets and cached public enrichment', async () => {
 test('serves the health-plan landscape and its assets', async () => {
   const response = await fetch(`${base}/health-plan-landscape`);
   assert.equal(response.status, 200);
+  assert.equal(response.headers.get('cache-control'), 'no-cache');
   const page = await response.text();
   assert.match(page, /<title>The Health Plan Landscape/);
   assert.match(page, /health-plan-landscape\.js/);
+  assert.match(page, /id="map-viewport"/);
+  assert.match(page, /id="map-fit"/);
+  assert.match(page, /id="map-fit-width"/);
+  assert.match(page, /id="map-sources-dialog"/);
+  for (const [asset, type] of [['health-plan-viewer.js', /javascript/], ['health-plan-viewer.css', /text\/css/]]) {
+    const resource = await fetch(`${base}/assets/${asset}`);
+    assert.equal(resource.status, 200);
+    assert.match(resource.headers.get('content-type'), type);
+  }
 
   const script = await fetch(`${base}/health-plan-landscape.js`);
   assert.equal(script.status, 200);

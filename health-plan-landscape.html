@@ -7,10 +7,23 @@
   <meta name="description" content="A logo landscape of commercial, ACA, Medicare Advantage and Medicaid health plans, the independent Blues, shared infrastructure and value-based care.">
   <link rel="icon" href="/images/profile.png">
   <link rel="stylesheet" href="/assets/health-plan-landscape.css?v=20260915-5">
+  <link rel="stylesheet" href="/assets/health-plan-viewer.css?v=20260915-4">
 </head>
 <body>
-  <nav class="site-nav" aria-label="Site navigation"><a href="/">← Ethan Ding</a><button id="print-map" type="button">Print / save PDF</button></nav>
-  <main class="poster">
+  <nav class="site-nav" aria-label="Map controls">
+    <a href="/">← Ethan Ding</a>
+    <div class="map-view-controls" role="group" aria-label="Map zoom">
+      <button id="map-fit" type="button" aria-pressed="true">Fit map</button>
+      <button id="map-fit-width" type="button" aria-pressed="false">Fit width</button>
+      <button id="map-zoom-out" type="button" aria-label="Zoom out">−</button>
+      <output id="map-zoom" aria-label="Zoom level">100%</output>
+      <button id="map-zoom-in" type="button" aria-label="Zoom in">+</button>
+    </div>
+    <div class="map-actions"><button id="map-labels" type="button" aria-pressed="false">Company labels</button><button id="map-sources" type="button">Notes &amp; sources</button><button id="print-map" type="button">Print / PDF</button></div>
+  </nav>
+  <div id="map-viewport" class="map-viewport" role="region" aria-label="Health plan landscape. Zoom to inspect; drag or scroll to explore." tabindex="0">
+  <div id="map-canvas" class="map-canvas">
+  <main class="poster" id="map-poster">
     <header class="masthead"><div><h1>The Health Plan Landscape</h1><p>Health plans, shared infrastructure and value-based care. Incumbents alongside technology-led challengers.</p></div><div class="edition"><strong>2026</strong><span id="map-count">The health-plan ecosystem</span></div></header>
     <div class="map-legend" aria-label="Company labels"><span class="cohort-tag startup">AI / tech startup</span><span class="cohort-tag incumbent">Incumbent</span><span><span class="source-tag">a16z</span> = featured in the original stack</span><span class="legend-note">Market-position labels, not a claim that every startup is AI-native.</span></div>
     <div class="top-stack">
@@ -67,6 +80,10 @@
     <footer class="map-footer"><p>Companies appear in multiple buckets. Paired marks show parent / group on the left and operating brand, affiliate or product on the right; noted affiliations are not ownership claims. Broad corporate ancestry may omit intermediate holding companies. TriZetto is a product label beside the Cognizant logo.<br>Based on the a16z Challenger Health Plan Stack; expanded in the visual tradition of the MAD landscape. Selected companies, not an exhaustive market census. State, county, contract and plan-year availability varies.</p><a class="byline" href="/">ethanding.com</a></footer>
     <noscript>Enable JavaScript to display the company landscape.</noscript>
   </main>
+  </div>
+  </div>
+  <div class="map-view-footer"><span>All categories in one view. Zoom in to inspect; drag or scroll to explore.</span><span>Click a company to visit its website.</span></div>
+  <dialog id="map-sources-dialog" class="map-sources-dialog" aria-labelledby="map-sources-title"><header><h2 id="map-sources-title">Notes &amp; sources</h2><button id="map-close-sources" type="button" aria-label="Close notes and sources">×</button></header>
   <div class="read-more">
     <details><summary>New additions: pharmacy, payer care management and MA enablement</summary>
       <p><strong>PBM versus adjacent services:</strong> <a href="https://www.rxbenefits.com/what-is-a-pbo/">RxBenefits describes its PBO model</a>: contracting, independent clinical management and service around PBM arrangements. It is not presented as interchangeable with the contracted PBM. <a href="https://navitus.com/">Navitus</a>, <a href="https://www.medimpact.com/">MedImpact</a>, <a href="https://www.liviniti.com/">Liviniti</a>, <a href="https://www.empirxhealth.com/">EmpiRx</a> and <a href="https://affirmedrx.com/">AffirmedRx</a> belong in the PBM universe. Navitus is co-owned by SSM Health and Costco; its portfolio includes Lumicera specialty pharmacy and Archimedes specialty-drug management. <a href="https://www.rxsense.com/">RxSense</a> belongs in pharmacy technology, not automatically in the full-service PBM bucket.</p>
@@ -112,6 +129,8 @@
       <p>Sources checked September 13, 2026. Company websites provide the new logo assets except Symetra, whose displayed logo comes from <a href="https://iconlogovector.com/logo/symetra">Icon Logo Vector</a>. All marks remain the property of their owners.</p>
     </details>
   </div>
+  </dialog>
   <script src="/health-plan-landscape.js?v=20260915-5"></script>
+  <script src="/assets/health-plan-viewer.js?v=20260915-4"></script>
 </body>
 </html>
