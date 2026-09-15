@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>The Health Plan Landscape · Ethan Ding</title>
-  <meta name="description" content="A logo landscape of commercial, ACA, Medicare Advantage and Medicaid health plans, the independent Blues, shared infrastructure and value-based care.">
+  <title>The Healthcare Landscape · Ethan Ding</title>
+  <meta name="description" content="Explore health plans, care delivery, provider software and the revenue cycle. A sourced, searchable healthcare market map with an info card for every entry.">
   <link rel="icon" href="/images/profile.png">
   <link rel="stylesheet" href="/assets/health-plan-landscape.css?v=20260915-5">
-  <link rel="stylesheet" href="/assets/health-plan-viewer.css?v=20260915-4">
+  <link rel="stylesheet" href="/assets/health-plan-viewer.css?v=20260915-8">
+  <link rel="stylesheet" href="/assets/healthcare-explorer.css?v=20260915-8">
 </head>
 <body>
   <nav class="site-nav" aria-label="Map controls">
     <a href="/">← Ethan Ding</a>
+    <div class="map-scopes" role="group" aria-label="Map region"><button type="button" data-map-scope="all" aria-pressed="true">All</button><button type="button" data-map-scope="payers" aria-pressed="false">Payers</button><button type="button" data-map-scope="providers" aria-pressed="false">Providers</button><button type="button" data-map-scope="rcm" aria-pressed="false">RCM</button></div>
     <div class="map-view-controls" role="group" aria-label="Map zoom">
       <button id="map-fit" type="button" aria-pressed="true">Fit map</button>
       <button id="map-fit-width" type="button" aria-pressed="false">Fit width</button>
@@ -19,18 +21,20 @@
       <output id="map-zoom" aria-label="Zoom level">100%</output>
       <button id="map-zoom-in" type="button" aria-label="Zoom in">+</button>
     </div>
-    <div class="map-actions"><button id="map-labels" type="button" aria-pressed="false">Company labels</button><button id="map-sources" type="button">Notes &amp; sources</button><button id="print-map" type="button">Print / PDF</button></div>
+    <div class="map-actions"><button id="map-labels" type="button" aria-pressed="false">Labels</button><button id="map-sources" type="button">Sources</button><button id="print-map" type="button">Print / PDF</button></div>
   </nav>
+  <div class="explorer-toolbar"><label class="map-search"><span aria-hidden="true">⌕</span><input id="map-search" type="search" placeholder="Find a company, product or function…" aria-label="Search companies, products and functions" autocomplete="off"><kbd>/</kbd></label><span id="map-status" role="status" aria-live="polite"></span><button id="map-browse" type="button">Browse entries</button></div>
+  <div class="explorer-workspace">
   <div id="map-viewport" class="map-viewport" role="region" aria-label="Health plan landscape. Zoom to inspect; drag or scroll to explore." tabindex="0">
   <div id="map-canvas" class="map-canvas">
   <main class="poster" id="map-poster">
-    <header class="masthead"><div><h1>The Health Plan Landscape</h1><p>Health plans, shared infrastructure and value-based care. Incumbents alongside technology-led challengers.</p></div><div class="edition"><strong>2026</strong><span id="map-count">The health-plan ecosystem</span></div></header>
+    <header class="masthead"><div><h1>The Healthcare Landscape</h1><p>Health plans, care delivery, provider software and the revenue cycle. Select any entry to understand its role.</p><p class="funding-context">Funding context: employers &amp; households · federal &amp; state programs → health plans / benefit administrators → care delivery &amp; supporting infrastructure. Payment paths vary by arrangement.</p></div><div class="edition"><strong>2026</strong><span id="map-count">The healthcare ecosystem</span></div></header>
     <div class="map-legend" aria-label="Company labels"><span class="cohort-tag startup">AI / tech startup</span><span class="cohort-tag incumbent">Incumbent</span><span><span class="source-tag">a16z</span> = featured in the original stack</span><span class="legend-note">Market-position labels, not a claim that every startup is AI-native.</span></div>
-    <div class="top-stack">
+    <div class="top-stack" data-scope="payers">
       <section class="zone brokers"><h2 class="zone-title">Broker / Advisor / Distribution</h2><div class="zone-body"><div class="split"><section class="subgroup"><h3 class="subhead">Employer benefits advisory</h3><div class="marks" data-bucket="brokers"></div></section><section class="subgroup"><h3 class="subhead">Benefits funding &amp; buying</h3><div class="marks" data-bucket="benefits"></div></section></div><section class="subgroup distribution"><h3 class="subhead">Medicare &amp; individual enrollment / agent platforms</h3><div class="marks" data-bucket="individual-distribution"></div></section></div></section>
       <section class="zone risk"><h2 class="zone-title">MGU / Stop-Loss / Captive</h2><p class="zone-note">Employer funding &amp; risk protection—not the funding model for every market below.</p><div class="zone-body"><div class="risk-grid"><section class="subgroup"><h3 class="subhead">Risk-bearing stop-loss carriers</h3><div class="marks" data-bucket="risk"></div></section><section class="subgroup"><h3 class="subhead">MGUs &amp; specialty intermediaries</h3><div class="marks" data-bucket="mgu"></div></section><section class="subgroup"><h3 class="subhead">Captives &amp; risk programs</h3><div class="marks" data-bucket="captive"></div></section></div></div></section>
     </div>
-    <section class="plan-shell" aria-labelledby="plan-heading">
+    <section class="plan-shell" aria-labelledby="plan-heading" data-scope="payers">
       <h2 class="plan-title" id="plan-heading">Health Plans <small>Markets &amp; coverage—not infrastructure functions</small></h2>
       <div class="market-grid operators">
         <section class="subgroup market"><h3 class="subhead">Employer / commercial</h3><p class="market-note">Employer + employee funded. Fully insured or self-funded / ASO.</p><div class="marks" data-bucket="incumbent-plans"></div><h4 class="minor-head">Challenger employer plans</h4><div class="marks" data-bucket="challenger-plans"></div></section>
@@ -41,7 +45,7 @@
       <section class="blues-band subgroup"><h3 class="subhead">The Blues: selected major organizations &amp; regional licensees</h3><p class="zone-note">A cross-market family of independent licensees—not a fifth plan market, and not all owned by Anthem / Elevance.</p><div class="marks" data-bucket="blues-plans"></div><p class="zone-note">HCSC’s five Blues: Illinois, Montana, New Mexico, Oklahoma and Texas. Cambia pairs show affiliation. Regional footprints and product availability differ.</p></section>
       <p class="support-caption">Companies repeat across markets where relevant. Commercial includes both employer and individual coverage; the separate columns make the buying channels visible. D-SNPs sit within Medicare Advantage and coordinate with Medicaid.</p>
     </section>
-    <section class="shared-shell" aria-labelledby="shared-heading">
+    <section class="shared-shell" aria-labelledby="shared-heading" data-scope="payers">
       <h2 class="shared-title" id="shared-heading">Shared Plan Infrastructure <small>Functions used across plan markets; no single vendor supplies every function to every plan</small></h2>
       <div class="engine-grid">
         <section class="zone administration"><h2 class="zone-title">Administration / Core Systems</h2><div class="zone-body"><section class="subgroup"><h3 class="subhead">TPA / ASO services · carrier-owned</h3><div class="marks" data-bucket="incumbent-tpa"></div></section><section class="subgroup"><h3 class="subhead">Independent administration &amp; platforms</h3><div class="marks" data-bucket="challenger-tpa"></div></section><section class="subgroup"><h3 class="subhead">Core software · TriZetto, HealthEdge &amp; peers</h3><div class="marks" data-bucket="core-platforms"></div><p class="zone-note">The software platform is not necessarily the TPA operating it.</p></section></div></section>
@@ -66,7 +70,7 @@
       </div>
       <p class="support-caption">TPA = third-party administrator · ASO = administrative services only · PBM = pharmacy benefit manager · MGU = managing general underwriter · COE = center of excellence</p>
     </section>
-    <section class="vbc-shell" aria-labelledby="vbc-heading">
+    <section class="vbc-shell" aria-labelledby="vbc-heading" data-scope="payers">
       <h2 class="vbc-title" id="vbc-heading">Value-Based Care <small>Care delivery, risk partnerships &amp; enabling technology</small></h2>
       <p class="vbc-intro">VBC is a payment and care-delivery model—not another type of insurance. It spans Medicare Advantage, Original Medicare ACOs, Medicaid and commercial contracts.</p>
       <div class="vbc-grid">
@@ -78,11 +82,13 @@
       <p class="support-caption">Risk varies by contract: shared savings, downside risk, capitation or fees. A software vendor or care manager is not automatically a risk-bearing provider.</p>
     </section>
     <footer class="map-footer"><p>Companies appear in multiple buckets. Paired marks show parent / group on the left and operating brand, affiliate or product on the right; noted affiliations are not ownership claims. Broad corporate ancestry may omit intermediate holding companies. TriZetto is a product label beside the Cognizant logo.<br>Based on the a16z Challenger Health Plan Stack; expanded in the visual tradition of the MAD landscape. Selected companies, not an exhaustive market census. State, county, contract and plan-year availability varies.</p><a class="byline" href="/">ethanding.com</a></footer>
-    <noscript>Enable JavaScript to display the company landscape.</noscript>
+    <noscript>Enable JavaScript to display the company landscape and entry information cards.</noscript>
   </main>
   </div>
   </div>
-  <div class="map-view-footer"><span>All categories in one view. Zoom in to inspect; drag or scroll to explore.</span><span>Click a company to visit its website.</span></div>
+  <aside id="entry-panel" class="entry-panel" aria-labelledby="entry-panel-title" hidden><header class="entry-panel-header"><button id="entry-panel-back" type="button" hidden>← Results</button><span id="entry-panel-title">Entry details</span><button id="entry-panel-close" type="button" aria-label="Close entry details">×</button></header><div id="entry-panel-content" class="entry-panel-content"></div></aside>
+  </div>
+  <div class="map-view-footer"><span>Click an entry for details. Zoom to inspect; drag or scroll to explore.</span><span>US-focused · Reviewed September 15, 2026 · Selected organizations</span></div>
   <dialog id="map-sources-dialog" class="map-sources-dialog" aria-labelledby="map-sources-title"><header><h2 id="map-sources-title">Notes &amp; sources</h2><button id="map-close-sources" type="button" aria-label="Close notes and sources">×</button></header>
   <div class="read-more">
     <details><summary>New additions: pharmacy, payer care management and MA enablement</summary>
@@ -101,7 +107,7 @@
         <tr><td><a href="https://www.406ventures.com/case-study/ableto/">Optum acquired AbleTo · 2020</a></td><td>Optum Behavioral Care, with AbleTo noted, rather than another independent startup tile. <a href="https://www.ableto.com/health-plans/">Current health-plan offering</a>.</td></tr>
       </tbody></table>
       <p><strong>Related consolidations, not labeled clean VC exits:</strong> <a href="https://includedhealth.com/announcements/grand-rounds-health-and-doctor-on-demand-rebrand-as-included-health/">Grand Rounds and Doctor On Demand became Included Health</a>; <a href="https://organizations.headspace.com/ginger-is-now-part-of-headspace">Ginger is now part of Headspace</a>. Both current brands fit the map. Previously included Oscar, Clover, Oak Street and Signify remain in their appropriate buckets.</p>
-      <p>Reviewed September 15, 2026. New marks are sourced from company sites; One Medical’s SVG is from <a href="https://commons.wikimedia.org/wiki/File:One_Medical_logo.svg">Wikimedia Commons</a>. Original logo sources are recorded with the assets. Pure biotech, devices and unrelated provider-software exits are outside this payer-centered scope.</p>
+      <p>Reviewed September 15, 2026. Company marks come from official sites and public logo archives; exact asset provenance is retained in the repository. One Medical’s SVG is from <a href="https://commons.wikimedia.org/wiki/File:One_Medical_logo.svg">Wikimedia Commons</a>. The provider expansion includes clinical systems, RCM and operating infrastructure, but is not a complete inventory of biotech or medical devices.</p>
     </details>
     <details><summary>Why markets, functions and value-based care are separate</summary>
       <p><strong>A plan market answers “who is covered and who funds coverage?”</strong> Employer, individual / ACA, Medicare Advantage and Medicaid managed care are different buying and funding arrangements. They are not additional layers on top of a TPA or PBM. Original Medicare is public coverage; its ACOs are not private MA insurance plans. <a href="https://www.cms.gov/priorities-innovation-key-concepts-accountable-care-accountable-care-organizations">CMS explains the ACO distinction</a>.</p>
@@ -118,8 +124,8 @@
       <p><strong>Related infrastructure:</strong> <a href="https://healthedge.com">HealthEdge</a>, <a href="https://www.availity.com">Availity</a>, <a href="https://www.evicore.com">EviCore</a>, <a href="https://www.coherehealth.com">Cohere</a>, <a href="https://lightbeamhealth.com">Lightbeam</a>, <a href="https://www.reveleer.com">Reveleer</a>, <a href="https://www.nationsbenefits.com">NationsBenefits</a> and <a href="https://www.papa.com">Papa</a>. Company logos link to the corresponding official websites.</p>
       <p>Expansion checked September 14–15, 2026. New logos come from company sites except <a href="https://companieslogo.com/molina-healthcare/logo/">Molina’s logo</a> (CompaniesLogo) and the Blue Cross NC logo displayed on partner Strive Health’s site. Asset provenance is retained locally. Current Cognizant branding is shown beside a textual TriZetto product label, rather than presenting the provider-RCM business’s logo as its payer core system.</p>
     </details>
-    <details><summary>What is still outside this map?</summary><p>Useful next expansions include deeper behavioral-health network coverage, home health / post-acute / long-term services, transportation and food-as-medicine specialists, delegated credentialing, interoperability / data exchange, actuarial and regulatory operations, provider revenue-cycle management, dental / vision / hearing carriers, and the broader reinsurer layer. Original Medicare contractors (MACs), stand-alone Part D, Medigap and PACE also deserve distinct sections; they should not all be folded into Medicare Advantage.</p><p>This is a payer-centered market map, not a complete healthcare-industry directory. It does not attempt to list every hospital, physician group, local ACO or regional Blues licensee.</p></details>
-    <details><summary>Sources and company notes</summary><ul><li>Taxonomy starting point: Julie Yoo, a16z, “The Great Health Plan Replacement,” September 10, 2026, and the accompanying Challenger Health Plan Stack.</li><li><a href="https://matt-turck.com/">Matt Turck’s MAD landscape</a> informs the visual layout.</li><li><a href="https://humana.gcs-web.com/static-files/151ed6d6-a25d-4019-b733-1520d56131ed">Humana 2025 Form 10-K</a>: commercial employer medical exit completed in 2025.</li><li><a href="https://www.judi.health/solutions/pharmacy-benefits-manager">Judi Rx</a> is the current name of Capital Rx; Judi Health also supplies medical-benefit administration and software.</li><li><a href="https://www.aradigmhealth.com/">Aradigm</a> supplies a cell-and-gene-therapy carve-out; it is shown under specialty rather than treated as a full-service PBM.</li><li>Logo links open the corresponding company website. All marks belong to their respective owners; inclusion does not imply endorsement.</li></ul></details>
+    <details><summary>Coverage, methodology and remaining boundaries</summary><p>The expanded map covers enrollment, servicing, credentialing, network data, interoperability, actuarial operations, quality, recovery, VBC settlement and regulatory operations. Provider sections cover care settings, clinical systems, the revenue cycle and operating infrastructure. Every specific placement has a card with a company description, its role in that section, relevant buyers and primary-source links. Repeated placements are intentional; a company can serve several workflows.</p><p>This is a US-focused editorial landscape with representative organizations, not an exhaustive healthcare directory or vendor evaluation. It does not enumerate every hospital, physician group, regional insurer, device or drug manufacturer. Transportation, food-as-medicine, vision and hearing, reinsurance, Medicare contractors, stand-alone Part D, Medigap and PACE could be developed further. These should not all be folded into Medicare Advantage. Corporate structures, product scope and local availability change; contract-specific details require direct verification.</p><p>Research and classifications reviewed September 15, 2026. Sources are attached to individual cards. Logos are identification marks, not evidence of a partnership. A parent / operating-brand pair is one entry; adjacent standalone companies imply no ownership relationship.</p></details>
+    <details><summary>Sources and company notes</summary><ul><li>Taxonomy starting point: Julie Yoo, a16z, “The Great Health Plan Replacement,” September 10, 2026, and the accompanying Challenger Health Plan Stack.</li><li><a href="https://matt-turck.com/">Matt Turck’s MAD landscape</a> informs the visual layout.</li><li><a href="https://humana.gcs-web.com/static-files/151ed6d6-a25d-4019-b733-1520d56131ed">Humana 2025 Form 10-K</a>: commercial employer medical exit completed in 2025.</li><li><a href="https://www.judi.health/solutions/pharmacy-benefits-manager">Judi Rx</a> is the current name of Capital Rx; Judi Health also supplies medical-benefit administration and software.</li><li><a href="https://www.aradigmhealth.com/">Aradigm</a> supplies a cell-and-gene-therapy carve-out; it is shown under specialty rather than treated as a full-service PBM.</li><li>Select any entry to open its information card; company website links are inside the cards. All marks belong to their respective owners; inclusion does not imply endorsement.</li></ul></details>
     <details><summary>Classification and expanded-market sources</summary>
       <p><strong>AI / tech startup</strong> is an editorial grouping of the original a16z challenger cohort plus selected technology-led challengers. It includes growth-stage businesses and does not mean that every company is AI-native. The <strong>a16z</strong> marker records inclusion in the supplied graphic, not an investment relationship. <strong>Incumbent</strong> means an established carrier, brokerage, administrator, service platform or specialist program manager, including operating brands owned by those groups. It does not mean “does not use AI.” These are market-position labels, not regulatory categories or a founding-year cutoff.</p>
       <p><strong>Brokerage and advisory:</strong> <a href="https://www.mercer.com/en-us/solutions/health-and-benefits/employee-benefits-strategy-and-consulting/healthcare-consulting/">Marsh healthcare consulting</a>, <a href="https://www.wtwco.com/en-us">WTW</a>, <a href="https://www.ajg.com/us/services/employee-benefits-consulting/">Gallagher</a>, <a href="https://global.lockton.com/us/en">Lockton</a>, <a href="https://www.usi.com/employee-benefits/">USI</a>, <a href="https://www.hubinternational.com/products/employee-benefits/">HUB</a>, and <a href="https://us.bbrown.com/">Brown &amp; Brown</a>. <a href="https://www.marsh.com/en/corp/about/news/mercer-will-adopt-the-marsh-brand-in-september.html">Mercer adopted the Marsh brand on September 1, 2026</a>; it is not counted as an additional independent broker.</p>
@@ -130,7 +136,10 @@
     </details>
   </div>
   </dialog>
-  <script src="/health-plan-landscape.js?v=20260915-5"></script>
-  <script src="/assets/health-plan-viewer.js?v=20260915-4"></script>
+  <script src="/assets/healthcare-data.js?v=20260915-8"></script>
+  <script src="/assets/healthcare-model.js?v=20260915-8"></script>
+  <script src="/health-plan-landscape.js?v=20260915-8"></script>
+  <script src="/assets/health-plan-viewer.js?v=20260915-8"></script>
+  <script src="/assets/healthcare-explorer.js?v=20260915-8"></script>
 </body>
 </html>

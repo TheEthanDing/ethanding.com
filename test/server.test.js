@@ -318,13 +318,13 @@ test('serves the health-plan landscape and its assets', async () => {
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('cache-control'), 'no-cache');
   const page = await response.text();
-  assert.match(page, /<title>The Health Plan Landscape/);
+  assert.match(page, /<title>The Healthcare Landscape/);
   assert.match(page, /health-plan-landscape\.js/);
   assert.match(page, /id="map-viewport"/);
   assert.match(page, /id="map-fit"/);
   assert.match(page, /id="map-fit-width"/);
   assert.match(page, /id="map-sources-dialog"/);
-  for (const [asset, type] of [['health-plan-viewer.js', /javascript/], ['health-plan-viewer.css', /text\/css/]]) {
+  for (const [asset, type] of [['health-plan-viewer.js', /javascript/], ['health-plan-viewer.css', /text\/css/], ['healthcare-data.js', /javascript/], ['healthcare-model.js', /javascript/], ['healthcare-explorer.js', /javascript/], ['healthcare-explorer.css', /text\/css/]]) {
     const resource = await fetch(`${base}/assets/${asset}`);
     assert.equal(resource.status, 200);
     assert.match(resource.headers.get('content-type'), type);

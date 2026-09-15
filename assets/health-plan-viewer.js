@@ -43,7 +43,8 @@
       const width = viewport.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - 2;
       const height = viewport.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - 2;
       // Give wide windows more columns of logos, not oversized gutters around a tall poster.
-      poster.style.width = Math.min(3600, Math.max(2400, Math.round(width / height * 15) * 100)) + 'px';
+      const expanded = poster.classList.contains('expanded-landscape');
+      poster.style.width = Math.min(expanded ? 6400 : 3600, Math.max(expanded ? 3000 : 2400, Math.round(width / height * (expanded ? 25 : 15)) * 100)) + 'px';
       apply(fitScale(poster.offsetWidth, poster.offsetHeight, width, height, mode));
     }
     function scheduleResize() {
@@ -70,6 +71,7 @@
     new window.ResizeObserver(scheduleResize).observe(viewport);
     new window.ResizeObserver(scheduleResize).observe(poster);
     window.addEventListener('resize', scheduleResize);
+    window.addEventListener('healthcare:refit', () => { mode = 'fit'; scheduleResize(); });
     document.fonts?.ready.then(scheduleResize);
 
     // Mouse dragging complements native touch and trackpad scrolling when zoomed in.

@@ -1,5 +1,6 @@
 // A company can intentionally appear in more than one functional bucket.
 const LOGOS = '/assets/health-plan-logos/';
+const EXPANSION = typeof HealthcareData === 'undefined' ? null : HealthcareData;
 const BRANDS = {
   uhg: ['UnitedHealth Group','uhg.svg','https://www.unitedhealthgroup.com'],
   uhc: ['UnitedHealthcare','uhc.svg','https://www.uhc.com'],
@@ -173,6 +174,7 @@ const BRANDS = {
   millennium: ['Millennium Physician Group','millennium.svg','https://millenniumphysician.com'],
 };
 
+if (EXPANSION) for (const [id, brand] of Object.entries(EXPANSION.newBrands)) BRANDS[id] = [brand.name, brand.logo, brand.website];
 const pair = (parent, child, note = '', relationship = 'owns') => ({ parent, id: child, note, relationship });
 const marked = (id, note) => ({ id, note });
 const BUCKETS = {
@@ -217,6 +219,13 @@ const BUCKETS = {
   'vbc-technology': ['innovaccer','arcadia','lightbeam','reveleer',pair('clover','counterpart','Clinical decision support')],
 };
 
+if (EXPANSION) {
+  for (const section of EXPANSION.sections) for (const category of section.categories) {
+    BUCKETS[category.id] = category.entries.map(entry => Array.isArray(entry) ? marked(entry[0], entry[1]) : entry);
+  }
+  BUCKETS['individual-distribution'].push(marked('healthsherpa', 'ACA quoting & enrollment'));
+}
+
 // Provenance is separate from market positioning: a16z is not an AI certification.
 const A16Z_BRANDS = new Set([
   'gyde','corridor','arlo','writewise','angle','firefly','curative','rivendell','vivian','prescience',
@@ -248,16 +257,18 @@ const WHITE_LOGOS = new Set(['kaiser','curative','nomi','milu','rightway','oneim
   'essence','highmarkhealth',
 ]);
 const CROPPED_CANVASES = new Set(['humana','symetra']);
+if (EXPANSION) for (const [id, brand] of Object.entries(EXPANSION.newBrands)) {
+  (brand.cohort === 'startup' ? STARTUP_BRANDS : INCUMBENT_BRANDS).add(id);
+  if (brand.white) WHITE_LOGOS.add(id);
+}
 
-function makeMark(id, note = '', className = '') {
+function makeMark(id, note = '', className = '', tag = 'button') {
   const brand = BRANDS[id];
   if (!brand) throw new Error('Unknown company: ' + id);
   const [name, file, url] = brand;
-  const link = document.createElement('a');
+  const link = document.createElement(tag);
   link.className = 'mark ' + className;
-  link.href = url;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
+  if (tag === 'button') link.type = 'button';
   link.dataset.company = id;
   const cohort = STARTUP_BRANDS.has(id) ? 'startup' : INCUMBENT_BRANDS.has(id) ? 'incumbent' : null;
   if (!cohort) throw new Error('Missing company cohort: ' + id);
@@ -265,18 +276,18 @@ function makeMark(id, note = '', className = '') {
   link.dataset.cohort = cohort;
   link.dataset.source = A16Z_BRANDS.has(id) ? 'a16z' : 'expanded';
   link.title = name + (note ? ' — ' + note : '');
-  link.setAttribute('aria-label', link.title + ' · ' + cohortLabel + (A16Z_BRANDS.has(id) ? ' · a16z source' : '') + ' (company website)');
+  link.setAttribute('aria-label', link.title + ' · ' + cohortLabel + (A16Z_BRANDS.has(id) ? ' · a16z source' : '') + (tag === 'button' ? ' (open entry details)' : ''));
   if (file) {
     const img = document.createElement('img');
-    img.src = LOGOS + file + '?v=20260915-5';
+    img.src = LOGOS + file + '?v=20260915-8';
     img.alt = name;
     img.decoding = 'async';
     if (WHITE_LOGOS.has(id)) img.classList.add('white-logo');
     if (CROPPED_CANVASES.has(id)) img.classList.add('padded-logo');
-    if (id === 'thatch' || id === 'innovaccer' || id === 'medimpact') {
+    if (id === 'thatch' || id === 'innovaccer' || id === 'medimpact' || EXPANSION?.newBrands[id]?.icon) {
       const wordmark = document.createElement('span');
       wordmark.className = 'icon-wordmark';
-      img.className = 'icon';
+      img.classList.add('icon');
       wordmark.append(img, document.createTextNode(name));
       link.append(wordmark);
     } else link.append(img);
@@ -304,25 +315,69 @@ function makeMark(id, note = '', className = '') {
   return link;
 }
 
-function makeEntry(entry) {
-  if (typeof entry === 'string') return makeMark(entry);
-  if (!entry.parent) return makeMark(entry.id, entry.note);
-  const group = document.createElement('div');
+function makeEntry(entry, bucketId, index) {
+  const item = typeof entry === 'string' ? { id: entry } : entry;
+  const key = typeof bucketId === 'string' ? `${bucketId}--${item.id}--${index}` : null;
+  if (!item.parent) {
+    const mark = makeMark(item.id, item.note);
+    if (key) mark.dataset.entry = key;
+    mark.setAttribute('aria-controls', 'entry-panel');
+    mark.setAttribute('aria-expanded', 'false');
+    return mark;
+  }
+  const group = document.createElement('button');
+  group.type = 'button';
   group.className = 'brand-pair';
-  group.setAttribute('role','group');
-  group.setAttribute('aria-label', BRANDS[entry.parent][0] + ' ' + entry.relationship + ' ' + BRANDS[entry.id][0] + (entry.note ? ' · ' + entry.note : ''));
+  if (key) group.dataset.entry = key;
+  group.setAttribute('aria-controls', 'entry-panel');
+  group.setAttribute('aria-expanded', 'false');
+  group.setAttribute('aria-label', BRANDS[entry.parent][0] + ' ' + entry.relationship + ' ' + BRANDS[entry.id][0] + (entry.note ? ' · ' + entry.note : '') + ' (open entry details)');
   const divider = document.createElement('span');
   divider.className = 'pair-line';
   divider.setAttribute('aria-hidden','true');
-  group.append(makeMark(entry.parent, '', 'parent'), divider, makeMark(entry.id, entry.note, 'child'));
+  group.append(makeMark(entry.parent, '', 'parent', 'span'), divider, makeMark(entry.id, entry.note, 'child', 'span'));
   return group;
 }
 
+if (EXPANSION && typeof window !== 'undefined') {
+  const footer = document.querySelector('#map-poster .map-footer');
+  for (const section of EXPANSION.sections) {
+    const shell = document.createElement('section');
+    shell.className = 'ecosystem-section';
+    shell.id = section.id;
+    shell.dataset.scope = section.scope;
+    const heading = document.createElement('h2');
+    heading.textContent = section.title;
+    const note = document.createElement('p');
+    note.className = 'ecosystem-note';
+    note.textContent = section.description;
+    const grid = document.createElement('div');
+    grid.className = 'ecosystem-grid';
+    for (const category of section.categories) {
+      const block = document.createElement('section');
+      block.className = 'subgroup';
+      const title = document.createElement('h3');
+      title.className = 'subhead';
+      title.textContent = category.title;
+      const marks = document.createElement('div');
+      marks.className = 'marks';
+      marks.dataset.bucket = category.id;
+      block.append(title, marks);
+      grid.append(block);
+    }
+    shell.append(heading, note, grid);
+    footer.before(shell);
+  }
+}
 for (const bucket of document.querySelectorAll('[data-bucket]')) {
   const entries = BUCKETS[bucket.dataset.bucket];
   if (!entries) throw new Error('Unknown map bucket: ' + bucket.dataset.bucket);
-  bucket.replaceChildren(...entries.map(makeEntry));
+  bucket.replaceChildren(...entries.map((entry, index) => makeEntry(entry, bucket.dataset.bucket, index)));
 }
 const count = new Set([...document.querySelectorAll('[data-company]')].map(el => el.dataset.company)).size;
 document.querySelector('#map-count').textContent = count + ' companies & brands';
 document.querySelector('#print-map').addEventListener('click', () => window.print());
+if (EXPANSION && typeof window !== 'undefined') {
+  const titles = Object.fromEntries([...document.querySelectorAll('[data-bucket]')].map(bucket => [bucket.dataset.bucket, (bucket.previousElementSibling?.matches('h2,h3,h4') ? bucket.previousElementSibling : bucket.closest('.subgroup')?.querySelector('.subhead'))?.textContent]));
+  window.HealthcareLandscape = { ...HealthcareModel.build(BRANDS, BUCKETS, EXPANSION, titles), brands: BRANDS };
+}

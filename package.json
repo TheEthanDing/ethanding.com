@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "test": "node --test",
-    "books:enrich": "node scripts/enrich-books.cjs"
+    "books:enrich": "node scripts/enrich-books.cjs",
+    "healthcare:build": "node scripts/build-healthcare-data.cjs"
   },
   "repository": {
     "type": "git",
