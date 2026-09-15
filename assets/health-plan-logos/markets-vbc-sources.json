@@ -1,0 +1,359 @@
+{
+  "checked": "2026-09-15",
+  "purpose": "Editorial market map, no endorsement implied",
+  "assets": {
+    "counterpart": {
+      "file": "counterpart.svg",
+      "page": "https://www.counterparthealth.com",
+      "url": "https://www.counterparthealth.com/static/cph/company-logos/Logomark-Digital.svg?v=e8940c6a",
+      "sha256": "64ba111c817e5b692c3a0ffdcd4898cd9f9acfca0b440b5e7ac83f4870ad989e"
+    },
+    "alignment": {
+      "file": "alignment.webp",
+      "page": "https://www.alignmenthealth.com",
+      "url": "https://images.squarespace-cdn.com/content/v1/66ca19d2955ff62a438530f7/a1c3c25a-c623-40dd-adab-69be7720aaf6/alignment-health_logo-blue.png?format=1500w",
+      "sha256": "6c62d9a8646ae088142d1dc7efbcac9ddfaa3e6d4a734112f834e73971a58e8a"
+    },
+    "wellcare": {
+      "file": "wellcare.png",
+      "page": "https://www.wellcare.com",
+      "url": "https://www.wellcare.com/-/media/logos-and-icons/wellcare-logos/wellcarelogo180.ashx",
+      "sha256": "6766066dfe59b9b5692e7016470ed4993ea9a92967fe6d49c1a5a553535c8717"
+    },
+    "hcsc": {
+      "file": "hcsc.svg",
+      "page": "https://www.hcsc.com/who-we-are/affiliates-subsidiaries",
+      "url": "https://www.hcsc.com/content/experience-fragments/hcsc/header/master/_jcr_content/root/header/logo.coreimg.svg/1774297518388/hcsc-header-logo.svg",
+      "sha256": "1e05a2ad98388cd238f6fc57604081eba6d409e8700ef1a85491607823017323"
+    },
+    "centene": {
+      "file": "centene.jpg",
+      "page": "https://www.centene.com/products-and-services.html",
+      "url": "https://www.centene.com/content/dam/centenedotcom/logos/centene_logo_2023.jpg",
+      "sha256": "4732f79969c8275795b553ab60b872b2f8da756e3fd8a48baa4cbb08313647fb"
+    },
+    "ibx": {
+      "file": "ibx.svg",
+      "page": "https://www.ibx.com",
+      "url": "https://www.ibx.com/images/logo.independence.svg",
+      "sha256": "e578e97cbc37d7b541a21492d9342a29469537b0526f0d201d9082594ff4608c"
+    },
+    "healthspring": {
+      "file": "healthspring.svg",
+      "page": "https://www.healthspring.com/about-us",
+      "url": "https://www.healthspring.com/static/svgs/logos/healthspring-logo.svg",
+      "sha256": "638e2f0025c00948ae5aa44179e312180b97972cc7b0b641052403e6319f727f"
+    },
+    "bcbsmi": {
+      "file": "bcbsmi.svg",
+      "page": "https://www.bcbsm.com",
+      "url": "https://www.bcbsm.com/amslibs/content/dam/public/shared-assets/images/header-logo/logo.svg",
+      "sha256": "085fd5246aeceb64a5c69dc09b6f8ad05ce7ad191d7aad19c879126dba7627f5"
+    },
+    "ambetter": {
+      "file": "ambetter.png",
+      "page": "https://www.ambetterhealth.com",
+      "url": "https://www.ambetterhealth.com/content/dam/centene/ambetterredesign/AmbetterHealth-PrimaryLogox80.png",
+      "sha256": "28c211395930b710beac4b32970473d641d5572c383d72c0bde6cfbf0202c01a"
+    },
+    "aledade": {
+      "file": "aledade.webp",
+      "page": "https://aledade.com",
+      "url": "https://aledade.com/hs-fs/hubfs/Aledade-Logo_Blue-1-300x60.png?width=300&height=60&name=Aledade-Logo_Blue-1-300x60.png",
+      "sha256": "6731bebc44690481650180f090342ad958489585137739300aa47491f538e008"
+    },
+    "healthedge": {
+      "file": "healthedge.png",
+      "page": "https://healthedge.com",
+      "url": "https://healthedge.com/wp-content/uploads/2024/10/cropped-103A_HE_2_COLOR_HORIZ_POS_268x60.png",
+      "sha256": "8d6ec7116e23ef9b86fa01a025b7e5a23417f6b4bd9f1c93d9e92a9a850a0466"
+    },
+    "astrana": {
+      "file": "astrana.svg",
+      "page": "https://www.astranahealth.com",
+      "url": "https://www.astranahealth.com/wp-content/uploads/2024/11/Astrana_LogoLockup_RGB_Default.svg",
+      "sha256": "c41952fdf2707cd433ce3f990acdaa280b2f84008eb7a96b8c8fdc0a86bb575b"
+    },
+    "agilon": {
+      "file": "agilon.svg",
+      "page": "https://www.agilonhealth.com",
+      "url": "https://www.agilonhealth.com/wp-content/uploads/2021/07/logo.svg",
+      "sha256": "8a086fbdbcea6bf6cbd1114d90ead2f1cee8424a4a34c642c12760e0f7dc2aff"
+    },
+    "signify": {
+      "file": "signify.jpg",
+      "page": "https://www.signifyhealth.com",
+      "url": "https://www.signifyhealth.com/hs-fs/hubfs/RGB_SH2022_Logo_Horizontal_FullColor.png?width=230&height=55&name=RGB_SH2022_Logo_Horizontal_FullColor.png",
+      "sha256": "3757ec91751ad479be85b02ba14b7b78694c882588c1f874a2ad22f1931227e5"
+    },
+    "cotiviti": {
+      "file": "cotiviti.png",
+      "page": "https://www.cotiviti.com",
+      "url": "https://www.cotiviti.com/hs-fs/hubfs/Cotiviti_Theme/img/cotiviti-logo.png?noresize&width=200&name=cotiviti-logo.png",
+      "sha256": "6697b7c5295435e0240dd29b43bc0daf037bdec6b6c8f97e64760d3a82d2d860"
+    },
+    "bcbssc": {
+      "file": "bcbssc.svg",
+      "page": "https://www.southcarolinablues.com",
+      "url": "https://www.southcarolinablues.com/content/dam/commercial-web-public/sc/blues/en/logo/light/logo-sc-light.svg",
+      "sha256": "2c8e377ddaa85e3fea95d2e97b979726211a156bb13c9c54f558c9eaf46bece5"
+    },
+    "cambia": {
+      "file": "cambia.svg",
+      "page": "https://www.cambiahealth.com/what-we-do/regional-health-plans/",
+      "url": "https://www.cambiahealth.com/wp-content/uploads/2026/05/logo.svg",
+      "sha256": "7b6be40253b8fbdd3554fabba3ff80aa52afb2154c9e45856c158b3fb27f61bf"
+    },
+    "cognizant": {
+      "file": "cognizant.svg",
+      "page": "https://www.cognizant.com/us/en/industries/healthcare-technology-solutions/trizetto",
+      "url": "https://cognizant.scene7.com/is/content/cognizant/COG-Logo-2022-1?fmt=png-alpha",
+      "sha256": "63126d30bc94be90ac5ce10f5971934eb34e9fd5a4cdc0bfa69d0b9c94d43dea"
+    },
+    "bcbsten": {
+      "file": "bcbsten.svg",
+      "page": "https://www.bcbst.com",
+      "url": "https://content.bcbst.com/api/public/content/logo-bcbst-blue.svg?v=afc05264",
+      "sha256": "16cc3d9f3a7f9caddc252c0de8b4cea00a72ae0786cc72f0b3f2e6c38fed32a2"
+    },
+    "monogram": {
+      "file": "monogram.svg",
+      "page": "https://www.monogramhealth.com",
+      "url": "https://www.monogramhealth.com/wp-content/uploads/2026/01/monogram-logo.svg",
+      "sha256": "74bd4a0e9eaf286159d90f7aeb6ad78fbb44f92f67d175ca6094a77f343b94e0"
+    },
+    "lightbeam": {
+      "file": "lightbeam.svg",
+      "page": "https://lightbeamhealth.com",
+      "url": "https://lightbeamhealth.com/wp-content/uploads/2025/12/logo-color.svg",
+      "sha256": "5ff8e25b65b8383916584e899e3ce3aa275c5ee7010d476d722169e78161d7b1"
+    },
+    "reveleer": {
+      "file": "reveleer.svg",
+      "page": "https://www.reveleer.com",
+      "url": "https://cdn.prod.website-files.com/66ba7aa7b4a4165b6cfbae6b/66baeb075a3428e6256cc0c4_reveleer-logo.svg",
+      "sha256": "3ec71d9bc9e1f5b35b6f50814608bfe9a52e6c2812bc69cf486714b91f921d3a"
+    },
+    "innovaccer": {
+      "file": "innovaccer.svg",
+      "page": "https://innovaccer.com",
+      "url": "https://cdn.prod.website-files.com/670e4ade75003c7364a3944d/670e5a8c26a4d429b1dc7393_innovaccer-logo.svg",
+      "sha256": "eadc4d993bf9a5865c2a07774877c50de077e2958211e70b25e33ded19e4cd37"
+    },
+    "waymark": {
+      "file": "waymark.svg",
+      "page": "https://www.waymarkcare.com",
+      "url": "https://cdn.prod.website-files.com/64a3c873c4968010f637b2dc/64d3782f2fae8721a5b3c3ad_Waymark-wordmark-tri-color-A-on-light.svg",
+      "sha256": "d43718c73d4c70ebbae9512a3c9c28dbf687ce2c461f64a74087ad1f3645d8db"
+    },
+    "pearl": {
+      "file": "pearl.png",
+      "page": "https://pearlhealth.com",
+      "url": "https://cdn.prod.website-files.com/680f4885bce57353bf2a48e0/69e11671f9888bac31adab49_PH_logo_primary_color_r_crop.png",
+      "sha256": "876b0dcbda16a8c827771bdab12484d10ed64189c229bda7cfe88108093f2c98"
+    },
+    "somatus": {
+      "file": "somatus.png",
+      "page": "https://somatus.com",
+      "url": "https://somatus.com/wp-content/uploads/2023/02/somatus-logo-2026-w-tagline-768x195.png",
+      "sha256": "fde3c2596236f3101caeca8d88b44e65347267a9dbbb30442e0556778b351681"
+    },
+    "privia": {
+      "file": "privia.png",
+      "page": "https://www.priviahealth.com/value-based-care",
+      "url": "https://www.priviahealth.com/themes/custom/priviahealth_corp/logo.png",
+      "sha256": "34159289ccb5bf059a12869eb17b4486ab01eb3213c63ec389ca3496c2a4ea9d"
+    },
+    "strive": {
+      "file": "strive.svg",
+      "page": "https://strivehealth.com",
+      "url": "https://strivehealth.com/wp-content/uploads/2022/09/main-logo-1.svg",
+      "sha256": "a7f37a39fe12187f7da65249def1b481f8a7f58baa3914a9faef8428ae2a0d6e"
+    },
+    "evicore": {
+      "file": "evicore.svg",
+      "page": "https://www.evicore.com",
+      "url": "https://www.evicore.com/themes/custom/evicore/logo.svg",
+      "sha256": "6b201803520419f2b51d2397953b7a6aada2b9188061f1942fed4763118058ba"
+    },
+    "cohere": {
+      "file": "cohere.svg",
+      "page": "https://www.coherehealth.com",
+      "url": "https://cdn.prod.website-files.com/682f8a4f57b1c18d8559493d/6830bd58382f752e3c4b4038_cohere-logo.svg",
+      "sha256": "58a07da2c7c373eb212b541ac3557c91a54b4a27c725b5961aa393d04f992d13"
+    },
+    "gohealth": {
+      "file": "gohealth.webp",
+      "page": "https://www.gohealth.com",
+      "url": "https://www.gohealth.com/wp-content/uploads/2021/08/logo-ghblue@2x.webp",
+      "sha256": "209f7cb5222a36ad5db886ea184648101bf0e7e0767e81dd7077c6adfa840a93"
+    },
+    "thyme": {
+      "file": "thyme.svg",
+      "page": "https://www.thymecare.com",
+      "url": "https://www.thymecare.com/hubfs/ThymeCare_wordmark_vert_color.svg",
+      "sha256": "835cd5d73959c3e2ffa8c32d64940eecb4b7d19a394b27c5de59aba8324a2cfb"
+    },
+    "availity": {
+      "file": "availity.svg",
+      "page": "https://www.availity.com",
+      "url": "https://www.availity.com/wp-content/themes/custom/img/logo.svg",
+      "sha256": "a5178d7b33cfd354aaf430280084f901ca4cb6b499851b40ce9fb41d10a526a4"
+    },
+    "ehealth": {
+      "file": "ehealth.png",
+      "page": "https://news.ehealthinsurance.com",
+      "url": "https://news.ehealthinsurance.com/media/themes/6557dd0b3d6332bc275a69fc/images/logo.png",
+      "sha256": "7a4be112310d0c2e6cc7d1c8e6eeddc0a735b3a4b344105acf02e8591e6ed624"
+    },
+    "carefirst": {
+      "file": "carefirst.svg",
+      "page": "https://individual.carefirst.com/individuals-families/home.page",
+      "url": "https://individual.carefirst.com/carefirst-resources/responsive-full-width/images/logo-carefirst.svg",
+      "sha256": "ba5914aab62cb4a809445001085e41d20877362f80afd57d043594c2082ab812"
+    },
+    "selectquote": {
+      "file": "selectquote.svg",
+      "page": "https://www.selectquote.com",
+      "url": "https://images.ctfassets.net/h3vmr83rcu7l/375tqOZMSphjiFXc96Jzu5/acb2e0d4665fd7e2ae3abe0d597dbdcd/SQLogo.svg",
+      "sha256": "78d7145fe54ad1d5084a9fd419f1e8a3ef447e3e8394597ad473aabc25eac4af"
+    },
+    "evolent": {
+      "file": "evolent.png",
+      "page": "https://www.evolent.com",
+      "url": "https://www.evolent.com/themes/custom/evolent/images/logo.png",
+      "sha256": "1a8d0639d1d6306e4cafd3bb5daf350575bdcdc9b5d9a91c0757a0470e7093f2"
+    },
+    "integrity": {
+      "file": "integrity.svg",
+      "page": "https://integrity.com",
+      "url": "https://integrity.com/wp-content/themes/integritymarketing2023/dist/images/Integrity_H_RGB.svg",
+      "sha256": "8bdc8be305f62a31c19c7e5a6154d6ea7c75cee6221d4e64919689e801ee0cd0"
+    },
+    "floridablue": {
+      "file": "floridablue.svg",
+      "page": "https://www.guidewell.com/who-we-are/our-businesses",
+      "url": "https://files.guidewell.com/asset/4b5dfaa2-bd6e-4b82-ad4b-d26aca66d9fb/Florida-Blue.svg",
+      "sha256": "80221d4c27b74b940d6c1553f917fc89733d901a64ff4d767cc6e67f4b1112ae"
+    },
+    "bcbsnd": {
+      "file": "bcbsnd.png",
+      "page": "https://www.cambiahealth.com/what-we-do/regional-health-plans/",
+      "url": "https://www.cambiahealth.com/wp-content/uploads/2026/06/logo-north-dakota-2.png",
+      "sha256": "8ced4801d8854693e0438e0c40dbc44054047cfdd18d304045f1ae0ffa13d758"
+    },
+    "regence": {
+      "file": "regence.png",
+      "page": "https://www.cambiahealth.com/what-we-do/regional-health-plans/",
+      "url": "https://www.cambiahealth.com/wp-content/uploads/2026/06/logo-blue-shield-1.png",
+      "sha256": "8e37b959431bee0945b46564b39d8517ece28d778392545b26179fbd2129e12d"
+    },
+    "oscar": {
+      "file": "oscar.svg",
+      "page": "https://www.hioscar.com/individuals",
+      "extraction": "Original inline SVG 1"
+    },
+    "clover": {
+      "file": "clover.svg",
+      "page": "https://www.cloverhealth.com",
+      "extraction": "Original inline SVG 0"
+    },
+    "bcbsma": {
+      "file": "bcbsma.svg",
+      "page": "https://www.bluecrossma.org",
+      "extraction": "Original inline SVG 0"
+    },
+    "oakstreet": {
+      "file": "oakstreet.svg",
+      "page": "https://www.oakstreethealth.com",
+      "extraction": "Original inline SVG 6"
+    },
+    "chenmed": {
+      "file": "chenmed.svg",
+      "page": "https://www.chenmed.com",
+      "extraction": "Original inline SVG 0"
+    },
+    "archwell": {
+      "file": "archwell.svg",
+      "page": "https://archwellhealth.com",
+      "extraction": "Original inline SVG 19"
+    },
+    "arcadia": {
+      "file": "arcadia.svg",
+      "page": "https://arcadia.io",
+      "extraction": "Original inline SVG 1"
+    },
+    "papa": {
+      "file": "papa.png",
+      "page": "https://www.papa.com",
+      "url": "https://images.papa.com/wp-content/uploads/2025/01/papa-logo.png"
+    },
+    "blueshieldca": {
+      "file": "blueshieldca.svg",
+      "page": "https://www.blueshieldca.com",
+      "extraction": "Original inline company SVG"
+    },
+    "cityblock": {
+      "file": "cityblock.svg",
+      "page": "https://www.cityblock.com",
+      "extraction": "Original inline company SVG"
+    },
+    "devoted": {
+      "file": "devoted.svg",
+      "page": "https://www.devoted.com",
+      "extraction": "Original encoded SVG in logo CSS"
+    },
+    "horizon": {
+      "file": "horizon.png",
+      "page": "https://www.horizonblue.com/about-us",
+      "url": "https://www.horizonblue.com/themes/custom/bootstrap_business/images/logo.png",
+      "sha256": "8e766c1d7bfbb1ba1f87774f9f8ed07238977fbd64953c0d8259fa67a909692e"
+    },
+    "highmark": {
+      "file": "highmark.svg",
+      "page": "https://www.highmark.com",
+      "url": "https://www.highmark.com/content/dam/digital-marketing/en/highmark/highmarkdotcom/highmark-bcbs-bs-logo.svg",
+      "sha256": "3a2c0e3c6fbb32f7e18ab41c934b3f2030d298298798b8472da30862ecd5f97c"
+    },
+    "bcbsnc": {
+      "file": "bcbsnc.jpg",
+      "page": "https://strivehealth.com",
+      "url": "https://strivehealth.com/wp-content/uploads/2022/10/bcbsnclogo-blk-blu-logo2-300x155.jpg",
+      "sha256": "92756ad00f4b45d0c0437884b6445cd36c41f1da6130bf7d79794dbf6c7765e6"
+    },
+    "guidewell": {
+      "file": "guidewell.png",
+      "page": "https://www.guidewell.com/brand-center/logos",
+      "url": "https://files.guidewell.com/transform/32478f35-227c-4165-8d74-d7a5459828e0/guidewell_logo_4c-250x100",
+      "sha256": "042b99960c32cc75896e98b0b1df1430fde0e4982e4ac296fc2a74cf806d6d0a"
+    },
+    "premera": {
+      "file": "premera.svg",
+      "page": "https://www.premera.com/visitor/",
+      "url": "https://www.premera.com/assets/image/logos/pbc_logo.svg",
+      "sha256": "f4df91b59851687a2e21d47c94c99ecebc470a267e68a261582d2dc52a566eb8"
+    },
+    "nationsbenefits": {
+      "file": "nationsbenefits.svg",
+      "page": "https://brand.nationsbenefits.com/logos",
+      "url": "https://cdn.prod.website-files.com/63c1c2e5fac44f00c3ae5864/645e9146be5815a9400d7d7b_NationsBenefits-logo-horiz-c.svg",
+      "sha256": "93a24d54f574bb7b9279016e1f3bf31ce877f84d5533e4aa43875b47006566da"
+    },
+    "bcbsmn": {
+      "file": "bcbsmn.svg",
+      "page": "https://www.bluecrossmn.com/about-us",
+      "url": "https://www.bluecrossmn.com/themes/custom/bcbsmn_theme/logo.svg",
+      "extraction": "Browser-observed official image"
+    },
+    "molina": {
+      "file": "molina.svg",
+      "page": "https://companieslogo.com/molina-healthcare/logo/",
+      "url": "https://companieslogo.com/img/orig/MOH_BIG-aa01b93e.svg?download=true&t=1720244492"
+    },
+    "trizetto": {
+      "file": null,
+      "page": "https://www.cognizant.com/us/en/industries/healthcare-technology-solutions/trizetto",
+      "note": "Textual product label paired with current Cognizant logo; not the separate TriZetto Provider Solutions logo"
+    }
+  }
+}
