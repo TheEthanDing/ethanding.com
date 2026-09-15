@@ -57,6 +57,9 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /BI tool per-seat pricing/);
   assert.match(homepage, /One agent, your whole stack/);
   assert.match(homepage, /Analytics token TAM model/);
+  assert.match(homepage, /href: '\/foundry-viz\/'/);
+  assert.match(homepage, /href: '\/healthcare-map'/);
+  assert.match(homepage, /href: '\/health-plan-landscape'/);
   assert.match(homepage, /href="\/diadochi"/);
   assert.match(homepage, /Power of the Sengoku clans/);
   assert.match(homepage, /Wars of the semis/);
@@ -304,6 +307,22 @@ test('serves bookshelf assets and cached public enrichment', async () => {
     assert.match(response.headers.get('content-type'), type, file);
     if (file.startsWith('/data/')) assert.equal(response.headers.get('cache-control'), 'no-cache');
   }
+});
+
+test('serves the health-plan landscape and its assets', async () => {
+  const response = await fetch(`${base}/health-plan-landscape`);
+  assert.equal(response.status, 200);
+  const page = await response.text();
+  assert.match(page, /<title>The Health Plan Landscape/);
+  assert.match(page, /health-plan-landscape\.js/);
+
+  const script = await fetch(`${base}/health-plan-landscape.js`);
+  assert.equal(script.status, 200);
+  assert.match(await script.text(), /Elevance Health/);
+
+  const logo = await fetch(`${base}/assets/health-plan-logos/yuzu-health.png`);
+  assert.equal(logo.status, 200);
+  assert.match(logo.headers.get('content-type'), /^image\/png/);
 });
 
 test('serves the repository-owned reading data', async () => {

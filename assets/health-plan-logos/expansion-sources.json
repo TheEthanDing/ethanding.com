@@ -1,0 +1,73 @@
+{
+  "checked": "2026-09-13",
+  "logos": {
+    "hub": {
+      "file": "hub.png",
+      "source": "https://www.hubinternational.com/Assets/Hub/images/Redesign/hub-logo-primary.png"
+    },
+    "voya": {
+      "file": "voya.svg",
+      "source": "https://cdn.voya.com/global/images/logo/1.0.1/logo.svg"
+    },
+    "marsh": {
+      "file": "marsh.svg",
+      "source": "https://www.marsh.com/content/dam/marsh/Imagery/marsh-2/logos/marsh-logo-skyblue-v1.svg"
+    },
+    "wtw": {
+      "file": "wtw.svg",
+      "source": "https://mediacdn.wtwco.com/willistower8735-wtw7458-prode832-66e2/media/project/wtw-sites/wtwco/logo/logo_desktop.svg"
+    },
+    "usi": {
+      "file": "usi.png",
+      "source": "https://www.usi.com/siteassets/images/usi_logo_web-2.png?v=836bcbcb"
+    },
+    "bcs": {
+      "file": "bcs.svg",
+      "source": "https://bcsf.com/wp-content/uploads/2020/10/bcs-logo.svg"
+    },
+    "amwins": {
+      "file": "amwins.svg",
+      "source": "https://www.amwins.com/images/default-source/branding/amw_r_clr_4cp_210915.svg"
+    },
+    "bbrown": {
+      "file": "bbrown.jpg",
+      "source": "https://4972039.fs1.hubspotusercontent-na1.net/hub/4972039/hubfs/BBRetail001-CMYK%20(1).jpg?width=230&height=32&name=BBRetail001-CMYK%20(1).jpg"
+    },
+    "mrm": {
+      "file": "mrm.svg",
+      "source": "https://irp.cdn-website.com/e240c01882d44443b052bff2e079a7d9/dms3rep/multi/MRMLogo.svg"
+    },
+    "hm": {
+      "file": "hm.png",
+      "source": "https://www.hmig.com/content/dam/hmig/en/website/HMInsuranceGroup-Blue.png"
+    },
+    "ryan": {
+      "file": "ryan.svg",
+      "source": "https://ryanspecialty.com/wp-content/themes/ryansg/svgs/rsg.svg"
+    },
+    "rsbenefits": {
+      "file": "rsbenefits.png",
+      "source": "https://rsbenefits.com/wp-content/uploads/2024/06/Benefits_RGB.png"
+    },
+    "tmhcc": {
+      "file": "tmhcc.png",
+      "source": "https://www.tmhcc.com/en-us/-/media/project/tokio-marine/shared/header-and-footer/tmhcc-logo.png?h=76&iar=0&w=229&hash=BEB79AB5F93419EACB683E5515D89FF8"
+    },
+    "lockton": {
+      "file": "lockton.svg",
+      "source": "https://lockbox.lockton.com/m/242b8b83061e2363/original/logo-white-footer.svg"
+    },
+    "pareto": {
+      "file": "pareto.svg",
+      "source": "https://paretohealth.com/#footer"
+    },
+    "gallagher": {
+      "file": "gallagher.png",
+      "source": "https://bynder.ajg.com/m/44ca9da97f47158b/original/Gallagher_HorizontalLarge-3D.png"
+    },
+    "symetra": {
+      "file": "symetra.webp",
+      "source": "https://iconlogovector.com/uploads/images/2026/01/lg-6972b6099a881-Symetra.webp"
+    }
+  }
+}
