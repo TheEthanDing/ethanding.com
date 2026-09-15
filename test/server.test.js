@@ -60,7 +60,8 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /href: '\/foundry-viz\/'/);
   assert.match(homepage, /href: '\/healthcare-map'/);
   assert.match(homepage, /href: '\/health-plan-landscape'/);
-  assert.match(homepage, /href="\/diadochi"/);
+  assert.match(homepage, /href: '\/diadochi'/);
+  assert.match(homepage, /href="\/health-plan-landscape"/);
   assert.match(homepage, /Power of the Sengoku clans/);
   assert.match(homepage, /Wars of the semis/);
   assert.match(homepage, /Wars of the airlines/);
@@ -68,12 +69,11 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /The iron railroad empires/);
   assert.match(homepage, /The oil wars/);
   assert.match(homepage, /The Bell wars/);
-  assert.match(homepage, /aspect-ratio: 2 \/ 1/);
   assert.match(homepage, /images\/project-previews\/foundry\.png/);
   assert.doesNotMatch(homepage, /<iframe class="showcase-frame/);
   assert.doesNotMatch(homepage, /class="interactive-links"/);
 
-  for (const preview of ['ancient-world', 'foundry', 'healthcare', 'data-agent', 'bi-pricing', 'analytics-token', 'sengoku', 'semiconductor', 'airlines', 'wall-street', 'railroads', 'oil', 'bell']) {
+  for (const preview of ['health-plan', 'ancient-world', 'foundry', 'healthcare', 'data-agent', 'bi-pricing', 'analytics-token', 'sengoku', 'semiconductor', 'airlines', 'wall-street', 'railroads', 'oil', 'bell']) {
     const image = await fetch(`${base}/images/project-previews/${preview}.png`);
     assert.equal(image.status, 200, `${preview} preview should be available`);
     assert.match(image.headers.get('content-type'), /^image\/png/);

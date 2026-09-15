@@ -1,9 +1,7 @@
 /* A walnut bookcase, with CSS-only perspective and no animation runtime. */
 .reading-section.bookshelf-section {
-  width: min(1140px, calc(100vw - 64px));
+  width: 100%;
   position: relative;
-  left: 50%;
-  transform: translateX(-50%);
   padding: 40px 0 32px;
   margin: 32px 0;
   color: #292d27;
@@ -15,7 +13,7 @@
 .bookshelf-section [hidden], .book-dialog [hidden] { display: none !important; }
 .bookshelf-section button:focus-visible, .bookshelf-section select:focus-visible, .bookshelf-section input:focus-visible, .book-dialog :focus-visible { outline: 2px solid #587262; outline-offset: 5px; }
 .shelf-heading { display: flex; align-items: center; justify-content: space-between; gap: 30px; margin-bottom: 28px; }
-.shelf-heading h3 { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(34px, 4vw, 48px); line-height: 1.12; letter-spacing: -1.8px; font-weight: 400; margin: 0 0 12px; }
+.shelf-heading h3 { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(32px, 3.5vw, 40px); line-height: 1.12; letter-spacing: -1.4px; font-weight: 400; margin: 0 0 12px; }
 .shelf-heading p { font-size: 14px; color: #747970; margin: 0; }
 .shelf-stats { display: flex; gap: 30px; flex-shrink: 0; }
 .shelf-stats div + div { border-left: 1px solid #e6e6df; padding-left: 30px; }
@@ -117,9 +115,9 @@ body.book-dialog-open { overflow: hidden; }
 .book-navigation button:disabled { opacity: .3; cursor: default; }
 @media (max-width: 850px) { .shelf-hint { display: none; } .shelf-stats { gap: 20px; } .shelf-stats div + div { padding-left: 20px; } .shelf-searchbar { gap: 8px; } }
 @media (max-width: 600px) {
-  .reading-section.bookshelf-section { width: calc(100vw - 32px); padding-top: 28px; }
+  .reading-section.bookshelf-section { padding-top: 28px; }
   .shelf-heading { gap: 12px; margin-bottom: 23px; }
-  .shelf-heading h3 { font-size: 34px; }
+  .shelf-heading h3 { font-size: clamp(28px, 8.7vw, 34px); }
   .shelf-heading p { font-size: 12px; max-width: 210px; line-height: 1.6; }
   .shelf-stats dt { font-size: 25px; }
   .shelf-stats dd { font-size: 9px; }
