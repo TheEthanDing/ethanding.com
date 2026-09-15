@@ -52,6 +52,9 @@ test('serves the homepage and health check', async () => {
   assert.match(homepage, /Foundry docs complexity map/);
   assert.match(homepage, /id="bookshelf"/);
   assert.match(homepage, /id="shelf-search"/);
+  assert.match(homepage, /id="shelf-next-section"/);
+  assert.match(homepage, /id="shelf-timeline"/);
+  assert.doesNotMatch(homepage, /id="shelf-more"/);
   assert.match(homepage, /id="book-dialog"/);
   assert.match(homepage, /Healthcare ecosystem map/);
   assert.match(homepage, /BI tool per-seat pricing/);
@@ -301,7 +304,7 @@ test('serves the healthcare ecosystem map and its script', async () => {
 });
 
 test('serves bookshelf assets and cached public enrichment', async () => {
-  for (const [file, type] of [['/assets/bookshelf.js', /javascript/], ['/assets/bookshelf.css', /text\/css/], ['/data/book-metadata.json', /json/], ['/data/book-appearance.json', /json/]]) {
+  for (const [file, type] of [['/assets/bookshelf-layout.js', /javascript/], ['/assets/bookshelf.js', /javascript/], ['/assets/bookshelf.css', /text\/css/], ['/data/book-metadata.json', /json/], ['/data/book-appearance.json', /json/]]) {
     const response = await fetch(`${base}${file}`);
     assert.equal(response.status, 200, file);
     assert.match(response.headers.get('content-type'), type, file);

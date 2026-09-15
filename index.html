@@ -6,8 +6,9 @@
     <title>Ethan Ding</title>
     <link rel="icon" type="image/png" href="/images/profile.png" />
     <link rel="stylesheet" crossorigin href="/assets/index-dwlculdd.css">
-    <link rel="stylesheet" href="/assets/bookshelf.css?v=20260915-2">
-    <script defer src="/assets/bookshelf.js?v=20260908-4"></script>
+    <link rel="stylesheet" href="/assets/bookshelf.css?v=20260915-4">
+    <script defer src="/assets/bookshelf-layout.js?v=20260915-4"></script>
+    <script defer src="/assets/bookshelf.js?v=20260915-4"></script>
     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8KB6YWZ4KS"></script>
@@ -537,7 +538,7 @@
       
       <section class="reading-section bookshelf-section" id="bookshelf" aria-labelledby="shelf-title">
         <header class="shelf-heading">
-          <div><h3 id="shelf-title">The bookshelf.</h3><p>What I’ve been reading, one book at a time.</p></div>
+          <div><h3 id="shelf-title">The bookshelf.</h3><p>A reading history, three months at a time.</p></div>
           <dl class="shelf-stats"><div><dt id="shelf-total">—</dt><dd>books collected</dd></div><div><dt id="shelf-years">—</dt><dd>years of reading</dd></div></dl>
         </header>
         <div class="shelf-searchbar" role="search" aria-label="Search my bookshelf">
@@ -552,9 +553,16 @@
           <span class="shelf-hint"><svg width="13" height="16" viewBox="0 0 13 16" fill="none" stroke="currentColor" aria-hidden="true"><rect x="2" y="1" width="9" height="14" rx="1"/><path d="M4 1v14"/></svg>Hover to browse · Click to open</span>
         </div>
         <div class="shelf-resultbar"><p id="shelf-results" role="status" aria-live="polite">Opening the collection…</p><button id="shelf-clear" type="button" hidden>Clear filters ×</button></div>
-        <div id="books-list" class="wooden-bookshelf"><p class="shelf-loading">Gathering the books…</p></div>
+        <div class="shelf-chronology" id="shelf-chronology" hidden>
+          <div class="shelf-period-heading"><div><h4 id="shelf-range"></h4><p id="shelf-direction">Slide right to read further back.</p></div><span id="shelf-page-status" role="status" aria-live="polite" aria-atomic="true"></span></div>
+          <nav id="shelf-timeline" class="shelf-timeline" aria-label="Jump to a reading quarter"></nav>
+        </div>
+        <div class="shelf-carousel">
+          <div id="books-list" class="wooden-bookshelf" role="region" aria-label="Four-row bookcase" aria-describedby="shelf-direction" tabindex="0"><p class="shelf-loading">Gathering the books…</p></div>
+          <button id="shelf-previous-section" class="shelf-arrow shelf-arrow-previous" type="button" aria-label="Previous four shelves" aria-controls="books-list" hidden>←</button>
+          <button id="shelf-next-section" class="shelf-arrow shelf-arrow-next" type="button" aria-label="Next four shelves" aria-controls="books-list" hidden>→</button>
+        </div>
         <div class="shelf-footer"><span>Jacket colors from my covers. Book sizes vary by edition.</span><span id="shelf-showing"></span></div>
-        <button id="shelf-more" type="button" class="shelf-more" hidden>Explore more shelves</button>
         <details class="shelf-activity" id="shelf-activity"><summary>Reading activity · <span id="book-count">—</span> books in the past year</summary>
           <div class="reading-chart"><div class="chart-header"><h4 class="chart-title">Reading activity</h4><p class="reading-pace">Click a month to browse its books</p></div><div class="chart-container"><canvas id="readingChart"></canvas></div></div>
         </details>
