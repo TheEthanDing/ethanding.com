@@ -27,21 +27,16 @@ body { grid-template-rows: auto auto minmax(0, 1fr) auto; }
 #map-poster .ecosystem-section[data-scope="providers"] { --region-border: #85b4ac; --region-bg: #f1f8f6; --region-ink: #24665b; }
 #map-poster .ecosystem-section[data-scope="rcm"] { --region-border: #b5a3d1; --region-bg: #f6f2fb; --region-ink: #60448a; }
 #map-poster .ecosystem-section > h2 { color: var(--region-ink); font-size: 17px; line-height: 1.2; margin: 0 0 5px; font-weight: 650; letter-spacing: -.25px; }
-#map-poster .ecosystem-note { color: #5a6c7e; font-size: 9px; margin: 0 0 8px; line-height: 1.4; }
-#map-poster .ecosystem-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
-#map-poster .ecosystem-grid > .subgroup { margin: 0; border: 1px solid var(--region-border); background: #fff; min-width: 0; }
+#map-poster .ecosystem-note { display: none; color: #5a6c7e; font-size: 9px; margin: 0 0 6px; line-height: 1.4; }
+.show-company-labels #map-poster .ecosystem-note { display: block; }
+/* Size categories to their contents; a two-company box need not be as wide as eight. */
+#map-poster .ecosystem-grid { display: grid; gap: 6px; }
+#map-poster .ecosystem-row { display: flex; gap: 6px; }
+#map-poster .ecosystem-grid .subgroup { flex: 1 1 0; margin: 0; border: 1px solid var(--region-border); background: #fff; min-width: 0; }
 #map-poster .ecosystem-grid .subhead { background: var(--region-bg); color: var(--region-ink); font-size: 12px; }
-#map-poster #payer-operations .ecosystem-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-#map-poster #provider-rcm .ecosystem-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-#map-poster #provider-operations .ecosystem-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 #map-poster .category-info-trigger { width: 100%; color: inherit; font: inherit; font-weight: inherit; padding: 0; border: 0; background: transparent; cursor: pointer; text-align: inherit; }
 #map-poster .category-info-trigger:hover { text-decoration: underline; text-underline-offset: 2px; }
-#map-poster .ecosystem-grid .mark { width: 76px; min-height: 39px; }
-#map-poster .ecosystem-grid .mark img { max-width: 72px; height: 26px; }
-#map-poster .ecosystem-grid .icon-wordmark { font-size: 10px; }
-#map-poster .ecosystem-grid .mark .icon { width: 20px; height: 20px; }
 #map-poster[data-view="providers"], #map-poster[data-view="rcm"] { grid-template-columns: 1fr; }
-#map-poster[data-view="rcm"] .ecosystem-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .entry-panel { min-height: 0; min-width: 0; border-left: 1px solid #ccd6e3; background: #fff; display: flex; flex-direction: column; color: #17263c; box-shadow: -5px 0 16px #24354b08; }
 .entry-panel-header { display: flex; align-items: center; flex: 0 0 auto; gap: 8px; min-height: 49px; padding: 8px 17px; border-bottom: 1px solid #e3e8ef; font-size: 11px; color: #62758b; }
 .entry-panel-header button { border: 0; background: transparent; cursor: pointer; color: #263c5a; min-height: 32px; font: inherit; }
@@ -113,7 +108,7 @@ body { grid-template-rows: auto auto minmax(0, 1fr) auto; }
 @media print {
   body, .explorer-workspace { display: block; }
   .explorer-toolbar, .entry-panel { display: none !important; }
-  #map-poster { width: 4000px !important; zoom: .5; }
+  #map-poster { width: 3200px !important; zoom: .62; }
   #map-poster [data-entry].search-dimmed { opacity: 1; }
   #map-poster [data-entry].is-selected { outline: 0; }
 }

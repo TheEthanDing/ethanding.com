@@ -12,7 +12,7 @@ body { height: 100dvh; overflow: hidden; display: grid; grid-template-rows: auto
 .map-viewport.is-pannable { cursor: grab; }
 .map-viewport.is-panning { cursor: grabbing; user-select: none; }
 .map-canvas { flex: 0 0 auto; position: relative; overflow: clip; margin: auto; background: #fff; }
-#map-poster { position: absolute; top: 0; left: 0; width: 2400px; max-width: none; margin: 0; padding: 18px; transform-origin: top left; display: grid; grid-template-columns: 1fr 1.6fr 1fr; gap: 10px; }
+#map-poster { position: absolute; top: 0; left: 0; width: 2400px; max-width: none; margin: 0; padding: 14px; transform-origin: top left; display: grid; grid-template-columns: 1.05fr 1.85fr 1.1fr; gap: 8px; }
 #map-poster .masthead { grid-column: 1 / -1; padding: 0; align-items: center; gap: 20px; }
 #map-poster .masthead h1 { font-size: 32px; line-height: 1.1; letter-spacing: -1px; max-width: none; }
 #map-poster .masthead p { font-size: 11px; margin: 6px 0 0; }
@@ -26,32 +26,32 @@ body { height: 100dvh; overflow: hidden; display: grid; grid-template-rows: auto
 #map-poster .plan-shell { grid-column: 2; grid-row: 3; padding: 8px; border-width: 1px; }
 #map-poster .vbc-shell { grid-column: 3; grid-row: 3; margin: 0; padding: 8px; border-width: 1px; }
 #map-poster .market-grid { grid-template-columns: 1.2fr 1fr 1.2fr 1fr; gap: 6px; margin-bottom: 6px; }
-#map-poster .vbc-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+#map-poster .vbc-grid { grid-template-columns: 1fr 1fr; gap: 6px; align-items: start; }
 #map-poster .shared-shell { grid-column: 1 / -1; grid-row: 4; margin: 0; padding: 8px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 8px; border-width: 1px; }
 #map-poster .shared-title { grid-column: 1 / -1; margin-bottom: 0; }
 #map-poster .engine-grid, #map-poster .services { display: contents; }
 #map-poster .administration, #map-poster .pharmacy { grid-column: span 3; }
-#map-poster .payments, #map-poster .network, #map-poster .services > .clinical { grid-column: span 2; }
-#map-poster .pharmacy-network { grid-column: span 2; }
+#map-poster .payments, #map-poster .network, #map-poster .services > .clinical { grid-column: span 3; }
+#map-poster .pharmacy-network { grid-column: 10 / 13; grid-row: 2; }
 #map-poster .care-band { grid-column: span 6; margin: 0; }
 #map-poster .care-grid { grid-template-columns: .85fr 1.15fr 1.15fr; gap: 6px; }
 #map-poster .care-grid > .subgroup:last-child { grid-column: auto; }
 #map-poster .pharmacy-grid { grid-template-columns: 1fr 1.2fr; gap: 6px; }
-#map-poster .oversight-grid { grid-column: span 4; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0; }
+#map-poster .oversight-grid { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 0; }
 #map-poster .shared-shell > .support-caption { grid-column: 1 / -1; }
 #map-poster .zone { border-width: 1px; }
 #map-poster .zone-title { padding: 5px 6px; font-size: 13px; line-height: 1.2; min-height: 0; }
 #map-poster .zone-body { padding: 5px; }
-#map-poster .subhead { padding: 4px 5px; font-size: 10px; line-height: 1.25; min-height: 0; }
+#map-poster .subhead { padding: 4px 5px; font-size: 12px; line-height: 1.25; min-height: 0; }
 #map-poster .subgroup + .subgroup { margin-top: 5px; }
 #map-poster .split > .subgroup, #map-poster .risk-grid > .subgroup, #map-poster .market-grid > .subgroup, #map-poster .vbc-grid > .subgroup, #map-poster .care-grid > .subgroup, #map-poster .pharmacy-grid > .subgroup { margin: 0; }
 #map-poster .distribution, #map-poster .blues-band { margin-top: 6px; }
 #map-poster .plan-title, #map-poster .shared-title, #map-poster .vbc-title { flex-direction: row; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 5px 10px; margin: -8px -8px 8px; padding: 6px 8px; font-size: 15px; line-height: 1.2; }
 #map-poster .shared-title { margin-bottom: 0; }
 #map-poster .plan-title small, #map-poster .shared-title small, #map-poster .vbc-title small { font-size: 9px; max-width: none; }
-#map-poster .marks { padding: 6px 4px; gap: 4px 6px; min-height: 0; align-content: start; }
-#map-poster .mark { width: 66px; min-height: 34px; padding: 2px 1px; gap: 3px; }
-#map-poster .mark img { width: 100%; max-width: 64px; height: 22px; object-fit: contain; }
+#map-poster .marks { padding: 4px; gap: 3px 5px; min-height: 0; align-content: start; }
+#map-poster .mark { width: 84px; min-height: 38px; padding: 2px 1px; gap: 3px; }
+#map-poster .mark img { width: 100%; max-width: 82px; height: 30px; object-fit: contain; }
 #map-poster .mark img.padded-logo, #map-poster .mark[data-company="guidewell"] img { object-fit: cover; }
 #map-poster .mark[data-company="papa"] img { max-width: 28px; }
 #map-poster .mark small { font-size: 6.5px; line-height: 1.15; }
@@ -62,24 +62,27 @@ body { height: 100dvh; overflow: hidden; display: grid; grid-template-rows: auto
 #map-poster .mark[data-cohort="startup"]::after { background: #9466c3; }
 #map-poster .map-legend > .cohort-tag::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #7b8795; }
 #map-poster .map-legend > .cohort-tag.startup::before { background: #9466c3; }
-#map-poster .brand-pair { width: auto; max-width: 100%; min-height: 36px; gap: 3px; padding: 2px; justify-content: center; }
-#map-poster .brand-pair .parent { width: 48px; }
-#map-poster .brand-pair .child { width: 63px; }
-#map-poster .brand-pair .mark img { height: 20px; }
-#map-poster .brand-pair .parent img { height: 17px; }
-#map-poster .pair-line { height: 22px; margin: 0 1px; }
+#map-poster .brand-pair { width: auto; max-width: 100%; min-height: 40px; gap: 3px; padding: 2px; justify-content: center; }
+#map-poster .brand-pair .parent { width: 56px; }
+#map-poster .brand-pair .child { width: 76px; }
+#map-poster .brand-pair .mark img { height: 28px; }
+#map-poster .brand-pair .parent img { height: 23px; }
+#map-poster .pair-line { height: 26px; margin: 0 1px; }
 #map-poster .cohort-tag, #map-poster .brand-pair .cohort-tag { font-size: 6px; padding: 2px 3px; gap: 2px; }
 #map-poster .brand-pair .parent .cohort-tag { font-size: 5.5px; }
 #map-poster .source-tag { font-size: 6px; padding-left: 2px; }
 #map-poster .map-legend > .cohort-tag { font-size: 9px; }
-#map-poster .icon-wordmark { font-size: 9px; gap: 2px; max-width: 100%; }
-#map-poster .mark .icon { width: 16px; height: 19px; }
+#map-poster .icon-wordmark { flex-direction: column; font-size: 10px; line-height: 1.1; text-align: center; overflow-wrap: anywhere; gap: 1px; max-width: 100%; }
+#map-poster .mark .icon { width: 20px; height: 23px; }
 #map-poster .parent-name { font-size: 8px; }
 #map-poster .product-name { font-size: 16px; }
 #map-poster .zone-note, #map-poster .market-note { font-size: 8px; line-height: 1.35; margin: 5px; min-height: 0; }
 #map-poster .minor-head { font-size: 8px; margin: 0 5px; padding-top: 4px; }
 #map-poster .vbc-intro, #map-poster .support-caption { font-size: 8px; line-height: 1.4; margin: 5px 2px 0; }
 #map-poster .vbc-intro { margin-bottom: 6px; }
+/* Keep qualifications available through Labels; sourced detail cards stay readable. */
+#map-poster :is(.zone-note, .market-note, .vbc-intro, .support-caption, .funding-context) { display: none; }
+.show-company-labels #map-poster :is(.zone-note, .market-note, .vbc-intro, .support-caption, .funding-context) { display: block; }
 #map-poster .map-footer { grid-column: 1 / -1; display: flex; flex-direction: row; margin: 0; font-size: 8px; gap: 20px; }
 #map-poster .map-footer p { max-width: 2100px; }
 #map-poster .byline { font-size: 10px; }

@@ -8,6 +8,29 @@
     if (![width, height, availableWidth, availableHeight].every(value => value > 0)) return 1;
     return mode === 'width' ? availableWidth / width : Math.min(availableWidth / width, availableHeight / height);
   }
+  function balanceRows(weights, capacity) {
+    if (!weights.length) return [];
+    let remaining = weights.reduce((sum, weight) => sum + weight, 0);
+    let rowsLeft = Math.min(weights.length, Math.max(1, Math.ceil(remaining / capacity)));
+    const rows = [];
+    let index = 0;
+    while (rowsLeft) {
+      const target = remaining / rowsLeft, row = [];
+      let sum = 0;
+      while (index < weights.length) {
+        if (row.length && rowsLeft > 1 && (
+          weights.length - index <= rowsLeft - 1 ||
+          Math.abs(sum + weights[index] - target) >= Math.abs(sum - target)
+        )) break;
+        sum += weights[index];
+        row.push(index++);
+      }
+      rows.push(row);
+      remaining -= sum;
+      rowsLeft--;
+    }
+    return rows;
+  }
   function mount(document, window) {
     const viewport = document.querySelector('#map-viewport');
     const canvas = document.querySelector('#map-canvas');
@@ -18,7 +41,25 @@
     const minus = document.querySelector('#map-zoom-out');
     const output = document.querySelector('#map-zoom');
     if (!viewport || !poster) return;
-    let mode = 'fit', scale = 1, frame = 0;
+    let mode = 'width', scale = 1, frame = 0, hasSized = false;
+
+    // Balance complete rows before scaling. Keep category order and the existing
+    // entry nodes, including their accessible names and parent/brand pairings.
+    for (const grid of document.querySelectorAll('.ecosystem-grid')) {
+      const blocks = [...grid.querySelectorAll('.subgroup')];
+      const weights = blocks.map(block => Math.max(3,
+        [...block.querySelectorAll('[data-entry]')].reduce((sum, entry) => sum + (entry.classList.contains('brand-pair') ? 1.7 : 1), 0)));
+      const rows = balanceRows(weights, 34).map(indices => {
+        const row = document.createElement('div');
+        row.className = 'ecosystem-row';
+        for (const index of indices) {
+          blocks[index].style.flexGrow = weights[index];
+          row.append(blocks[index]);
+        }
+        return row;
+      });
+      grid.replaceChildren(...rows);
+    }
 
     function apply(nextScale, preserveCenter = false) {
       const bounds = viewport.getBoundingClientRect(), board = canvas.getBoundingClientRect();
@@ -34,26 +75,34 @@
       plus.disabled = scale >= 3;
       minus.disabled = scale <= .025;
       viewport.classList.toggle('is-pannable', poster.offsetWidth * scale > viewport.clientWidth || poster.offsetHeight * scale > viewport.clientHeight);
-      if (preserveCenter) viewport.scrollTo({ left: centerX * scale - viewport.clientWidth / 2, top: centerY * scale - viewport.clientHeight / 2, behavior: 'instant' });
+      if (preserveCenter) {
+        const nextBoard = canvas.getBoundingClientRect();
+        viewport.scrollTo({
+          left: viewport.scrollLeft + nextBoard.left + centerX * scale - bounds.left - viewport.clientWidth / 2,
+          top: viewport.scrollTop + nextBoard.top + centerY * scale - bounds.top - viewport.clientHeight / 2,
+          behavior: 'instant',
+        });
+      }
       else if (mode !== 'manual') viewport.scrollTo({ left: 0, top: 0, behavior: 'instant' });
     }
-    function resize() {
+    function resize(resetPosition = false) {
       if (mode === 'manual') { apply(scale); return; }
       const style = window.getComputedStyle(viewport);
       const width = viewport.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - 2;
       const height = viewport.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - 2;
-      // Give wide windows more columns of logos, not oversized gutters around a tall poster.
+      // Keep logo packing stable; fit the view without inflating category boxes.
       const expanded = poster.classList.contains('expanded-landscape');
-      poster.style.width = Math.min(expanded ? 6400 : 3600, Math.max(expanded ? 3000 : 2400, Math.round(width / height * (expanded ? 25 : 15)) * 100)) + 'px';
-      apply(fitScale(poster.offsetWidth, poster.offsetHeight, width, height, mode));
+      poster.style.width = (expanded ? 3200 : 2400) + 'px';
+      apply(fitScale(poster.offsetWidth, poster.offsetHeight, width, height, mode), hasSized && !resetPosition);
+      hasSized = true;
     }
     function scheduleResize() {
       window.cancelAnimationFrame(frame);
-      frame = window.requestAnimationFrame(resize);
+      frame = window.requestAnimationFrame(() => resize());
     }
     function zoom(factor) { mode = 'manual'; apply(scale * factor, true); }
-    fit.addEventListener('click', () => { mode = 'fit'; resize(); });
-    fitWidth.addEventListener('click', () => { mode = 'width'; resize(); });
+    fit.addEventListener('click', () => { mode = 'fit'; resize(true); });
+    fitWidth.addEventListener('click', () => { mode = 'width'; resize(true); });
     plus.addEventListener('click', () => zoom(1.3));
     minus.addEventListener('click', () => zoom(1 / 1.3));
     const labels = document.querySelector('#map-labels');
@@ -66,12 +115,12 @@
       if (event.ctrlKey || event.metaKey || event.altKey) return;
       if (event.key === '+' || event.key === '=') { event.preventDefault(); zoom(1.3); }
       if (event.key === '-') { event.preventDefault(); zoom(1 / 1.3); }
-      if (event.key === '0') { event.preventDefault(); mode = 'fit'; resize(); }
+      if (event.key === '0') { event.preventDefault(); mode = 'fit'; resize(true); }
     });
     new window.ResizeObserver(scheduleResize).observe(viewport);
     new window.ResizeObserver(scheduleResize).observe(poster);
     window.addEventListener('resize', scheduleResize);
-    window.addEventListener('healthcare:refit', () => { mode = 'fit'; scheduleResize(); });
+    window.addEventListener('healthcare:refit', scheduleResize);
     document.fonts?.ready.then(scheduleResize);
 
     // Mouse dragging complements native touch and trackpad scrolling when zoomed in.
@@ -109,5 +158,5 @@
     sources.addEventListener('close', () => sourceButton.focus());
     scheduleResize();
   }
-  return { fitScale, mount };
+  return { fitScale, balanceRows, mount };
 });
