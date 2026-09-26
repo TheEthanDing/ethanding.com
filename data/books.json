@@ -1,5 +1,118 @@
 [
   {
+    "id": "506137f7-9c7a-4f28-b3f5-c9d5e46995e0",
+    "title": "The Challenger Sale",
+    "authors": [
+      "Matthew Dixon",
+      "Brent Adamson"
+    ],
+    "categories": [],
+    "sagas": [],
+    "dateStarted": "2026-09-23",
+    "dateFinished": "",
+    "daysTaken": null,
+    "rating": null,
+    "notes": "Currently rereading. Started approximately Wednesday, September 23, 2026.",
+    "owned": false,
+    "cover": "/images/books/recJfhPMg45FZsKO7-challenger-sale.jpg"
+  },
+  {
+    "id": "b7c55e64-35c7-452a-a268-a42f79f95563",
+    "title": "The Chip: How Two Americans Invented the Microchip and Launched a Revolution",
+    "authors": [
+      "T. R. Reid"
+    ],
+    "categories": [],
+    "sagas": [],
+    "dateStarted": "2026-09-18",
+    "dateFinished": "2026-09-22",
+    "daysTaken": 5,
+    "rating": null,
+    "notes": "Start and finish dates estimated proportionally from an approximately 320-page edition, in reading order between August 7 and September 22, 2026.",
+    "owned": false,
+    "cover": ""
+  },
+  {
+    "id": "bf659ec4-f16b-422c-a8bd-df5334c6a9f0",
+    "title": "The Man Behind the Microchip",
+    "authors": [
+      "Leslie Berlin"
+    ],
+    "categories": [],
+    "sagas": [],
+    "dateStarted": "2026-09-11",
+    "dateFinished": "2026-09-17",
+    "daysTaken": 7,
+    "rating": null,
+    "notes": "Start and finish dates estimated proportionally from an approximately 440-page edition, in reading order between August 7 and September 22, 2026.",
+    "owned": false,
+    "cover": ""
+  },
+  {
+    "id": "65ed96b5-88c5-4f2b-a511-714b374209c5",
+    "title": "The World's Banker",
+    "authors": [
+      "Sebastian Mallaby"
+    ],
+    "categories": [],
+    "sagas": [],
+    "dateStarted": "2026-09-03",
+    "dateFinished": "2026-09-10",
+    "daysTaken": 8,
+    "rating": null,
+    "notes": "Start and finish dates estimated proportionally from an approximately 496-page edition, in reading order between August 7 and September 22, 2026.",
+    "owned": false,
+    "cover": ""
+  },
+  {
+    "id": "17e5d008-2471-431e-ba42-9eb10ddef92e",
+    "title": "Kochland",
+    "authors": [
+      "Christopher Leonard"
+    ],
+    "categories": [],
+    "sagas": [],
+    "dateStarted": "2026-08-22",
+    "dateFinished": "2026-09-02",
+    "daysTaken": 12,
+    "rating": null,
+    "notes": "Start and finish dates estimated proportionally from an approximately 704-page edition, in reading order between August 7 and September 22, 2026.",
+    "owned": false,
+    "cover": ""
+  },
+  {
+    "id": "1ded60f9-a8c1-48d9-ae80-271b4f904f3f",
+    "title": "What You Do Is Who You Are",
+    "authors": [
+      "Ben Horowitz"
+    ],
+    "categories": [],
+    "sagas": [],
+    "dateStarted": "2026-08-17",
+    "dateFinished": "2026-08-21",
+    "daysTaken": 5,
+    "rating": null,
+    "notes": "Reread. Start and finish dates estimated proportionally from an approximately 288-page edition, in reading order between August 7 and September 22, 2026.",
+    "owned": false,
+    "cover": "/images/books/recMT4l1MGSPgx42q-what-you-do-is-who-you-are.jpg"
+  },
+  {
+    "id": "e5230b15-358d-4468-bf06-c4c86aa92e94",
+    "title": "DisneyWar",
+    "authors": [
+      "James B. Stewart"
+    ],
+    "categories": [],
+    "sagas": [],
+    "dateStarted": "2026-08-07",
+    "dateFinished": "2026-08-16",
+    "daysTaken": 10,
+    "rating": null,
+    "notes": "Start and finish dates estimated proportionally from an approximately 608-page edition, in reading order between August 7 and September 22, 2026.",
+    "owned": false,
+    "cover": ""
+  },
+  {
     "id": "3aca75de-abf4-4c29-a9e9-f038ad72b344",
     "title": "The Little Kingdom",
     "authors": [

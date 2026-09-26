@@ -7828,6 +7828,149 @@
     "recpq6ZkfdFR3yIrw": {
       "lookupTitle": "Designing Your Life",
       "fetchedAt": "2026-09-08"
+    },
+    "506137f7-9c7a-4f28-b3f5-c9d5e46995e0": {
+      "lookupTitle": "The Challenger Sale",
+      "fetchedAt": "2026-09-26",
+      "source": "https://openlibrary.org/works/OL15981317W",
+      "catalogTitle": "The challenger sale",
+      "authors": [
+        "Matthew Dixon",
+        "Matthew Dixon",
+        "Brent Adamson"
+      ],
+      "pageCount": 221,
+      "pageCountBasis": "Median across catalog editions",
+      "publishedYear": 2011,
+      "category": "Business",
+      "subjects": [
+        "Sales management",
+        "Selling",
+        "Customer relations",
+        "Ventes",
+        "Gestion",
+        "Vente",
+        "BUSINESS & ECONOMICS",
+        "Sales & Selling"
+      ]
+    },
+    "b7c55e64-35c7-452a-a268-a42f79f95563": {
+      "lookupTitle": "The Chip: How Two Americans Invented the Microchip and Launched a Revolution",
+      "fetchedAt": "2026-09-26",
+      "source": "https://openlibrary.org/works/OL1950362W",
+      "catalogTitle": "The Chip",
+      "authors": [
+        "T. R. Reid"
+      ],
+      "pageCount": 243,
+      "pageCountBasis": "Median across catalog editions",
+      "publishedYear": 1984,
+      "category": "History",
+      "subjects": [
+        "Microelectronics",
+        "History",
+        "Micro-elektronica",
+        "Histoire",
+        "Microélectronique"
+      ]
+    },
+    "bf659ec4-f16b-422c-a8bd-df5334c6a9f0": {
+      "lookupTitle": "The Man Behind the Microchip",
+      "fetchedAt": "2026-09-26",
+      "source": "https://openlibrary.org/works/OL8004582W",
+      "catalogTitle": "The Man Behind the Microchip",
+      "authors": [
+        "Leslie Berlin",
+        "Leslie Berlin"
+      ],
+      "pageCount": 428,
+      "pageCountBasis": "Median across catalog editions",
+      "publishedYear": 2005,
+      "category": "Biography",
+      "subjects": [
+        "Electronics engineers",
+        "Biography",
+        "History",
+        "Engineers, biography",
+        "Santa clara county (calif.)",
+        "California, history, local",
+        "United states, biography",
+        "Microelectronics industry"
+      ]
+    },
+    "65ed96b5-88c5-4f2b-a511-714b374209c5": {
+      "lookupTitle": "The World's Banker",
+      "fetchedAt": "2026-09-26",
+      "source": "https://openlibrary.org/works/OL3597448W",
+      "catalogTitle": "The World's Banker",
+      "authors": [
+        "Sebastian Mallaby"
+      ],
+      "pageCount": 480,
+      "pageCountBasis": "Median across catalog editions",
+      "publishedYear": 2004,
+      "category": "Business",
+      "subjects": [
+        "Economic development",
+        "Economic policy",
+        "Finance",
+        "Financial crises",
+        "Presidents",
+        "World Bank",
+        "Banks and banking",
+        "Developing countries, economic policy"
+      ]
+    },
+    "17e5d008-2471-431e-ba42-9eb10ddef92e": {
+      "lookupTitle": "Kochland",
+      "fetchedAt": "2026-09-26",
+      "source": "https://openlibrary.org/works/OL21108790W",
+      "catalogTitle": "Kochland",
+      "authors": [
+        "Christopher Leonard"
+      ],
+      "pageCount": 353,
+      "pageCountBasis": "Median across catalog editions",
+      "publishedYear": 2019,
+      "category": "",
+      "subjects": []
+    },
+    "1ded60f9-a8c1-48d9-ae80-271b4f904f3f": {
+      "lookupTitle": "What You Do Is Who You Are",
+      "fetchedAt": "2026-09-26",
+      "source": "https://openlibrary.org/works/OL21164124W",
+      "catalogTitle": "What You Do Is Who You Are",
+      "authors": [
+        "Ben Horowitz"
+      ],
+      "pageCount": 304,
+      "pageCountBasis": "Median across catalog editions",
+      "publishedYear": 2019,
+      "category": "Business",
+      "subjects": [
+        "nyt:advice-how-to-and-miscellaneous=2019-11-17",
+        "New York Times bestseller",
+        "Corporate culture",
+        "Leadership",
+        "New business enterprises"
+      ]
+    },
+    "e5230b15-358d-4468-bf06-c4c86aa92e94": {
+      "lookupTitle": "DisneyWar",
+      "fetchedAt": "2026-09-26",
+      "source": "https://openlibrary.org/works/OL8134697W",
+      "catalogTitle": "DisneyWar",
+      "authors": [
+        "James B. Stewart"
+      ],
+      "pageCount": 608,
+      "pageCountBasis": "Median across catalog editions",
+      "publishedYear": 2005,
+      "category": "",
+      "subjects": [
+        "Walt Disney Company",
+        "Eisner, michael, 1942-"
+      ]
     }
   }
 }
