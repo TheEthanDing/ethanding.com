@@ -14,6 +14,17 @@
   const year = root.querySelector('#shelf-year');
   const sort = root.querySelector('#shelf-sort');
   const result = root.querySelector('#shelf-results');
+  const browseToggle = root.querySelector('#shelf-browse-toggle');
+  const browsePanel = root.querySelector('#shelf-browse-panel');
+  function setBrowseOpen(open) {
+    browsePanel.hidden = !open;
+    browseToggle.setAttribute('aria-expanded', String(open));
+    browseToggle.querySelector('span').textContent = open ? '−' : '+';
+  }
+  browseToggle.addEventListener('click', () => setBrowseOpen(browsePanel.hidden));
+  browsePanel.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { setBrowseOpen(false); browseToggle.focus(); }
+  });
   const previousSection = root.querySelector('#shelf-previous-section');
   const nextSection = root.querySelector('#shelf-next-section');
   const timeline = root.querySelector('#shelf-timeline');
@@ -123,8 +134,10 @@
     filtered.sort(sort.value === 'title' ? (a, b) => a.title.localeCompare(b.title) : sort.value === 'author' ? (a, b) => authorsOf(a).localeCompare(authorsOf(b)) : sort.value === 'oldest' ? (a, b) => (a.dateFinished || '9999').localeCompare(b.dateFinished || '9999') : (a, b) => (b.dateFinished || '').localeCompare(a.dateFinished || ''));
     const hasFilters = Boolean(search.value || category || year.value || month);
     clear.hidden = !hasFilters;
+    result.parentElement.hidden = !hasFilters;
+    browseToggle.classList.toggle('has-filters', hasFilters || sort.value !== 'newest');
     root.querySelector('#shelf-search-clear').hidden = !search.value;
-    result.textContent = hasFilters ? `${filtered.length} ${filtered.length === 1 ? 'book' : 'books'} found${search.value.trim() ? ` for “${search.value.trim()}”` : ''}${month ? ` in ${new Date(month + '-15').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}` : ''}` : 'A few favorites, a lot of rabbit holes.';
+    result.textContent = hasFilters ? `${filtered.length} ${filtered.length === 1 ? 'book' : 'books'} found${search.value.trim() ? ` for “${search.value.trim()}”` : ''}${month ? ` in ${new Date(month + '-15').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}` : ''}` : '';
     renderRows();
   }
   function resetFilters() {
@@ -268,5 +281,5 @@
     if (event.key === 'ArrowLeft' && activeIndex > 0) { event.preventDefault(); activeIndex--; renderDetail(); }
     if (event.key === 'ArrowRight' && activeIndex < filtered.length - 1) { event.preventDefault(); activeIndex++; renderDetail(); }
   });
-  document.addEventListener('keydown', event => { if (event.key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey && !dialog.open && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !document.activeElement.isContentEditable) { event.preventDefault(); search.focus(); } });
+  document.addEventListener('keydown', event => { if (event.key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey && !dialog.open && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !document.activeElement.isContentEditable) { event.preventDefault(); setBrowseOpen(true); search.focus(); } });
 })();

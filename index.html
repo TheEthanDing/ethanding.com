@@ -6,9 +6,9 @@
     <title>Ethan Ding</title>
     <link rel="icon" type="image/png" href="/images/profile.png" />
     <link rel="stylesheet" crossorigin href="/assets/index-dwlculdd.css">
-    <link rel="stylesheet" href="/assets/bookshelf.css?v=20260915-4">
+    <link rel="stylesheet" href="/assets/bookshelf.css?v=20260926-1">
     <script defer src="/assets/bookshelf-layout.js?v=20260915-4"></script>
-    <script defer src="/assets/bookshelf.js?v=20260915-4"></script>
+    <script defer src="/assets/bookshelf.js?v=20260926-1"></script>
     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8KB6YWZ4KS"></script>
@@ -539,24 +539,24 @@
       
       <section class="reading-section bookshelf-section" id="bookshelf" aria-labelledby="shelf-title">
         <header class="shelf-heading">
-          <div><h3 id="shelf-title">The bookshelf.</h3><p>A reading history, three months at a time.</p></div>
-          <dl class="shelf-stats"><div><dt id="shelf-total">—</dt><dd>books collected</dd></div><div><dt id="shelf-years">—</dt><dd>years of reading</dd></div></dl>
+          <h3 id="shelf-title">The bookshelf.</h3>
+          <button id="shelf-browse-toggle" class="shelf-browse-toggle" type="button" aria-expanded="false" aria-controls="shelf-browse-panel">Search &amp; filter <span aria-hidden="true">+</span></button>
         </header>
-        <div class="shelf-searchbar" role="search" aria-label="Search my bookshelf">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
-          <input id="shelf-search" type="search" placeholder="Find a title or author" aria-label="Find a title or author" autocomplete="off">
-          <button id="shelf-search-clear" type="button" aria-label="Clear search" hidden>×</button><kbd aria-hidden="true">/</kbd>
-          <select id="shelf-year" aria-label="Year read"><option value="">All years</option></select>
-          <select id="shelf-sort" aria-label="Sort books"><option value="newest">Recently read</option><option value="oldest">Oldest first</option><option value="title">Title A–Z</option><option value="author">Author A–Z</option></select>
-        </div>
-        <div class="shelf-filterbar">
+        <div id="shelf-browse-panel" class="shelf-browse-panel" hidden>
+          <div class="shelf-searchbar" role="search" aria-label="Search my bookshelf">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <input id="shelf-search" type="search" placeholder="Find a title or author" aria-label="Find a title or author" autocomplete="off">
+            <button id="shelf-search-clear" type="button" aria-label="Clear search" hidden>×</button><kbd aria-hidden="true">/</kbd>
+            <select id="shelf-year" aria-label="Year read"><option value="">All years</option></select>
+            <select id="shelf-sort" aria-label="Sort books"><option value="newest">Recently read</option><option value="oldest">Oldest first</option><option value="title">Title A–Z</option><option value="author">Author A–Z</option></select>
+          </div>
           <div id="shelf-categories" class="shelf-categories" role="group" aria-label="Book categories"></div>
-          <span class="shelf-hint"><svg width="13" height="16" viewBox="0 0 13 16" fill="none" stroke="currentColor" aria-hidden="true"><rect x="2" y="1" width="9" height="14" rx="1"/><path d="M4 1v14"/></svg>Hover to browse · Click to open</span>
-        </div>
-        <div class="shelf-resultbar"><p id="shelf-results" role="status" aria-live="polite">Opening the collection…</p><button id="shelf-clear" type="button" hidden>Clear filters ×</button></div>
-        <div class="shelf-chronology" id="shelf-chronology" hidden>
-          <div class="shelf-period-heading"><div><h4 id="shelf-range"></h4><p id="shelf-direction">Slide right to read further back.</p></div><span id="shelf-page-status" role="status" aria-live="polite" aria-atomic="true"></span></div>
           <nav id="shelf-timeline" class="shelf-timeline" aria-label="Jump to a reading quarter"></nav>
+        </div>
+        <div class="shelf-resultbar" hidden><p id="shelf-results" role="status" aria-live="polite"></p><button id="shelf-clear" type="button" hidden>Clear filters ×</button></div>
+        <div class="shelf-chronology" id="shelf-chronology" hidden>
+          <div class="shelf-period-heading"><h4 id="shelf-range"></h4><span id="shelf-page-status" role="status" aria-live="polite" aria-atomic="true"></span></div>
+          <p id="shelf-direction" class="shelf-sr-only">Use the arrows or swipe to browse.</p>
         </div>
         <div class="shelf-carousel">
           <div id="books-list" class="wooden-bookshelf" role="region" aria-label="Four-row bookcase" aria-describedby="shelf-direction" tabindex="0"><p class="shelf-loading">Gathering the books…</p></div>
@@ -564,7 +564,8 @@
           <button id="shelf-next-section" class="shelf-arrow shelf-arrow-next" type="button" aria-label="Next four shelves" aria-controls="books-list" hidden>→</button>
         </div>
         <div class="shelf-footer"><span>Jacket colors from my covers. Book sizes vary by edition.</span><span id="shelf-showing"></span></div>
-        <details class="shelf-activity" id="shelf-activity"><summary>Reading activity · <span id="book-count">—</span> books in the past year</summary>
+        <details class="shelf-activity" id="shelf-activity"><summary>Reading activity</summary>
+          <p class="shelf-activity-totals"><span id="shelf-total">—</span> books over <span id="shelf-years">—</span> years. <span id="book-count">—</span> in the past year.</p>
           <div class="reading-chart"><div class="chart-header"><h4 class="chart-title">Reading activity</h4><p class="reading-pace">Click a month to browse its books</p></div><div class="chart-container"><canvas id="readingChart"></canvas></div></div>
         </details>
         <noscript><p>This interactive shelf needs JavaScript. <a href="/data/books.json">View the reading log</a>.</p></noscript>

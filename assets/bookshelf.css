@@ -187,3 +187,27 @@ body.book-dialog-open { overflow: hidden; }
 .shelf-book.is-near-edge:focus-visible .shelf-book-object { transform: translateX(calc(var(--book-depth) - var(--book-width) * .94)) translateY(-13px) rotateY(-23deg) rotateZ(-2deg); }
 .shelf-book.is-near-edge .shelf-book-tooltip { left: auto; right: 0; }
 @media (hover: hover) and (pointer: fine) { .shelf-book.is-near-edge:hover .shelf-book-object { transform: translateX(calc(var(--book-depth) - var(--book-width) * .94)) translateY(-13px) rotateY(-23deg) rotateZ(-2deg); } }
+
+/* Keep the collection in front; browsing tools are available on demand. */
+.home-page .shelf-heading { margin-bottom: 12px; gap: 12px; }
+.home-page .shelf-heading h3 { margin: 0; }
+.shelf-browse-toggle { display: inline-flex; align-items: center; gap: 10px; flex-shrink: 0; min-height: 44px; padding: 8px 0 8px 12px; border: 0; background: transparent; color: #646c60; font-size: 12px !important; }
+.shelf-browse-toggle > span { font-size: 18px; font-weight: 300; }
+.shelf-browse-toggle:hover, .shelf-browse-toggle.has-filters { color: #292d27; text-decoration: underline; text-underline-offset: 4px; }
+.shelf-browse-panel { padding: 4px 0 14px; }
+.shelf-browse-panel .shelf-categories { flex-wrap: wrap; margin: 10px 0; }
+.shelf-browse-panel .shelf-timeline { margin: 0; padding-bottom: 8px; }
+.shelf-period-heading { padding: 0 0 14px; }
+.shelf-period-heading h4 { margin: 0; font: 400 12px/1.5 var(--site-body, sans-serif); letter-spacing: 0; color: #747970; }
+.shelf-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.shelf-resultbar { margin: 0 0 14px; align-items: baseline; }
+.shelf-resultbar p { margin: 0; }
+.shelf-activity-totals { text-align: center; margin: 20px 0 0; line-height: 1.6; }
+.shelf-activity summary:focus-visible { outline: 2px solid #587262; outline-offset: 5px; }
+@media (max-width: 600px) {
+  .home-page .shelf-heading { margin-bottom: 10px; }
+  .shelf-browse-toggle { gap: 6px; font-size: 11px !important; }
+  .shelf-period-heading { align-items: center; }
+  .shelf-period-heading h4 { font-size: 11px; }
+  #shelf-page-status { padding: 0; }
+}
