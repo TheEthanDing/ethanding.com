@@ -1,5 +1,93 @@
 [
   {
+    "id": "b6eb5d1a-bbd7-4a1d-adc8-d55aa666b1cc",
+    "title": "The Commanding Heights: The Battle for the World Economy",
+    "authors": [
+      "Daniel Yergin",
+      "Joseph Stanislaw"
+    ],
+    "categories": [],
+    "sagas": [],
+    "dateStarted": "2026-10-17",
+    "dateFinished": "",
+    "daysTaken": null,
+    "rating": null,
+    "notes": "Currently reading. Started October 17, 2026; exact start date confirmed by Ethan on October 18, 2026. No finish date recorded.",
+    "owned": false,
+    "cover": "/images/books/2026-10/the-commanding-heights.jpg"
+  },
+  {
+    "id": "ac24902b-fd35-4e35-ad1d-dc9eff5a8864",
+    "title": "The Activator Advantage: What Today's Rainmakers Do Differently",
+    "authors": [
+      "Matthew Dixon",
+      "Rory Channer",
+      "Karen Freeman",
+      "Ted McKenna"
+    ],
+    "categories": [],
+    "sagas": [],
+    "dateStarted": "2026-10-13",
+    "dateFinished": "2026-10-16",
+    "daysTaken": 4,
+    "rating": null,
+    "notes": "Start and finish dates estimated proportionally using an approximately 240-page edition, in inferred reading order between September 23 and October 16, 2026. These dates are estimates, not exact reading records.",
+    "owned": false,
+    "cover": "/images/books/2026-10/the-activator-advantage.jpg"
+  },
+  {
+    "id": "f34c66fb-9765-4d23-a54e-07a97c6f0588",
+    "title": "The Challenger Customer: Selling to the Hidden Influencer Who Can Multiply Your Results",
+    "authors": [
+      "Brent Adamson",
+      "Matthew Dixon",
+      "Pat Spenner",
+      "Nick Toman"
+    ],
+    "categories": [],
+    "sagas": [],
+    "dateStarted": "2026-10-09",
+    "dateFinished": "2026-10-12",
+    "daysTaken": 4,
+    "rating": null,
+    "notes": "Start and finish dates estimated proportionally using an approximately 288-page edition, in inferred reading order between September 23 and October 16, 2026. These dates are estimates, not exact reading records.",
+    "owned": false,
+    "cover": "/images/books/2026-10/the-challenger-customer.jpg"
+  },
+  {
+    "id": "a60c535c-a487-493e-8d75-e4f0a4d3c846",
+    "title": "Boyd: The Fighter Pilot Who Changed the Art of War",
+    "authors": [
+      "Robert Coram"
+    ],
+    "categories": [],
+    "sagas": [],
+    "dateStarted": "2026-10-01",
+    "dateFinished": "2026-10-08",
+    "daysTaken": 8,
+    "rating": null,
+    "notes": "Start and finish dates estimated proportionally using an approximately 496-page edition, in inferred reading order between September 23 and October 16, 2026. These dates are estimates, not exact reading records.",
+    "owned": false,
+    "cover": "/images/books/2026-10/boyd.jpg"
+  },
+  {
+    "id": "14c2ae92-360f-4313-896b-45646a42ccff",
+    "title": "The JOLT Effect: How High Performers Overcome Customer Indecision",
+    "authors": [
+      "Matthew Dixon",
+      "Ted McKenna"
+    ],
+    "categories": [],
+    "sagas": [],
+    "dateStarted": "2026-09-27",
+    "dateFinished": "2026-09-30",
+    "daysTaken": 4,
+    "rating": null,
+    "notes": "Start and finish dates estimated proportionally using an approximately 256-page edition, in inferred reading order between September 23 and October 16, 2026. These dates are estimates, not exact reading records.",
+    "owned": false,
+    "cover": "/images/books/2026-10/the-jolt-effect.jpg"
+  },
+  {
     "id": "506137f7-9c7a-4f28-b3f5-c9d5e46995e0",
     "title": "The Challenger Sale",
     "authors": [
@@ -9,10 +97,10 @@
     "categories": [],
     "sagas": [],
     "dateStarted": "2026-09-23",
-    "dateFinished": "",
-    "daysTaken": null,
+    "dateFinished": "2026-09-26",
+    "daysTaken": 4,
     "rating": null,
-    "notes": "Currently rereading. Started approximately Wednesday, September 23, 2026.",
+    "notes": "Reread. Start and finish dates estimated proportionally using an approximately 240-page edition, in inferred reading order between September 23 and October 16, 2026. These dates are estimates, not exact reading records. The previously recorded approximate September 23 start is preserved.",
     "owned": false,
     "cover": "/images/books/recJfhPMg45FZsKO7-challenger-sale.jpg"
   },
@@ -30,7 +118,7 @@
     "rating": null,
     "notes": "Start and finish dates estimated proportionally from an approximately 320-page edition, in reading order between August 7 and September 22, 2026.",
     "owned": false,
-    "cover": ""
+    "cover": "/images/books/2026-10/the-chip.jpg"
   },
   {
     "id": "bf659ec4-f16b-422c-a8bd-df5334c6a9f0",
@@ -46,7 +134,7 @@
     "rating": null,
     "notes": "Start and finish dates estimated proportionally from an approximately 440-page edition, in reading order between August 7 and September 22, 2026.",
     "owned": false,
-    "cover": ""
+    "cover": "/images/books/2026-10/the-man-behind-the-microchip.jpg"
   },
   {
     "id": "65ed96b5-88c5-4f2b-a511-714b374209c5",
@@ -62,7 +150,7 @@
     "rating": null,
     "notes": "Start and finish dates estimated proportionally from an approximately 496-page edition, in reading order between August 7 and September 22, 2026.",
     "owned": false,
-    "cover": ""
+    "cover": "/images/books/2026-10/the-worlds-banker.jpg"
   },
   {
     "id": "17e5d008-2471-431e-ba42-9eb10ddef92e",
@@ -78,7 +166,7 @@
     "rating": null,
     "notes": "Start and finish dates estimated proportionally from an approximately 704-page edition, in reading order between August 7 and September 22, 2026.",
     "owned": false,
-    "cover": ""
+    "cover": "/images/books/2026-10/kochland.jpg"
   },
   {
     "id": "1ded60f9-a8c1-48d9-ae80-271b4f904f3f",
