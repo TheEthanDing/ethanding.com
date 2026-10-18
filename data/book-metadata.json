@@ -7971,6 +7971,79 @@
         "Walt Disney Company",
         "Eisner, michael, 1942-"
       ]
+    },
+    "b6eb5d1a-bbd7-4a1d-adc8-d55aa666b1cc": {
+      "lookupTitle": "The Commanding Heights: The Battle for the World Economy",
+      "fetchedAt": "2026-10-18",
+      "source": "https://openlibrary.org/works/OL2748131W",
+      "catalogTitle": "The Commanding Heights",
+      "authors": [
+        "Daniel Yergin",
+        "Joseph Stanislaw"
+      ],
+      "pageCount": 543,
+      "pageCountBasis": "Median across catalog editions",
+      "publishedYear": 1998,
+      "category": "History",
+      "subjects": [
+        "Capitalism",
+        "Competition, International",
+        "Deregulation",
+        "Economic history",
+        "Economic policy",
+        "History",
+        "International Competition",
+        "Markets"
+      ]
+    },
+    "ac24902b-fd35-4e35-ad1d-dc9eff5a8864": {
+      "lookupTitle": "The Activator Advantage: What Today's Rainmakers Do Differently",
+      "fetchedAt": "2026-10-18"
+    },
+    "f34c66fb-9765-4d23-a54e-07a97c6f0588": {
+      "lookupTitle": "The Challenger Customer: Selling to the Hidden Influencer Who Can Multiply Your Results",
+      "fetchedAt": "2026-10-18",
+      "source": "https://openlibrary.org/works/OL20039964W",
+      "catalogTitle": "The challenger customer",
+      "authors": [
+        "Brent Adamson"
+      ],
+      "pageCount": 278,
+      "pageCountBasis": "Median across catalog editions",
+      "publishedYear": 2015,
+      "category": "Business",
+      "subjects": [
+        "Sales management",
+        "Selling",
+        "Customer relations"
+      ]
+    },
+    "a60c535c-a487-493e-8d75-e4f0a4d3c846": {
+      "lookupTitle": "Boyd: The Fighter Pilot Who Changed the Art of War",
+      "fetchedAt": "2026-10-18",
+      "source": "https://openlibrary.org/works/OL4311885W",
+      "catalogTitle": "Boyd",
+      "authors": [
+        "Robert Coram"
+      ],
+      "pageCount": 412,
+      "pageCountBasis": "Median across catalog editions",
+      "publishedYear": 2002,
+      "category": "Biography",
+      "subjects": [
+        "Military Aeronautics",
+        "United States. Air Force",
+        "Fighter plane combat",
+        "Officers",
+        "United States",
+        "Nonfiction",
+        "Biography & Autobiography",
+        "Fighter pilots"
+      ]
+    },
+    "14c2ae92-360f-4313-896b-45646a42ccff": {
+      "lookupTitle": "The JOLT Effect: How High Performers Overcome Customer Indecision",
+      "fetchedAt": "2026-10-18"
     }
   }
 }
